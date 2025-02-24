@@ -7,8 +7,8 @@
 
 struct WeatherData: Codable {
     let current: CurrentWeather
-//    let hourly: [HourlyWeather]
-//    let daily: [DailyWeather]
+    let hourly: [HourlyWeather]
+    let daily: [DailyWeather]
 }
 
 struct CurrentWeather: Codable {

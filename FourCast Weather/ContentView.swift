@@ -12,13 +12,35 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("\(Int(weatherData?.current.temp ?? 0)) ℃")
-                .bold()
-                .font(.title)
-                .padding(20)
-            Text("Odczuwalna: \(Int(weatherData?.current.feelsLike ?? 0)) ℃")
             Text("Piekary Śląskie")
                 .bold()
+            Text("\(Int(weatherData?.current.temp ?? 0)) ℃")
+                .font(.largeTitle)
+                .padding(10)
+            Text("Odczuwalna: \(Int(weatherData?.current.feelsLike ?? 0)) ℃")
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 5) {
+                    ForEach(weatherData?.hourly ?? [], id: \.dt) {hourlyForecast in
+                        VStack {
+                            let timeInterval = TimeInterval(hourlyForecast.dt)
+                            let date = Date(timeIntervalSince1970: timeInterval)
+                            let calendar = Calendar.current
+                            let hourComponent = calendar.component(.hour, from: date)
+                            let formattedHour = String(format: "%02d", hourComponent)
+                            Text(formattedHour)
+                            Text("\(Int(hourlyForecast.temp)) ℃")
+                        }
+                        .frame(width: 48)
+                        .padding()
+                        .background(Material.ultraThin)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+                    }
+                }
+            }
+            .padding()
+            .background(.red)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
             
             Spacer()
         }
