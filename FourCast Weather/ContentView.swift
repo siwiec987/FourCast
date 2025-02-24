@@ -11,7 +11,7 @@ struct ContentView: View {
     @State private var weatherData: WeatherData?
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 5) {
             Text("Piekary Śląskie")
                 .bold()
             Text("\(Int(weatherData?.current.temp ?? 0)) ℃")
@@ -42,7 +42,23 @@ struct ContentView: View {
             .background(.red)
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
             
-            Spacer()
+            VStack(spacing: 5) {
+                ForEach(weatherData?.daily ?? [], id: \.dt) {dailyForecast in
+                    HStack {
+                        Text("\(getWeekday(from: dailyForecast.dt))")
+                        Spacer()
+                        Text("\(Int(dailyForecast.temp.min)) ℃")
+                        Text(". . .")
+                        Text("\(Int(dailyForecast.temp.max)) ℃")
+                    }
+                    .padding()
+                }
+                .background(Material.ultraThin)
+                .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+            }
+            .padding()
+            .background(.red)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
         }
         .padding()
         .task {
@@ -85,6 +101,15 @@ struct ContentView: View {
             throw OpenWeatherError.invalidData
         }
         
+    }
+    
+    func getWeekday(from timestamp: Int) -> String {
+        let timeInterval = TimeInterval(timestamp)
+        let date = Date(timeIntervalSince1970: timeInterval)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "EE"
+        dateFormatter.locale = Locale(identifier: "pl_PL")
+        return dateFormatter.string(from: date)
     }
 }
 
