@@ -24,6 +24,7 @@ struct DailyForecastView: View {
                     Text(". . .")
                     Text("\(Int(dailyForecast.temp.max))°")
                 }
+                .foregroundStyle(.white)
                 .padding()
                 
             }

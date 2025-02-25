@@ -9,14 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var weatherData: WeatherData?
+    @StateObject var locationManager = LocationManager()
     
     var body: some View {
         ZStack {
-            LinearGradient(colors: [
-                Color(red: 0.541, green: 0.867, blue: 1),
-                Color(red: 0.145, green: 0.475, blue: 1)
-            ], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            BackgroundView()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 15) {
@@ -27,7 +24,8 @@ struct ContentView: View {
                 .padding()
                 .task {
                     do {
-                        weatherData = try await WeatherService.getWeatherData()
+                        weatherData = try await WeatherService.getWeatherData(
+                            latitude: locationManager.latitude ?? 0, longitude: locationManager.longitude ?? 0)
                     } catch OpenWeatherError.invalidURL {
                         print("Invalid URL")
                     } catch OpenWeatherError.invalidResponse {
@@ -41,9 +39,14 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            locationManager.requestLocation()
+        }
     }
 }
 
 #Preview {
     ContentView()
 }
+
+

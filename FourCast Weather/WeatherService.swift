@@ -9,12 +9,11 @@ import Foundation
 
 class WeatherService {
     static let shared = WeatherService()
+    var weatherData: WeatherData?
     
     private init() {}
     
-    static func getWeatherData() async throws -> WeatherData {
-        let latitude = 50.3757787
-        let longitude = 18.937873187224838
+    static func getWeatherData(latitude: Double, longitude: Double) async throws -> WeatherData {
         let apiKey = "792cfab2b422b4dbd5795ced996a90b0"
         let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&units=metric&appid=\(apiKey)"
         
@@ -31,6 +30,7 @@ class WeatherService {
         do {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
+//            weatherData = try decoder.decode(WeatherData.self, from: data)
             return try decoder.decode(WeatherData.self, from: data)
         } catch {
             throw OpenWeatherError.invalidData

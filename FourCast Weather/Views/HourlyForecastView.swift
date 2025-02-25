@@ -31,6 +31,7 @@ struct HourlyForecastView: View {
                         Text("\(Int(hourlyForecast.temp))°")
                     }
                     .frame(width: 31)
+                    .foregroundStyle(.white)
                     .padding()
                 }
             }

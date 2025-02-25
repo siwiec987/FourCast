@@ -28,6 +28,6 @@ struct CurrentWeatherView: View {
             Text("Odczuwalna: \(Int(weatherData?.current.feelsLike ?? 0))°")
                 .padding(.bottom, 30)
         }
-//        .padding()
+        .foregroundStyle(.white)
     }
 }
