@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var weatherData: WeatherData?
+    @State private var cityName = ". . ."
     @StateObject var locationManager = LocationManager()
     
     var body: some View {
@@ -17,12 +18,16 @@ struct ContentView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 15) {
-                    Text("\(locationManager.latitude ?? 0), \(locationManager.longitude ?? 0)")
-                    CurrentWeatherView(weatherData: weatherData, locationName: "GÓWNO")
+//                    Text("\(locationManager.latitude ?? 0), \(locationManager.longitude ?? 0)")
+                    CurrentWeatherView(weatherData: weatherData, locationName: cityName)
                     HourlyForecastView(weatherData: weatherData)
                     DailyForecastView(weatherData: weatherData)
                 }
                 .padding()
+                .onChange(of: locationManager.location, initial: false) {
+                    updateCityName()
+                    
+                }
 //                .onChange(of: locationManager.location) { (_, _) in
 //                    Task {
 //                        do {
@@ -52,9 +57,20 @@ struct ContentView: View {
 //                }
             }
         }
-        .onAppear {
-            
+    }
+    
+    private func updateCityName() {
+        locationManager.getCityName { name in
+            cityName = name ?? "Nieznana lokalizacja"
         }
+    }
+    
+    private func fetchWeather() {
+        guard let  lat = locationManager.location?.coordinate.latitude, let lon = locationManager.location?.coordinate.longitude else {
+            return
+        }
+        
+        //TODO
     }
 }
 
