@@ -28,6 +28,13 @@ struct HourlyForecastView: View {
                         Text("\(Date.getWeekday(from: hourlyForecast.dt))")
                             .font(.subheadline)
                         Text(formattedHour)
+                        
+                        Image(systemName: "cloud.sun.fill")
+                            .renderingMode(.original)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 40, height: 40)
+                        
                         Text("\(Int(hourlyForecast.temp))°")
                     }
                     .frame(width: 31)

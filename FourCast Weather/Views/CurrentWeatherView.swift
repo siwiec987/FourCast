@@ -9,10 +9,11 @@ import SwiftUI
 
 struct CurrentWeatherView: View {
     let weatherData: WeatherData?
+    var locationName: String
     
     var body: some View {
         VStack(spacing: 5) {
-            Text("Piekary Śląskie")
+            Text(locationName)
                 .bold()
             
             Text("\(Int(weatherData?.current.temp ?? 0))°")

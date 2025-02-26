@@ -9,20 +9,40 @@ import Foundation
 import CoreLocation
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    private var locationManager = CLLocationManager()
+    private var locationManager: CLLocationManager?
     
     @Published var latitude: Double?
     @Published var longitude: Double?
+    @Published var location: CLLocation?
     
     override init() {
         super.init()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        self.locationManager = CLLocationManager()
+        self.locationManager!.delegate = self
     }
     
-    func requestLocation() {
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
+    private func checkLocationAuthorization() {
+        guard let locationManager = self.locationManager else {
+            return
+        }
+        
+        switch locationManager.authorizationStatus {
+            
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .restricted:
+            print("location restricted")
+        case .denied:
+            print("location denied")
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.requestLocation()
+        @unknown default:
+            break
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuthorization()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -32,11 +52,28 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         self.latitude = location.coordinate.latitude
         self.longitude = location.coordinate.longitude
-        
-        locationManager.stopUpdatingLocation()
+        self.location = location
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Błąd pobierania lokalizacji: \(error.localizedDescription)")
     }
+
+    func getCityName(completion: @escaping (String?) -> Void) {
+        guard let location = self.location else {
+            completion(nil)
+            return
+        }
+
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if let firstLocation = placemarks?.first, error == nil {
+                completion(firstLocation.locality)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    
+    
 }
