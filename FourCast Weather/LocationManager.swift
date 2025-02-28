@@ -11,9 +11,9 @@ import CoreLocation
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
     
-    @Published var latitude: Double?
-    @Published var longitude: Double?
     @Published var location: CLLocation?
+    @Published var locationName = ". . ."
+    @Published var locationReady = false
     
     override init() {
         super.init()
@@ -21,7 +21,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         self.locationManager!.delegate = self
     }
     
-    private func checkLocationAuthorization() {
+    func checkLocationAuthorization() {
         guard let locationManager = self.locationManager else {
             return
         }
@@ -36,6 +36,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             print("location denied")
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.requestLocation()
+            self.locationReady = false
         @unknown default:
             break
         }
@@ -50,16 +51,18 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
             return
         }
         
-        self.latitude = location.coordinate.latitude
-        self.longitude = location.coordinate.longitude
         self.location = location
+        self.getLocationName { name in
+        self.locationName = name ?? "Nieznana lokalizacja"
+        }
+        self.locationReady = true
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Błąd pobierania lokalizacji: \(error.localizedDescription)")
     }
 
-    func getCityName(completion: @escaping (String?) -> Void) {
+    private func getLocationName(completion: @escaping (String?) -> Void) {
         guard let location = self.location else {
             completion(nil)
             return
