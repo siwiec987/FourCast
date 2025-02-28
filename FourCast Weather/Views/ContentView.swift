@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var weatherData: WeatherData?
-    @State private var cityName = ". . ."
+    @StateObject private var weatherService = WeatherService.shared
     @StateObject var locationManager = LocationManager()
     
     var body: some View {
@@ -18,64 +17,49 @@ struct ContentView: View {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 15) {
-//                    Text("\(locationManager.latitude ?? 0), \(locationManager.longitude ?? 0)")
-                    CurrentWeatherView(weatherData: weatherData, locationName: cityName)
-                    HourlyForecastView(weatherData: weatherData)
-                    DailyForecastView(weatherData: weatherData)
+                    CurrentWeatherView(weatherData: weatherService.weatherData, locationName: locationManager.locationName)
+                    HourlyForecastView(weatherData: weatherService.weatherData)
+                    DailyForecastView(weatherData: weatherService.weatherData)
                 }
                 .padding()
                 .onChange(of: locationManager.location, initial: false) {
-                    updateCityName()
-                    
+                    if let location = locationManager.location, locationManager.locationReady {
+                        Task {
+                            do {
+//                                try await weatherService.fetchWeatherData(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                                try await weatherService.fetchWeatherData(location: location)
+                                
+                            } catch OpenWeatherError.invalidData {
+                                print("Invalid data")
+                            } catch {
+                                print("cos innego wydupcylo")
+                            }
+                        }
+                    }
                 }
-//                .onChange(of: locationManager.location) { (_, _) in
-//                    Task {
+            }
+            .refreshable {
+//                if let location = locationManager.location, locationManager.locationReady {
+//                    weatherService.clearCache()
+//                    let task = Task {
 //                        do {
-//                            weatherData = try await WeatherService.getWeatherData(
-//                                latitude: locationManager.latitude ?? 0,
-//                                longitude: locationManager.longitude ?? 0
-//                            )
+//                            try await weatherService.fetchWeatherData(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+//                            
+//                        } catch OpenWeatherError.invalidData {
+//                            print("Invalid data")
 //                        } catch {
-//                            print("Błąd pobierania pogody: \(error.localizedDescription)")
+//                            print("cos innego wydupcylo")
 //                        }
 //                    }
+//                    await task.value
 //                }
-//                .task {
-//                    do {
-//                        weatherData = try await WeatherService.getWeatherData(
-//                            latitude: locationManager.location?.coordinate.latitude ?? 0, longitude: locationManager.location?.coordinate.longitude ?? 0)
-//                    } catch OpenWeatherError.invalidURL {
-//                        print("Invalid URL")
-//                    } catch OpenWeatherError.invalidResponse {
-//                        print("Invalid response")
-//                    } catch OpenWeatherError.invalidData {
-//                        print("Invalid data")
-//                        print(weatherData ?? "pusto")
-//                    } catch {
-//                        print("Unexpected error")
-//                    }
-//                }
+                
+                locationManager.checkLocationAuthorization()
             }
         }
-    }
-    
-    private func updateCityName() {
-        locationManager.getCityName { name in
-            cityName = name ?? "Nieznana lokalizacja"
-        }
-    }
-    
-    private func fetchWeather() {
-        guard let  lat = locationManager.location?.coordinate.latitude, let lon = locationManager.location?.coordinate.longitude else {
-            return
-        }
-        
-        //TODO
     }
 }
 
 #Preview {
     ContentView()
 }
-
-
