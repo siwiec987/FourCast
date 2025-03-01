@@ -15,7 +15,7 @@ struct DailyForecastView: View {
 
     
     var body: some View {
-        VStack(spacing: 5) {
+        VStack {
             ForEach(weatherData?.daily ?? [], id: \.dt) {dailyForecast in
                 HStack {
                     Text("\(Date.getWeekday(from: dailyForecast.dt))")
@@ -24,13 +24,14 @@ struct DailyForecastView: View {
                     Text(". . .")
                     Text("\(Int(dailyForecast.temp.max))°")
                 }
-                .foregroundStyle(.white)
-                .padding()
-                
             }
+            .foregroundStyle(.white)
+//            .padding(.init(top: 20, leading: 20, bottom: 10, trailing: 20))
+            .padding(5)
         }
         .padding()
         .background(.white.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .listStyle(PlainListStyle())
     }
 }
