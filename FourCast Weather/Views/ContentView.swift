@@ -26,7 +26,6 @@ struct ContentView: View {
                     if let location = locationManager.location, locationManager.locationReady {
                         Task {
                             do {
-//                                try await weatherService.fetchWeatherData(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
                                 try await weatherService.fetchWeatherData(location: location)
                                 
                             } catch OpenWeatherError.invalidData {
@@ -39,21 +38,6 @@ struct ContentView: View {
                 }
             }
             .refreshable {
-//                if let location = locationManager.location, locationManager.locationReady {
-//                    weatherService.clearCache()
-//                    let task = Task {
-//                        do {
-//                            try await weatherService.fetchWeatherData(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-//                            
-//                        } catch OpenWeatherError.invalidData {
-//                            print("Invalid data")
-//                        } catch {
-//                            print("cos innego wydupcylo")
-//                        }
-//                    }
-//                    await task.value
-//                }
-                
                 locationManager.checkLocationAuthorization()
             }
         }
