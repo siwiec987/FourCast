@@ -9,42 +9,70 @@ import SwiftUI
 
 struct HourlyForecastView: View {
     let weatherData: WeatherData?
-    
-//    @EnvironmentObject var weatherService: WeatherService
-//    @EnvironmentObject var locationManager: LocationManager
 
-    
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 5) {
-                ForEach(weatherData?.hourly ?? [], id: \.dt) {hourlyForecast in
+            HStack(spacing: 10) {
+                ForEach(getWeekdays(forecasts: weatherData?.hourly ?? []), id: \.self) {day in
                     VStack {
-                        let timeInterval = TimeInterval(hourlyForecast.dt)
-                        let date = Date(timeIntervalSince1970: timeInterval)
-                        let calendar = Calendar.current
-                        let hourComponent = calendar.component(.hour, from: date)
-                        let formattedHour = String(format: "%02d", hourComponent)
-                        
-                        Text("\(Date.getWeekday(from: hourlyForecast.dt))")
+                        Text(day)
                             .font(.subheadline)
-                        Text(formattedHour)
-                        
-                        Image(systemName: "cloud.sun.fill")
-                            .renderingMode(.original)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 40, height: 40)
-                        
-                        Text("\(Int(hourlyForecast.temp))°")
+                            .padding([.top, .bottom], 10)
+                        HStack {
+                            ForEach(weatherData?.hourly.filter {
+                                Date.getWeekday(from: $0.dt) == day
+                            } ?? [], id: \.dt) {hourlyForecast in
+                                VStack {
+                                    let timeInterval = TimeInterval(hourlyForecast.dt)
+                                    let date = Date(timeIntervalSince1970: timeInterval)
+                                    let calendar = Calendar.current
+                                    let hourComponent = calendar.component(.hour, from: date)
+                                    let formattedHour = String(format: "%02d", hourComponent)
+
+                                    Text(formattedHour)
+                                        .font(.subheadline)
+                                    Image(systemName: "cloud.sun.fill")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 40, height: 40)
+                                    
+                                    Text("\(Int(hourlyForecast.temp))°")
+                                        .bold()
+                                }
+                                
+                                //                    .frame(width: 31)
+                            }
+                        }
                     }
-                    .frame(width: 31)
-                    .foregroundStyle(.white)
-                    .padding()
+                    .padding([.leading, .bottom, .trailing])
+                    .background(.white.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
                 }
             }
+//            .containerRelativeFrame(.horizontal, count: 9, spacing: 0)
         }
-        .padding()
+        .contentMargins(10)
+//        .scrollTargetBehavior(.viewAligned)
         .background(.white.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .foregroundStyle(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+    
+    func getWeekdays(forecasts: [HourlyWeather]) -> [String] {
+        var result: [String] = []
+        
+        for forecast in forecasts {
+            let day = Date.getWeekday(from: forecast.dt)
+            if !result.contains(day) {
+                result.append(day)
+            }
+        }
+        
+        return result
+    }
+    
+    func filterWeatherData() {
+        
     }
 }
