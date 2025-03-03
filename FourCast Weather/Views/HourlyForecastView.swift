@@ -14,7 +14,7 @@ struct HourlyForecastView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
                 ForEach(getWeekdays(forecasts: weatherData?.hourly ?? []), id: \.self) {day in
-                    VStack {
+                    VStack(alignment: .leading) {
                         Text(day)
                             .font(.subheadline)
                             .padding([.top, .bottom], 10)
@@ -31,11 +31,11 @@ struct HourlyForecastView: View {
 
                                     Text(formattedHour)
                                         .font(.subheadline)
-                                    Image(systemName: "cloud.sun.fill")
+                                    Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
                                         .renderingMode(.original)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        .frame(width: 40, height: 40)
+                                        .frame(width: 30, height: 30)
                                     
                                     Text("\(Int(hourlyForecast.temp))°")
                                         .bold()
@@ -74,5 +74,12 @@ struct HourlyForecastView: View {
     
     func filterWeatherData() {
         
+    }
+}
+
+#Preview {
+    ZStack {
+        BackgroundView()
+        HourlyForecastView(weatherData: SampleWeatherData().data)
     }
 }

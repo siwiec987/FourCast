@@ -20,6 +20,12 @@ struct DailyForecastView: View {
                 HStack {
                     Text("\(Date.getWeekday(from: dailyForecast.dt))")
                     Spacer()
+                    Image(systemName: WeatherService.getWeatherIcon(dailyForecast.weather[0].icon))
+                        .renderingMode(.original)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30, height: 30)
+                    Spacer()
                     Text("\(Int(dailyForecast.temp.min))°")
                     Text(". . .")
                     Text("\(Int(dailyForecast.temp.max))°")
@@ -33,5 +39,12 @@ struct DailyForecastView: View {
         .background(.white.opacity(0.2))
         .clipShape(RoundedRectangle(cornerRadius: 15))
         .listStyle(PlainListStyle())
+    }
+}
+
+#Preview {
+    ZStack {
+        BackgroundView()
+        DailyForecastView(weatherData: SampleWeatherData().data)
     }
 }

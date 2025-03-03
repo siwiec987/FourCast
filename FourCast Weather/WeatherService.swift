@@ -91,9 +91,53 @@ class WeatherService: ObservableObject {
         }
     }
     
-    func clearCache() {
-        weatherData = nil
-        lastFetchTime = nil
+    static func getWeatherIcon(_ icon: String) -> String {
+        switch(icon.last) {
+        case "d":
+            switch(icon) {
+            case "01d":
+                return "sun.max.fill"
+            case "02d":
+                return "cloud.sun.fill"
+            case "03d", "04d":
+                return "cloud.fill"
+            case "09d":
+                return "cloud.drizzle.fill"
+            case "10d":
+                return "cloud.sun.rain.fill"
+            case "11d":
+                return "cloud.bolt.fill"
+            case "13d":
+                return "snowflake"
+            case "50d":
+                return "sun.haze.fill"
+            default:
+                return "ellipsis"
+            }
+        case "n":
+            switch(icon) {
+            case "01n":
+                return "moon.fill"
+            case "02n":
+                return "cloud.moon.fill"
+            case "03n", "04n":
+                return "cloud.fill"
+            case "09n":
+                return "cloud.drizzle.fill"
+            case "10n":
+                return "cloud.moon.rain.fill"
+            case "11n":
+                return "cloud.bolt.fill"
+            case "13n":
+                return "snowflake"
+            case "50n":
+                return "moon.haze.fill"
+            default:
+                return "ellipsis"
+            }
+        default:
+            return "ellipsis"
+        }
     }
 }
 

@@ -19,7 +19,7 @@ struct CurrentWeatherView: View {
             Text("\(Int(weatherData?.current.temp ?? 0))°")
                 .font(.system(size: 80, weight: .light))
             
-            Image(systemName: "cloud.sun.fill")
+            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon ?? "ellipsis"))
                 .renderingMode(.original)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
@@ -30,5 +30,12 @@ struct CurrentWeatherView: View {
                 .padding(.bottom, 30)
         }
         .foregroundStyle(.white)
+    }
+}
+
+#Preview {
+    ZStack {
+        BackgroundView()
+        CurrentWeatherView(weatherData: SampleWeatherData().data, locationName: "aaaa")
     }
 }
