@@ -12,7 +12,7 @@ struct HourlyForecastView: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+            HStack(spacing: 0) {
                 ForEach(getWeekdays(forecasts: weatherData?.hourly ?? []), id: \.self) {day in
                     VStack(alignment: .leading) {
                         Text(day)
@@ -31,6 +31,7 @@ struct HourlyForecastView: View {
 
                                     Text(formattedHour)
                                         .font(.subheadline)
+                                    
                                     Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
                                         .renderingMode(.original)
                                         .resizable()
@@ -40,21 +41,16 @@ struct HourlyForecastView: View {
                                     Text("\(Int(hourlyForecast.temp))°")
                                         .bold()
                                 }
-                                
-                                //                    .frame(width: 31)
                             }
                         }
                     }
                     .padding([.leading, .bottom, .trailing])
-                    .background(.white.opacity(0.2))
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                 }
             }
-//            .containerRelativeFrame(.horizontal, count: 9, spacing: 0)
         }
-        .contentMargins(10)
-//        .scrollTargetBehavior(.viewAligned)
-        .background(.white.opacity(0.2))
+        .contentMargins(0)
+        .background(.white.opacity(0.25))
         .foregroundStyle(.white)
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
@@ -70,10 +66,6 @@ struct HourlyForecastView: View {
         }
         
         return result
-    }
-    
-    func filterWeatherData() {
-        
     }
 }
 
