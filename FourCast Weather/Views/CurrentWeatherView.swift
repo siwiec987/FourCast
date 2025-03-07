@@ -19,12 +19,12 @@ struct CurrentWeatherView: View {
             Text("\(Int(weatherData?.current.temp ?? 0))°")
                 .font(.system(size: 80, weight: .light))
             
-            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon ?? "ellipsis"))
-                .renderingMode(.original)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 180, height: 150)
-                .padding(0)
+//            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon ?? "ellipsis"))
+//                .renderingMode(.original)
+//                .resizable()
+//                .aspectRatio(contentMode: .fit)
+//                .frame(width: 180, height: 150)
+//                .padding(0)
             
             Text("Odczuwalna: \(Int(weatherData?.current.feelsLike ?? 0))°")
                 .padding(.bottom, 30)
