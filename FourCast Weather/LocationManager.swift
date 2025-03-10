@@ -8,14 +8,17 @@
 import Foundation
 import CoreLocation
 
-class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+@Observable
+class LocationManager: NSObject, CLLocationManagerDelegate {
+    static let shared = LocationManager()
+    
     private var locationManager: CLLocationManager?
     
-    @Published var location: CLLocation?
-    @Published var locationName = ". . ."
-    @Published var locationReady = false
+    var location: CLLocation?
+    var locationName = ". . ."
+    var locationReady = false
     
-    override init() {
+    private override init() {
         super.init()
         self.locationManager = CLLocationManager()
         self.locationManager!.delegate = self
@@ -53,8 +56,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         
         self.location = location
         self.getLocationName { name in
-        self.locationName = name ?? "Nieznana lokalizacja"
+            self.locationName = name ?? "Nieznana lokalizacja"
         }
+        
         self.locationReady = true
     }
     
@@ -78,5 +82,18 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
     
+    func getCoordinate(addressString: String, completion: @escaping(CLLocationCoordinate2D, NSError?) -> Void) {
+        let geocoder = CLGeocoder()
+        geocoder.geocodeAddressString(addressString) { (placemarks, error) in
+            if let placemark = placemarks?.first, error == nil {
+                let location = placemark.location!
+                
+                completion(location.coordinate, nil)
+                return
+            }
+            
+            completion(kCLLocationCoordinate2DInvalid, error as NSError?)
+        }
+    }
     
 }

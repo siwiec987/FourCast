@@ -8,29 +8,23 @@
 import Foundation
 import CoreLocation
 
-class WeatherService: ObservableObject {
+@Observable
+class WeatherService {
     static let shared = WeatherService()
     
-    @Published public var weatherData: WeatherData?
-    @Published private var isLoading = false
-    
-    private var lastFetchTime: Date?
-    private var lastFetchLocation: CLLocation?
+//    @Published public var weatherData: WeatherData?
+    var isLoading = false
     
     private init() {}
     
-    func fetchWeatherData(location: CLLocation) async throws {
+    func fetchWeatherData(coordinate: CLLocationCoordinate2D, lastFetchTime: Date?) async throws  -> (WeatherData?, Date?) {
         if self.isLoading {
-            return
+            throw OpenWeatherError.alreadyInUse
         }
         
-        if let lastLocation = self.lastFetchLocation,
-           let lastTime = self.lastFetchTime,
-           location.distance(from: lastLocation) < 1000 &&
+           if let lastTime = lastFetchTime,
            Date().timeIntervalSince(lastTime) < 30 {
-            if self.weatherData != nil {
-                return
-            }
+               throw OpenWeatherError.fetchNotNecessary
         }
         
         await MainActor.run {
@@ -38,8 +32,8 @@ class WeatherService: ObservableObject {
         }
         
         do {
-            let latitude = location.coordinate.latitude
-            let longitude = location.coordinate.longitude
+            let latitude = coordinate.latitude
+            let longitude = coordinate.longitude
             let apiKey = "792cfab2b422b4dbd5795ced996a90b0"
             let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&units=metric&appid=\(apiKey)"
             
@@ -60,12 +54,15 @@ class WeatherService: ObservableObject {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             
-            try await MainActor.run {
-                weatherData = try decoder.decode(WeatherData.self, from: data)
-                lastFetchTime = Date.now
-                lastFetchLocation = location
+            let result = try decoder.decode(WeatherData.self, from: data)
+            
+            await MainActor.run {
+//                weatherData = try decoder.decode(WeatherData.self, from: data)
+//                lastFetchTime = Date.now
                 isLoading = false
             }
+            
+            return (data: result, fetchTime: Date.now)
             
         } catch {
             print("Decoding error: \(error)")
@@ -83,11 +80,11 @@ class WeatherService: ObservableObject {
                     print("Unknown decoding error")
                 }
             }
+            await MainActor.run {
+                self.isLoading = false
+            }
+            
             throw OpenWeatherError.invalidData
-        }
-        
-        await MainActor.run {
-            self.isLoading = false
         }
     }
     
@@ -145,4 +142,6 @@ enum OpenWeatherError: Error {
     case invalidURL
     case invalidResponse
     case invalidData
+    case alreadyInUse
+    case fetchNotNecessary
 }

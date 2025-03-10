@@ -1,0 +1,73 @@
+//
+//  AddLocationView.swift
+//  FourCast Weather
+//
+//  Created by Jakub Siwiec on 09/03/2025.
+//
+
+import SwiftUI
+
+struct SearchLocationView: View {
+    @Binding var isPresented: Bool
+    
+    @State private var showingSheet = false
+    @State private var locationSearchService = LocationSearchService()
+    @State private var additionalLocations = AdditionalLocations.shared
+    @State private var weatherService = WeatherService.shared
+    @State private var locationManager: LocationManager = LocationManager.shared
+    
+    var body: some View {
+        NavigationStack {
+            List(locationSearchService.results) {result in
+                VStack(alignment: .leading) {
+                    Button(result.title) {
+                        locationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
+                            print(coordinate)
+                            
+                            Task {
+                                do {
+                                    let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
+                                    let newLocation = AdditionalLocationData(name: result.title, coordinate: coordinate, weatherData: response, lastFetchTime: time)
+                                    additionalLocations.locations.append(newLocation)
+                                    
+                                } catch OpenWeatherError.invalidData {
+                                    print("Invalid data")
+                                } catch OpenWeatherError.alreadyInUse {
+                                    print("Aready fetching")
+                                } catch OpenWeatherError.fetchNotNecessary {
+                                    print("Not necessary")
+                                } catch {
+                                    print("coś innego")
+                                }
+                            }
+                            
+                            isPresented = false
+                        }
+                    }
+                    .foregroundStyle(.primary)
+                    
+                    Text(result.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .toolbar {
+                Button {
+                    isPresented = false
+                } label: {
+                    Text("Cancel")
+                }
+            }
+        }
+        .searchable(text: $locationSearchService.query, prompt: "Szukaj miasta")
+        .padding(.top, 10)
+        .sheet(isPresented: $showingSheet) {
+            
+        }
+    }
+}
+
+//#Preview {
+//    @Previewable @State var ispresented = true
+//    SearchLocationView(isPresented: $ispresented)
+//}
