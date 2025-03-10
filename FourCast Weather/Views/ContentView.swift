@@ -55,30 +55,30 @@ struct ContentView: View {
                         }
                     }
                     
-                    ForEach(additionalLocations.locations, id: \.self.name) { additionalLocation in
+                    ForEach(additionalLocations.locations.indices, id: \.self) { index in
                         Tab {
                             ScrollView(showsIndicators: false) {
                                 VStack(spacing: 15) {
-                                    CurrentWeatherView(weatherData: additionalLocation.weatherData, locationName: additionalLocation.name)
-                                    HourlyForecastView(weatherData: additionalLocation.weatherData)
-                                    DailyForecastView(weatherData: additionalLocation.weatherData)
+                                    CurrentWeatherView(weatherData: additionalLocations.locations[index].weatherData, locationName: additionalLocations.locations[index].name)
+                                    HourlyForecastView(weatherData: additionalLocations.locations[index].weatherData)
+                                    DailyForecastView(weatherData: additionalLocations.locations[index].weatherData)
                                 }
                                 .padding()
                             }
-//                            .onAppear {
-//                                do {
-//                                    (additionalLocation.weatherData, additionalLocation.lastFetchTime) = try await weatherService.fetchWeatherData(location: additionalLocation.location, lastFetchTime: additionalLocation.lastFetchTime)
-//                                    
-//                                } catch OpenWeatherError.invalidData {
-//                                    print("Invalid data")
-//                                } catch OpenWeatherError.alreadyInUse {
-//                                    print("Aready fetching")
-//                                } catch OpenWeatherError.fetchNotNecessary {
-//                                    print("Not necessary")
-//                                } catch {
-//                                    print("coś innego")
-//                                }
-//                            }
+                            .refreshable {
+                                do {
+                                    (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate, lastFetchTime: additionalLocations.locations[index].lastFetchTime)
+                                    
+                                } catch OpenWeatherError.invalidData {
+                                    print("Invalid data")
+                                } catch OpenWeatherError.alreadyInUse {
+                                    print("Aready fetching")
+                                } catch OpenWeatherError.fetchNotNecessary {
+                                    print("Not necessary")
+                                } catch {
+                                    print("coś innego")
+                                }
+                            }
                         }
                     }
                 }
@@ -97,7 +97,6 @@ struct ContentView: View {
 
                         Text("No internet connection")
                             .font(.footnote)
-                            .bold()
                             .foregroundStyle(.red)
                         
                         Spacer()
@@ -117,7 +116,7 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingSheet) {
             SearchLocationView(isPresented: $showingSheet)
-                .presentationDetents([.medium, .large])
+//                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
     }
