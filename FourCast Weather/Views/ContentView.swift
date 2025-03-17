@@ -14,16 +14,18 @@ struct ContentView: View {
     @State private var currentLocationWeatherData: WeatherData?
     @State private var currentLocationLastFetchTime: Date?
     
-    @State private var showingSheet = false
-    
     @State private var additionalLocations = AdditionalLocations.shared
     
+    @State private var selection = -1
+    
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ZStack {
                 BackgroundView()
-                TabView {
-                    Tab("Current", systemImage: "location") {
+                TabView(selection: $selection) {
+                    Tab("Current", systemImage: "location", value: -1) {
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: 15) {
                                 CurrentWeatherView(weatherData: currentLocationWeatherData, locationName: locationManager.locationName)
@@ -56,40 +58,43 @@ struct ContentView: View {
                     }
                     
                     ForEach(additionalLocations.locations.indices, id: \.self) { index in
-                        Tab {
-                            ScrollView(showsIndicators: false) {
-                                VStack(spacing: 15) {
-                                    CurrentWeatherView(weatherData: additionalLocations.locations[index].weatherData, locationName: additionalLocations.locations[index].name)
-                                    HourlyForecastView(weatherData: additionalLocations.locations[index].weatherData)
-                                    DailyForecastView(weatherData: additionalLocations.locations[index].weatherData)
+                        if index < additionalLocations.locations.count {
+                            Tab(value: index) {
+                                ScrollView(showsIndicators: false) {
+                                    VStack(spacing: 15) {
+                                        CurrentWeatherView(weatherData: additionalLocations.locations[index].weatherData, locationName: additionalLocations.locations[index].name)
+                                        HourlyForecastView(weatherData: additionalLocations.locations[index].weatherData)
+                                        DailyForecastView(weatherData: additionalLocations.locations[index].weatherData)
+                                    }
+                                    .padding()
                                 }
-                                .padding()
-                            }
-                            .refreshable {
-                                do {
-                                    (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate, lastFetchTime: additionalLocations.locations[index].lastFetchTime)
-                                    
-                                } catch OpenWeatherError.invalidData {
-                                    print("Invalid data")
-                                } catch OpenWeatherError.alreadyInUse {
-                                    print("Aready fetching")
-                                } catch OpenWeatherError.fetchNotNecessary {
-                                    print("Not necessary")
-                                } catch {
-                                    print("coś innego")
+                                .refreshable {
+                                    do {
+                                        (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate, lastFetchTime: additionalLocations.locations[index].lastFetchTime)
+                                        
+                                    } catch OpenWeatherError.invalidData {
+                                        print("Invalid data")
+                                    } catch OpenWeatherError.alreadyInUse {
+                                        print("Aready fetching")
+                                    } catch OpenWeatherError.fetchNotNecessary {
+                                        print("Not necessary")
+                                    } catch {
+                                        print("coś innego")
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                .id(additionalLocations.locations.count)
+                .id(selection)
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 .toolbar {
                     ToolbarItemGroup(placement: .bottomBar) {
-                        Button {
-                            showingSheet = true
-                        } label: {
-                            Image(systemName: "plus.square.fill.on.square.fill")
+//                        NavigationLink(destination: AllLocationsView(selection: $selection, navigationPath: $navigationPath)) {
+                        NavigationLink(destination: AllLocationsView(selection: $selection)) {
+                            Image(systemName: "square.fill.on.square.fill")
                                 .renderingMode(.original)
                         }
                         
@@ -114,11 +119,11 @@ struct ContentView: View {
                 .tint(.white)
             }
         }
-        .sheet(isPresented: $showingSheet) {
-            SearchLocationView(isPresented: $showingSheet)
+//        .sheet(isPresented: $showingSheet) {
+//            SearchLocationView(isPresented: $showingSheet, selection: $selection)
 //                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-        }
+//                .presentationDragIndicator(.visible)
+//        }
     }
 }
 

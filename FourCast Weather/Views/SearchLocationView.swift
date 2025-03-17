@@ -9,8 +9,8 @@ import SwiftUI
 
 struct SearchLocationView: View {
     @Binding var isPresented: Bool
+    @Binding var selection: Int
     
-    @State private var showingSheet = false
     @State private var locationSearchService = LocationSearchService()
     @State private var additionalLocations = AdditionalLocations.shared
     @State private var weatherService = WeatherService.shared
@@ -29,6 +29,7 @@ struct SearchLocationView: View {
                                     let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
                                     let newLocation = AdditionalLocationData(name: result.title, coordinate: coordinate, weatherData: response, lastFetchTime: time)
                                     additionalLocations.locations.append(newLocation)
+                                    selection = additionalLocations.locations.count - 1
                                     
                                 } catch OpenWeatherError.invalidData {
                                     print("Invalid data")
@@ -60,14 +61,12 @@ struct SearchLocationView: View {
             }
         }
         .searchable(text: $locationSearchService.query, prompt: "Szukaj miasta")
-        .padding(.top, 10)
-        .sheet(isPresented: $showingSheet) {
-            
-        }
+//        .padding(.top, 10)
     }
 }
 
-//#Preview {
-//    @Previewable @State var ispresented = true
-//    SearchLocationView(isPresented: $ispresented)
-//}
+#Preview {
+    @Previewable @State var ispresented = true
+    @Previewable @State var selection = 1
+    SearchLocationView(isPresented: $ispresented, selection: $selection)
+}
