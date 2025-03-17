@@ -6,6 +6,7 @@
 //
 
 struct WeatherData: Codable {
+    let timezoneOffset: Int
     let current: CurrentWeather
     let hourly: [HourlyWeather]
     let daily: [DailyWeather]
