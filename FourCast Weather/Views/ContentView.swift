@@ -13,12 +13,10 @@ struct ContentView: View {
     @State private var locationManager = LocationManager.shared
     @State private var currentLocationWeatherData: WeatherData?
     @State private var currentLocationLastFetchTime: Date?
-    
     @State private var additionalLocations = AdditionalLocations.shared
-    
     @State private var selection = -1
-    
     @State private var navigationPath = NavigationPath()
+    @State private var shouldRefresh = false
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -87,13 +85,13 @@ struct ContentView: View {
                     }
                 }
                 .id(additionalLocations.locations.count)
-                .id(selection)
+                .id(shouldRefresh)
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 .toolbar {
                     ToolbarItemGroup(placement: .bottomBar) {
 //                        NavigationLink(destination: AllLocationsView(selection: $selection, navigationPath: $navigationPath)) {
-                        NavigationLink(destination: AllLocationsView(selection: $selection)) {
+                        NavigationLink(destination: AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)) {
                             Image(systemName: "square.fill.on.square.fill")
                                 .renderingMode(.original)
                         }

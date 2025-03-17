@@ -11,7 +11,7 @@ struct AllLocationsView: View {
     @Environment(\.dismiss) private var dismiss
     
     @Binding var selection: Int
-//    @Binding var navigationPath: NavigationPath
+    @Binding var shouldRefresh: Bool
     
     @State private var additionalLocations = AdditionalLocations.shared
     @State private var showingSheet = false
@@ -32,6 +32,7 @@ struct AllLocationsView: View {
                         LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
                             .onTapGesture {
                                 selection = index
+                                shouldRefresh.toggle()
                                 dismiss()
                                 print(index)
                             }
@@ -40,6 +41,7 @@ struct AllLocationsView: View {
                                     withAnimation {
                                         additionalLocations.locations.remove(at: index)
                                         selection = additionalLocations.locations.count - 1
+                                        shouldRefresh.toggle()
                                     }
                                     print(index)
                                 }
@@ -73,9 +75,9 @@ struct AllLocationsView: View {
 
 #Preview {
     @Previewable @State var selection = 1
-    @Previewable @State var path = NavigationPath()
+    @Previewable @State var shouldRefresh = false
 //    AllLocationsView(selection: $selection, navigationPath: $path)
-    AllLocationsView(selection: $selection)
+    AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)
 }
 
 struct LocationView: View {
