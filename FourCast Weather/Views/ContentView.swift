@@ -15,11 +15,16 @@ struct ContentView: View {
     @State private var currentLocationLastFetchTime: Date?
     @State private var additionalLocations = AdditionalLocations.shared
     @State private var selection = -1
-    @State private var navigationPath = NavigationPath()
     @State private var shouldRefresh = false
     
+    @State private var bottomToolbarText = ""
+    
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
+    @State private var showingError = false
+    
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack {
             ZStack {
                 BackgroundView()
                 TabView(selection: $selection) {
@@ -51,7 +56,13 @@ struct ContentView: View {
                             }
                         }
                         .refreshable {
-                            locationManager.checkLocationAuthorization()
+                            do {
+                                try locationManager.checkLocationAuthorization()
+                            } catch {
+                                errorTitle = "Daj lokalizację pls"
+                                errorMessage = "Ustawienia > Aplikacje > FourCast Weather > Miejsce"
+                                showingError = true
+                            }
                         }
                     }
                     
@@ -84,13 +95,15 @@ struct ContentView: View {
                         }
                     }
                 }
+                .navigationTitle(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
                 .id(additionalLocations.locations.count)
                 .id(shouldRefresh)
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarColorScheme(.dark, for: .navigationBar)
                 .toolbar {
                     ToolbarItemGroup(placement: .bottomBar) {
-//                        NavigationLink(destination: AllLocationsView(selection: $selection, navigationPath: $navigationPath)) {
                         NavigationLink(destination: AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)) {
                             Image(systemName: "square.fill.on.square.fill")
                                 .renderingMode(.original)
@@ -98,31 +111,48 @@ struct ContentView: View {
                         
                         Spacer()
 
-                        Text("No internet connection")
+                        Text(bottomToolbarText)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(.white)
                         
                         Spacer()
                         
-                        Button {
-                            
-                        } label: {
+                        NavigationLink(destination: SettingsView()) {
                             Image(systemName: "gearshape.fill")
                                 .renderingMode(.original)
                         }
                     }
                 }
-                .toolbarBackground(Material.thin, for: .bottomBar)
+                .toolbarBackground(Color.accentColor, for: .bottomBar)
                 .toolbarBackgroundVisibility(.visible, for: .bottomBar)
                 .tint(.white)
             }
+            .alert(errorTitle, isPresented: $showingError) {
+                Button("OK") {}
+            } message: {
+                Text(errorMessage)
+            }
         }
-//        .sheet(isPresented: $showingSheet) {
-//            SearchLocationView(isPresented: $showingSheet, selection: $selection)
-//                .presentationDetents([.medium, .large])
-//                .presentationDragIndicator(.visible)
-//        }
     }
+//    func fetchWeather(coordinate: CLLocationCoordinate2D, lastFetchTime: Date?) async -> (WeatherData?, Date?) {
+//        var response: WeatherData?
+//        var fetchTime: Date?
+//        
+//        do {
+//            (response, fetchTime) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: lastFetchTime)
+//            
+//        } catch OpenWeatherError.invalidData {
+//            print("Invalid data")
+//        } catch OpenWeatherError.alreadyInUse {
+//            print("Aready fetching")
+//        } catch OpenWeatherError.fetchNotNecessary {
+//            print("Not necessary")
+//        } catch {
+//            print("coś innego")
+//        }
+//        
+//        return (response, fetchTime)
+//    }
 }
 
 

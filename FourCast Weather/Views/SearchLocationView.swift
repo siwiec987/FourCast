@@ -24,21 +24,25 @@ struct SearchLocationView: View {
                         locationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
                             print(coordinate)
                             
-                            Task {
-                                do {
-                                    let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
-                                    let newLocation = AdditionalLocationData(name: result.title, coordinate: coordinate, weatherData: response, lastFetchTime: time)
-                                    additionalLocations.locations.append(newLocation)
-                                    selection = additionalLocations.locations.count - 1
-                                    
-                                } catch OpenWeatherError.invalidData {
-                                    print("Invalid data")
-                                } catch OpenWeatherError.alreadyInUse {
-                                    print("Aready fetching")
-                                } catch OpenWeatherError.fetchNotNecessary {
-                                    print("Not necessary")
-                                } catch {
-                                    print("coś innego")
+                            if additionalLocations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {
+                                print("Równe")
+                            } else {
+                                Task {
+                                    do {
+                                        let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
+                                        let newLocation = AdditionalLocationData(name: result.title, coordinate: coordinate, weatherData: response, lastFetchTime: time)
+                                        additionalLocations.locations.append(newLocation)
+                                        selection = additionalLocations.locations.count - 1
+                                        
+                                    } catch OpenWeatherError.invalidData {
+                                        print("Invalid data")
+                                    } catch OpenWeatherError.alreadyInUse {
+                                        print("Aready fetching")
+                                    } catch OpenWeatherError.fetchNotNecessary {
+                                        print("Not necessary")
+                                    } catch {
+                                        print("coś innego")
+                                    }
                                 }
                             }
                             
@@ -56,7 +60,7 @@ struct SearchLocationView: View {
                 Button {
                     isPresented = false
                 } label: {
-                    Text("Cancel")
+                    Text("Gotowe")
                 }
             }
         }

@@ -24,7 +24,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         self.locationManager!.delegate = self
     }
     
-    func checkLocationAuthorization() {
+    func checkLocationAuthorization() throws {
         guard let locationManager = self.locationManager else {
             return
         }
@@ -35,8 +35,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         case .restricted:
             print("location restricted")
+            throw LocationManagerError.locationRestricted
         case .denied:
             print("location denied")
+            throw LocationManagerError.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
             locationManager.requestLocation()
             self.locationReady = false
@@ -46,7 +48,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        checkLocationAuthorization()
+        do {
+            try checkLocationAuthorization()
+        } catch {
+            print("aaa")
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -96,4 +102,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
     
+}
+
+enum LocationManagerError: Error {
+    case locationRestricted
+    case locationDenied
 }
