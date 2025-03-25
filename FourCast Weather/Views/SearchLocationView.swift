@@ -30,7 +30,7 @@ struct SearchLocationView: View {
                                 Task {
                                     do {
                                         let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
-                                        let newLocation = AdditionalLocationData(name: result.title, coordinate: coordinate, weatherData: response, lastFetchTime: time)
+                                        let newLocation = AdditionalLocationData(name: result.title, coordinate: Coordinate(coordinate), weatherData: response, lastFetchTime: time)
                                         additionalLocations.locations.append(newLocation)
                                         selection = additionalLocations.locations.count - 1
                                         

@@ -11,9 +11,11 @@ import CoreLocation
 struct ContentView: View {
     @State private var weatherService = WeatherService.shared
     @State private var locationManager = LocationManager.shared
+    @State private var additionalLocations = AdditionalLocations.shared
+    
     @State private var currentLocationWeatherData: WeatherData?
     @State private var currentLocationLastFetchTime: Date?
-    @State private var additionalLocations = AdditionalLocations.shared
+
     @State private var selection = -1
     @State private var shouldRefresh = false
     
@@ -79,7 +81,7 @@ struct ContentView: View {
                                 }
                                 .refreshable {
                                     do {
-                                        (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate, lastFetchTime: additionalLocations.locations[index].lastFetchTime)
+                                        (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate.getCoordinate(), lastFetchTime: additionalLocations.locations[index].lastFetchTime)
                                         
                                     } catch OpenWeatherError.invalidData {
                                         print("Invalid data")
@@ -95,13 +97,18 @@ struct ContentView: View {
                         }
                     }
                 }
-                .navigationTitle(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
+//                .toolbarColorScheme(.dark, for: .navigationBar)
                 .id(additionalLocations.locations.count)
                 .id(shouldRefresh)
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarColorScheme(.dark, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
+                            .bold()
+                            .foregroundStyle(.white)
+                    }
+                }
                 .toolbar {
                     ToolbarItemGroup(placement: .bottomBar) {
                         NavigationLink(destination: AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)) {
@@ -127,6 +134,13 @@ struct ContentView: View {
                 .toolbarBackgroundVisibility(.visible, for: .bottomBar)
                 .tint(.white)
             }
+//            .ignoresSafeArea()
+            .navigationTitle(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
+            .navigationBarTitleDisplayMode(.inline)
+//            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(Color(red: 0.541, green: 0.867, blue: 1).gradient, for: .navigationBar)
+            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+            
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK") {}
             } message: {
@@ -134,25 +148,6 @@ struct ContentView: View {
             }
         }
     }
-//    func fetchWeather(coordinate: CLLocationCoordinate2D, lastFetchTime: Date?) async -> (WeatherData?, Date?) {
-//        var response: WeatherData?
-//        var fetchTime: Date?
-//        
-//        do {
-//            (response, fetchTime) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: lastFetchTime)
-//            
-//        } catch OpenWeatherError.invalidData {
-//            print("Invalid data")
-//        } catch OpenWeatherError.alreadyInUse {
-//            print("Aready fetching")
-//        } catch OpenWeatherError.fetchNotNecessary {
-//            print("Not necessary")
-//        } catch {
-//            print("coś innego")
-//        }
-//        
-//        return (response, fetchTime)
-//    }
 }
 
 
