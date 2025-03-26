@@ -12,8 +12,12 @@ struct AdditionalLocationData: Codable {
     let name: String
 //    let coordinate: CLLocationCoordinate2D
     let coordinate: Coordinate
-    var weatherData: WeatherData?
+    var weatherData: WeatherData? //WeatherData jest prawdopodobnie za duże na UserDefaults, lepoej zapisać JSON na urządzeniu
     var lastFetchTime: Date?
+    
+    var coordinateObject: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: coordinate.latitude, longitude: coordinate.longitude)
+    }
 }
 
 struct Coordinate: Codable {
@@ -23,10 +27,6 @@ struct Coordinate: Codable {
     init(_ coordinate: CLLocationCoordinate2D) {
         self.latitude = coordinate.latitude
         self.longitude = coordinate.longitude
-    }
-    
-    func getCoordinate() -> CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
     }
 }
 
@@ -56,7 +56,6 @@ class AdditionalLocations {
         if let data = UserDefaults.standard.data(forKey: saveKey) {
             if let decoded = try? JSONDecoder().decode([AdditionalLocationData].self, from: data) {
                 locations = decoded
-                return
             }
         }
     }
