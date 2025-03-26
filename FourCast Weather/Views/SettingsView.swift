@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var tempUnit = UnitTemperature.init(forLocale: .current)
-    @State private var windSpeedUnit = UnitSpeed.init(forLocale: .current)
+    @State private var userSettings = UserSettings.shared
     
-    private var tempUnits: [UnitTemperature] = [.celsius, .fahrenheit, .kelvin]
-    private var windSpeedUnits: [UnitSpeed] = [.metersPerSecond, .kilometersPerHour, .milesPerHour]
+    //    private var temperatureUnits: [UnitTemperature] = [.celsius, .fahrenheit, .kelvin]
+    //    private var windSpeedUnits: [UnitSpeed] = [.metersPerSecond, .kilometersPerHour, .milesPerHour]
+    private var temperatureUnits = ["°C", "°F", "K"]
+    private var windSpeedUnits = ["m/s", "km/h", "mph"]
     
     var body: some View {
         Form {
             Section("Jednostki") {
-                Picker("Temperatura", selection: $tempUnit) {
-                    ForEach(tempUnits, id: \.self) { unit in
-                        Text(unit.symbol)
+                Picker("Temperatura", selection: $userSettings.settings.temperatureUnitString) {
+                    ForEach(temperatureUnits, id: \.self) { unit in
+                        Text(unit)
                     }
                 }
                 
-                Picker("Prędkość wiatru", selection: $windSpeedUnit) {
+                Picker("Prędkość wiatru", selection: $userSettings.settings.windSpeedUnitString) {
                     ForEach(windSpeedUnits, id: \.self) {unit in
-                        Text(unit.symbol)
+                        Text(unit)
                     }
                 }
                 
@@ -43,4 +44,67 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
+}
+
+struct UserSettingsModel: Codable {
+    var temperatureUnitString: String
+    var windSpeedUnitString: String
+    
+    var temperatureUnit: UnitTemperature {
+        switch(temperatureUnitString) {
+        case "°C":
+            return .celsius
+        case "°F":
+            return .fahrenheit
+        default:
+            return .kelvin
+        }
+    }
+    
+    var windSpeedUnit: UnitSpeed {
+        switch(windSpeedUnitString) {
+        case "km/h":
+            return .kilometersPerHour
+        case "mph":
+            return .milesPerHour
+        default:
+            return .metersPerSecond
+        }
+    }
+}
+
+@Observable
+class UserSettings {
+    static let shared = UserSettings()
+    
+    private let saveKey = "userSettings"
+    
+    var settings: UserSettingsModel {
+        didSet {
+            saveToUserDefaults()
+        }
+    }
+    
+    private init() {
+        if let data = UserDefaults.standard.data(forKey: saveKey) {
+            if let decoded = try? JSONDecoder().decode(UserSettingsModel.self, from: data) {
+                settings = decoded
+                return
+            }
+        }
+        
+        let tempLocale = UnitTemperature.init(forLocale: .current)
+        let speedLocale = UnitSpeed.init(forLocale: .current)
+        
+        let defaultTemperature = tempLocale == .celsius ? "°C" : tempLocale == .fahrenheit ? "°F" : "K"
+        let defaultSpeed = speedLocale == .milesPerHour ? "mph" : "m/s"
+
+        settings = UserSettingsModel(temperatureUnitString: defaultTemperature, windSpeedUnitString: defaultSpeed)
+    }
+    
+    private func saveToUserDefaults() {
+        if let encoded = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(encoded, forKey: saveKey)
+        }
+    }
 }
