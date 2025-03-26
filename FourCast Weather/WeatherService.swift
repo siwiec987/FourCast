@@ -35,7 +35,8 @@ class WeatherService {
             let latitude = coordinate.latitude
             let longitude = coordinate.longitude
             let apiKey = "792cfab2b422b4dbd5795ced996a90b0"
-            let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&units=metric&appid=\(apiKey)"
+//            let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&units=metric&appid=\(apiKey)"
+            let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&appid=\(apiKey)"
             
             guard let url = URL(string: urlString) else {
                 throw OpenWeatherError.invalidURL
