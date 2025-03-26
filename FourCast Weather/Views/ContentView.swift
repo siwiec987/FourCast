@@ -25,6 +25,17 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    private var navbarTitle: String {
+        if selection == -1 {
+            return locationManager.locationName
+        }
+        if selection < additionalLocations.locations.count {
+            return additionalLocations.locations[selection].name
+        }
+        
+        return ""
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -81,7 +92,7 @@ struct ContentView: View {
                                 }
                                 .refreshable {
                                     do {
-                                        (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinate.getCoordinate(), lastFetchTime: additionalLocations.locations[index].lastFetchTime)
+                                        (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) = try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinateObject, lastFetchTime: additionalLocations.locations[index].lastFetchTime)
                                         
                                     } catch OpenWeatherError.invalidData {
                                         print("Invalid data")
@@ -104,7 +115,7 @@ struct ContentView: View {
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 .toolbar {
                     ToolbarItem(placement: .principal) {
-                        Text(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
+                        Text(navbarTitle)
                             .bold()
                             .foregroundStyle(.white)
                     }
@@ -135,7 +146,7 @@ struct ContentView: View {
                 .tint(.white)
             }
 //            .ignoresSafeArea()
-            .navigationTitle(selection == -1 ? locationManager.locationName : (selection < additionalLocations.locations.count ? additionalLocations.locations[selection].name : ""))
+            .navigationTitle(navbarTitle)
             .navigationBarTitleDisplayMode(.inline)
 //            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(Color(red: 0.541, green: 0.867, blue: 1).gradient, for: .navigationBar)

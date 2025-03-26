@@ -17,7 +17,7 @@ struct HourlyForecastView: View {
                 let weekdays = getWeekdays(forecasts: weatherData?.hourly ?? [])
                 
                 ForEach(weekdays, id: \.self) { day in
-                    dayForecastView(for: day)
+                    DayForecastView(day: day, hourlyForecast: weatherData?.hourly, timezoneOffset: weatherData?.timezoneOffset)
                 }
             }
         }
@@ -25,59 +25,6 @@ struct HourlyForecastView: View {
         .background(.white.opacity(0.25))
         .foregroundStyle(.white)
         .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    private func dayForecastView(for day: String) -> some View {
-        VStack(alignment: .leading) {
-            Text(day)
-                .font(.subheadline)
-                .padding([.top, .bottom], 10)
-            
-            HStack {
-                let hourlyForecasts = getHourlyForecasts(for: day)
-                
-                ForEach(hourlyForecasts, id: \.dt) { hourlyForecast in
-                    hourlyForecastItem(for: hourlyForecast)
-                }
-            }
-        }
-        .padding([.leading, .bottom, .trailing])
-        .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    private func hourlyForecastItem(for hourlyForecast: HourlyWeather) -> some View {
-        VStack {
-            let formattedHour = getFormattedHour(from: hourlyForecast.dt)
-            
-            Text(formattedHour)
-                .font(.subheadline)
-            
-            Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
-                .renderingMode(.original)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 30, height: 30)
-            
-            Text("\(Int(hourlyForecast.temp))°")
-                .bold()
-        }
-    }
-    
-    private func getFormattedHour(from timestamp: Int) -> String {
-        let timeInterval = TimeInterval(timestamp)
-        let utcDate = Date(timeIntervalSince1970: timeInterval)
-        
-        let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(secondsFromGMT: weatherData?.timezoneOffset ?? 0)
-        formatter.dateFormat = "HH"
-        
-        return formatter.string(from: utcDate)
-    }
-    
-    private func getHourlyForecasts(for day: String) -> [HourlyWeather] {
-        return weatherData?.hourly.filter {
-            Date.getWeekday(from: $0.dt, with: weatherData?.timezoneOffset ?? 0) == day
-        } ?? []
     }
     
     func getWeekdays(forecasts: [HourlyWeather]) -> [String] {
@@ -91,6 +38,76 @@ struct HourlyForecastView: View {
         }
         
         return result
+    }
+}
+
+struct DayForecastView: View {
+    var day: String
+    var hourlyForecast: [HourlyWeather]?
+    var timezoneOffset: Int?
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(day)
+                .font(.subheadline)
+                .padding([.top, .bottom], 10)
+            
+            HStack {
+                let hourlyForecasts = getHourlyForecasts(for: day)
+                
+                ForEach(hourlyForecasts, id: \.dt) { hourlyForecast in
+                    HourlyForecastItem(hourlyForecast: hourlyForecast, timezoneOffset: timezoneOffset)
+                }
+            }
+        }
+        .padding([.leading, .bottom, .trailing])
+        .clipShape(RoundedRectangle(cornerRadius: 15))
+    }
+    
+    private func getHourlyForecasts(for day: String) -> [HourlyWeather] {
+        return (hourlyForecast ?? []).filter {
+            Date.getWeekday(from: $0.dt, with: timezoneOffset ?? 0) == day
+        }
+    }
+}
+
+struct HourlyForecastItem: View {
+    let hourlyForecast: HourlyWeather
+    let timezoneOffset: Int?
+    
+    @State private var userSettings = UserSettings.shared
+    
+    private var temperature: Int {
+        let temp = hourlyForecast.temp
+        return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+    }
+    var body: some View {
+        VStack {
+            let formattedHour = getFormattedHour()
+            
+            Text(formattedHour)
+                .font(.subheadline)
+            
+            Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
+                .renderingMode(.original)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30, height: 30)
+            
+            Text("\(temperature)°")
+                .bold()
+        }
+    }
+    
+    private func getFormattedHour() -> String {
+        let timeInterval = TimeInterval(hourlyForecast.dt)
+        let utcDate = Date(timeIntervalSince1970: timeInterval)
+        
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(secondsFromGMT: timezoneOffset ?? 0)
+        formatter.dateFormat = "HH"
+        
+        return formatter.string(from: utcDate)
     }
 }
 
