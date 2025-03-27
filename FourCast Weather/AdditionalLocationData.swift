@@ -34,26 +34,30 @@ struct Coordinate: Codable {
 class AdditionalLocations {
     static let shared = AdditionalLocations()
     
-    private let saveKey = "savedLocations"
+    private let filePath = "locations"
     
     var locations: [AdditionalLocationData] = [] {
         didSet {
-            saveToUserDefaults()
+            saveToJSON()
         }
     }
     
     private init() {
-        loadFromUserDefaults()
+        loadFromJSON()
     }
     
-    private func saveToUserDefaults() {
+    private func saveToJSON() {
+        let fileURL = URL.documentsDirectory.appending(path: filePath)
+        
         if let encoded = try? JSONEncoder().encode(locations) {
-            UserDefaults.standard.set(encoded, forKey: saveKey)
+            try? encoded.write(to: fileURL, options: [.atomic, .completeFileProtection])
         }
     }
     
-    private func loadFromUserDefaults() {
-        if let data = UserDefaults.standard.data(forKey: saveKey) {
+    private func loadFromJSON() {
+        let fileURL = URL.documentsDirectory.appending(path: filePath)
+        
+        if let data = try? Data(contentsOf: fileURL) {
             if let decoded = try? JSONDecoder().decode([AdditionalLocationData].self, from: data) {
                 locations = decoded
             }
