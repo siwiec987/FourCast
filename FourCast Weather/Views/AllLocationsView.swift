@@ -26,35 +26,36 @@ struct AllLocationsView: View {
         if additionalLocations.locations.isEmpty {
             ContentUnavailableView("Brak lokalizacji", systemImage: "questionmark.app", description: Text("Dodaj lokalizację używając '+'"))
         } else {
-            LazyVGrid(columns: columns) {
-                ForEach(additionalLocations.locations.indices, id: \.self) { index in
-                    if index < additionalLocations.locations.count {
-                        LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
-                            .onTapGesture {
-                                selection = index
-                                shouldRefresh.toggle()
-                                dismiss()
-                                print(index)
-                            }
-                            .contextMenu {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    withAnimation {
+            ScrollView {
+                LazyVGrid(columns: columns) {
+                    ForEach(additionalLocations.locations.indices, id: \.self) { index in
+                        if index < additionalLocations.locations.count {
+                            LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
+//                                .transition(.move(edge: .trailing))
+                                .onTapGesture {
+                                    selection = index
+                                    shouldRefresh.toggle()
+                                    dismiss()
+                                    print(index)
+                                }
+                                .contextMenu {
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
                                         additionalLocations.locations.remove(at: index)
                                         selection = additionalLocations.locations.count - 1
                                         shouldRefresh.toggle()
+                                        print(index)
                                     }
-                                    print(index)
                                 }
-                            }
+                        }
                     }
+                    
+                    //                ForEach(0..<7) { location in
+                    //                    LocationView(name: "Loation \(location)", weatherData: SampleWeatherData().data)
+                    //                }
                 }
-                
-                //                ForEach(0..<7) { location in
-                //                    LocationView(name: "Loation \(location)", weatherData: SampleWeatherData().data)
-                //                }
+                .id(selection)
+                .padding()
             }
-            .id(selection)
-            .padding()
         }
             
         Spacer()
@@ -83,12 +84,21 @@ struct AllLocationsView: View {
 struct LocationView: View {
     @State var name: String
     @State var weatherData: WeatherData?
+    @State private var userSettings = UserSettings.shared
+    
+    private var temperature: Int {
+        if let temp = weatherData?.current.temp {
+            return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+        }
+        
+         return 0
+    }
     
     var body: some View {
         ZStack {
             Color.blue
             
-            Text("\(Int(weatherData?.current.temp ?? 0))°")
+            Text("\(temperature)°")
                 .font(.largeTitle)
                 .foregroundStyle(.white)
                 .shadow(color: .black, radius: 10)
