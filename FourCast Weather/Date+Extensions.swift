@@ -18,4 +18,15 @@ extension Date {
         dateFormatter.locale = locale
         return dateFormatter.string(from: date)
     }
+    
+    static func getFormattedHour(from timestamp: Int, with timezoneOffset: Int = 0, format: String = "HH:mm") -> String {
+        let timeInterval = TimeInterval(timestamp)
+        let utcDate = Date(timeIntervalSince1970: timeInterval)
+        
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(secondsFromGMT: timezoneOffset)
+        formatter.dateFormat = format
+        
+        return formatter.string(from: utcDate)
+    }
 }
