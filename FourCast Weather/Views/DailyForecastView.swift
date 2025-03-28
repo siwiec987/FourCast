@@ -40,7 +40,7 @@ struct DailyForecastView: View {
             .padding(5)
         }
         .padding()
-        .background(.white.opacity(0.25))
+        .background(.tertiary.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     

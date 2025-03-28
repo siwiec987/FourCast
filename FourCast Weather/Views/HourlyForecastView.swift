@@ -21,9 +21,9 @@ struct HourlyForecastView: View {
                 }
             }
         }
-        .contentMargins(0)
-        .background(.white.opacity(0.25))
         .foregroundStyle(.white)
+        .contentMargins(0)
+        .background(.tertiary.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     
@@ -83,7 +83,7 @@ struct HourlyForecastItem: View {
     }
     var body: some View {
         VStack {
-            let formattedHour = getFormattedHour()
+            let formattedHour = Date.getFormattedHour(from: hourlyForecast.dt, with: timezoneOffset ?? 0, format: "HH")
             
             Text(formattedHour)
                 .font(.subheadline)
@@ -97,17 +97,6 @@ struct HourlyForecastItem: View {
             Text("\(temperature)°")
                 .bold()
         }
-    }
-    
-    private func getFormattedHour() -> String {
-        let timeInterval = TimeInterval(hourlyForecast.dt)
-        let utcDate = Date(timeIntervalSince1970: timeInterval)
-        
-        let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(secondsFromGMT: timezoneOffset ?? 0)
-        formatter.dateFormat = "HH"
-        
-        return formatter.string(from: utcDate)
     }
 }
 

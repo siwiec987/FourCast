@@ -10,9 +10,8 @@ import CoreLocation
 
 struct AdditionalLocationData: Codable {
     let name: String
-//    let coordinate: CLLocationCoordinate2D
-    let coordinate: Coordinate
-    var weatherData: WeatherData? //WeatherData jest prawdopodobnie za duże na UserDefaults, lepoej zapisać JSON na urządzeniu
+    let coordinate: Coordinate //CLLocationCoordinate2D nie jest Codable i trzeba było kombinować
+    var weatherData: WeatherData?
     var lastFetchTime: Date?
     
     var coordinateObject: CLLocationCoordinate2D {
