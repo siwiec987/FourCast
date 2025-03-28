@@ -40,22 +40,24 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             print("location denied")
             throw LocationManagerError.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
-            locationManager.requestLocation()
+//            locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
+            locationManager.startUpdatingLocation() //to śmiga od razu
             self.locationReady = false
+            print("zaczyna pobieranie lokalizacji")
         @unknown default:
             break
         }
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        do {
-            try checkLocationAuthorization()
-        } catch {
-            print("aaa")
-        }
+        try? checkLocationAuthorization()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let locationManager = locationManager {
+            locationManager.stopUpdatingLocation()
+        }
+        
         guard let location = locations.last else {
             return
         }
@@ -66,6 +68,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
         
         self.locationReady = true
+        print("kończy pobieranie lokalizacji")
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
