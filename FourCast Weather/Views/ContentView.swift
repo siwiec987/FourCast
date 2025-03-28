@@ -47,9 +47,14 @@ struct ContentView: View {
                                 CurrentWeatherView(weatherData: currentLocationWeatherData, locationName: locationManager.locationName)
                                 HourlyForecastView(weatherData: currentLocationWeatherData)
                                 DailyForecastView(weatherData: currentLocationWeatherData)
+                                SunriseSunsetView(weatherData: currentLocationWeatherData)
+                                MoonriseMoonsetView(weatherData: currentLocationWeatherData)
+                                Spacer()
+                                    .frame(height: 30)
                             }
                             .padding()
                             .onChange(of: locationManager.location, initial: false) {
+                                print("zmiana lokalizacji")
                                 if let location = locationManager.location, locationManager.locationReady {
                                     Task {
                                         do {
@@ -87,6 +92,10 @@ struct ContentView: View {
                                         CurrentWeatherView(weatherData: additionalLocations.locations[index].weatherData, locationName: additionalLocations.locations[index].name)
                                         HourlyForecastView(weatherData: additionalLocations.locations[index].weatherData)
                                         DailyForecastView(weatherData: additionalLocations.locations[index].weatherData)
+                                        SunriseSunsetView(weatherData: additionalLocations.locations[index].weatherData)
+                                        MoonriseMoonsetView(weatherData: additionalLocations.locations[index].weatherData)
+                                        Spacer()
+                                            .frame(height: 30)
                                     }
                                     .padding()
                                 }
@@ -108,7 +117,6 @@ struct ContentView: View {
                         }
                     }
                 }
-//                .toolbarColorScheme(.dark, for: .navigationBar)
                 .id(additionalLocations.locations.count)
                 .id(shouldRefresh)
                 .tabViewStyle(.page)
@@ -149,7 +157,7 @@ struct ContentView: View {
             .navigationTitle(navbarTitle)
             .navigationBarTitleDisplayMode(.inline)
 //            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(Color(red: 0.541, green: 0.867, blue: 1).gradient, for: .navigationBar)
+            .toolbarBackground(Color(red: 0.400, green: 0.750, blue: 1), for: .navigationBar)
             .toolbarBackgroundVisibility(.visible, for: .navigationBar)
             
             .alert(errorTitle, isPresented: $showingError) {
