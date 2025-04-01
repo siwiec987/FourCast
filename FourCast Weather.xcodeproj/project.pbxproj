@@ -78,11 +78,12 @@
 				};
 			};
 			buildConfigurationList = 2DF9F4B42D5D39290089598D /* Build configuration list for PBXProject "FourCast Weather" */;
-			developmentRegion = en;
+			developmentRegion = pl;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				pl,
 			);
 			mainGroup = 2DF9F4B02D5D39290089598D;
 			minimizedProjectReferenceProxies = 1;
@@ -247,6 +248,7 @@
 				DEVELOPMENT_TEAM = 64Y9KZQZ75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FourCast-Weather-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FourCast Weather";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to provide weather data";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide weather data";
@@ -284,6 +286,7 @@
 				DEVELOPMENT_TEAM = 64Y9KZQZ75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FourCast-Weather-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FourCast Weather";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "We need your location to provide weather data";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We need your location to provide weather data";
