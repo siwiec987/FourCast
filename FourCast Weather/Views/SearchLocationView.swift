@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SearchLocationView: View {
-    @Binding var isPresented: Bool
+    @Environment(\.dismiss) var dismiss
+    
     @Binding var selection: Int
     
     @State private var locationSearchService = LocationSearchService()
@@ -46,7 +47,7 @@ struct SearchLocationView: View {
                                 }
                             }
                             
-                            isPresented = false
+                            dismiss()
                         }
                     }
                     .foregroundStyle(.primary)
@@ -58,9 +59,11 @@ struct SearchLocationView: View {
             }
             .toolbar {
                 Button {
-                    isPresented = false
+                    dismiss()
                 } label: {
-                    Text("Gotowe")
+//                    Text("Gotowe")
+                    Image(systemName: "x.circle.fill")
+//                        .tint(.gray)
                 }
             }
         }
@@ -70,7 +73,6 @@ struct SearchLocationView: View {
 }
 
 #Preview {
-    @Previewable @State var ispresented = true
     @Previewable @State var selection = 1
-    SearchLocationView(isPresented: $ispresented, selection: $selection)
+    SearchLocationView(selection: $selection)
 }

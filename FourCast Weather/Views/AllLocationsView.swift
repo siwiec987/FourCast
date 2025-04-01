@@ -24,7 +24,7 @@ struct AllLocationsView: View {
     
     var body: some View {
         if additionalLocations.locations.isEmpty {
-            ContentUnavailableView("Brak lokalizacji", systemImage: "questionmark.app", description: Text("Dodaj lokalizację używając '+'"))
+            ContentUnavailableView("Brak lokalizacji", systemImage: "", description: Text("Dodaj lokalizację używając '+'"))
         } else {
             ScrollView {
                 LazyVGrid(columns: columns) {
@@ -68,7 +68,7 @@ struct AllLocationsView: View {
             }
         }
         .sheet(isPresented: $showingSheet) {
-            SearchLocationView(isPresented: $showingSheet, selection: $selection)
+            SearchLocationView(selection: $selection)
             .presentationDragIndicator(.hidden)
         }
     }
@@ -77,7 +77,6 @@ struct AllLocationsView: View {
 #Preview {
     @Previewable @State var selection = 1
     @Previewable @State var shouldRefresh = false
-//    AllLocationsView(selection: $selection, navigationPath: $path)
     AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)
 }
 
