@@ -58,12 +58,8 @@ struct SearchLocationView: View {
                 }
             }
             .toolbar {
-                Button {
+                Button("Done", systemImage: "x.circle.fill") {
                     dismiss()
-                } label: {
-//                    Text("Gotowe")
-                    Image(systemName: "x.circle.fill")
-//                        .tint(.gray)
                 }
             }
         }
