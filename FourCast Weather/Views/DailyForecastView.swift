@@ -10,8 +10,6 @@ import SwiftUI
 struct DailyForecastView: View {
     let weatherData: WeatherData?
     
-    @State private var userSettings = UserSettings.shared
-    
     var body: some View {
         VStack {
             ForEach(weatherData?.daily ?? [], id: \.dt) {dailyForecast in
@@ -29,11 +27,11 @@ struct DailyForecastView: View {
                     
                     Spacer()
                     
-                    Text("\(getConvertedTemperature(dailyForecast.temp.min))°")
+                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.min))°")
                     
                     Text(". . .")
                     
-                    Text("\(getConvertedTemperature(dailyForecast.temp.max))°")
+                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.max))°")
                 }
             }
             .foregroundStyle(.white)
@@ -42,10 +40,6 @@ struct DailyForecastView: View {
         .padding()
         .background(.tertiary.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 15))
-    }
-    
-    private func getConvertedTemperature(_ temp: Double) -> Int {
-         return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
     }
 }
 

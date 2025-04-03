@@ -48,10 +48,6 @@ struct AllLocationsView: View {
                                 }
                         }
                     }
-                    
-                    //                ForEach(0..<7) { location in
-                    //                    LocationView(name: "Loation \(location)", weatherData: SampleWeatherData().data)
-                    //                }
                 }
                 .id(selection)
                 .padding()
@@ -83,11 +79,10 @@ struct AllLocationsView: View {
 struct LocationView: View {
     @State var name: String
     @State var weatherData: WeatherData?
-    @State private var userSettings = UserSettings.shared
     
     private var temperature: Int {
         if let temp = weatherData?.current.temp {
-            return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+            return WeatherService.getConvertedTemperature(from: temp)
         }
         
          return 0

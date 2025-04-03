@@ -75,11 +75,9 @@ struct HourlyForecastItem: View {
     let hourlyForecast: HourlyWeather
     let timezoneOffset: Int?
     
-    @State private var userSettings = UserSettings.shared
-    
     private var temperature: Int {
         let temp = hourlyForecast.temp
-        return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+        return WeatherService.getConvertedTemperature(from: temp)
     }
     var body: some View {
         VStack {

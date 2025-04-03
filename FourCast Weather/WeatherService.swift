@@ -137,6 +137,11 @@ class WeatherService {
             return "ellipsis"
         }
     }
+    
+    static func getConvertedTemperature(from temp: Double) -> Int {
+        let userSettings = UserSettings.shared
+        return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+    }
 }
 
 enum OpenWeatherError: Error {
