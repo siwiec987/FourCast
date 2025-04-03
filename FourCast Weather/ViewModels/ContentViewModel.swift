@@ -15,8 +15,6 @@ class ContentViewModel {
     var selection = -1
     var shouldRefresh = false
     
-    var bottomToolbarText = ""
-    
     var errorTitle = ""
     var errorMessage = ""
     var showingError = false
@@ -37,6 +35,43 @@ class ContentViewModel {
         }
         
         return ""
+    }
+    
+    var bottomToolbarMessage: String {
+        guard let lastFetch =
+                (selection == -1) ?
+                currentLocationLastFetchTime : (
+                    selection >= 0 && selection < additionalLocations.locations.count ?
+                    additionalLocations.locations[selection].lastFetchTime : nil)
+        else {
+            return ""
+        }
+        
+        let calendar = Calendar.current
+        if calendar.isDateInToday(lastFetch) {
+            return lastFetch.formatted(date: .omitted, time: .shortened)
+        }
+        
+        return lastFetch.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    
+    var bottomToolbarTitle: String {
+        guard !bottomToolbarMessage.isEmpty else {
+            return ""
+        }
+        
+        return "Ostatnia aktualizacja"
+    }
+    
+    func fetchCurrentLocation() {
+        do {
+            try locationManager.checkLocationAuthorization()
+        } catch {
+            errorTitle = "Daj lokalizację pls"
+            errorMessage = "Ustawienia > Aplikacje > FourCast Weather > Miejsce"
+            showingError = true
+        }
     }
     
     func fetchWeatherForCurrentLocation() {
