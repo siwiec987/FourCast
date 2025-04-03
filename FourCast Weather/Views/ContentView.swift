@@ -29,17 +29,8 @@ struct ContentView: View {
                         ScrollView(showsIndicators: false) {
                             WeatherView(weatherData: viewModel.currentLocationWeatherData, locationName: locationManager.locationName)
                         }
-                        .onChange(of: locationManager.location, initial: true) {
+                        .onChange(of: locationManager.location, initial: false) {
                             viewModel.fetchWeatherForCurrentLocation()
-                        }
-                        .refreshable {
-                            do {
-                                try locationManager.checkLocationAuthorization()
-                            } catch {
-                                viewModel.errorTitle = "Daj lokalizację pls"
-                                viewModel.errorMessage = "Ustawienia > Aplikacje > FourCast Weather > Miejsce"
-                                viewModel.showingError = true
-                            }
                         }
                     }
                     
@@ -49,15 +40,36 @@ struct ContentView: View {
                                 ScrollView(showsIndicators: false) {
                                     WeatherView(weatherData: additionalLocations.locations[index].weatherData, locationName: additionalLocations.locations[index].name)
                                 }
-                                .refreshable {
-                                    await viewModel.refreshWeatherForAdditionalLocation(index: index)
-                                }
                             }
                         }
                     }
                 }
                 .id(additionalLocations.locations.count)
                 .id(viewModel.shouldRefresh)
+                .onReceive(NotificationCenter.default.publisher(
+                    for: UIScene.willEnterForegroundNotification)) { _ in
+                        print("\nCame back to foreground")
+                        if viewModel.selection == -1 {
+                            print("City: \(locationManager.locationName)")
+                            viewModel.fetchCurrentLocation()
+                        }
+                        if viewModel.selection >= 0 && viewModel.selection < additionalLocations.locations.count {
+                            print("City: \(additionalLocations.locations[viewModel.selection].name)")
+                            Task {
+                                await viewModel.refreshWeatherForAdditionalLocation(index: viewModel.selection)
+                            }
+                        }
+                }
+                .onChange(of: viewModel.selection) {
+                    if viewModel.selection == -1 {
+                        viewModel.fetchCurrentLocation()
+                    } else {
+                        print("pogoda dla --\(viewModel.selection)-- jest pobierana")
+                        Task {
+                            await viewModel.refreshWeatherForAdditionalLocation(index: viewModel.selection)
+                        }
+                    }
+                }
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
                 .toolbar {
@@ -76,9 +88,18 @@ struct ContentView: View {
                         
                         Spacer()
 
-                        Text(viewModel.bottomToolbarText)
-                            .font(.footnote)
-                            .foregroundStyle(.white)
+                        VStack {
+//                            if !WeatherService.shared.isLoading {
+                                Text(viewModel.bottomToolbarTitle)
+                                    .font(.caption2)
+                                
+                                Text(viewModel.bottomToolbarMessage)
+                                    .font(.footnote)
+                                    .fontWeight(.semibold)
+//                            }
+                        }
+                        .foregroundStyle(.white)
+//                        .animation(.default, value: WeatherService.shared.isLoading)
                         
                         Spacer()
                         
