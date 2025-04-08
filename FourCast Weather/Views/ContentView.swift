@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct ContentView: View {
-    @State private var viewModel = ContentViewModel()
+    @State private var viewModel = ContentViewModel.shared
     @State private var locationManager = LocationManager.shared
     @State private var calendarManager = CalendarManager.shared
     @State private var additionalLocations = AdditionalLocations.shared
@@ -63,7 +63,8 @@ struct ContentView: View {
                 .onChange(of: viewModel.selection) {
                     if viewModel.selection == -1 {
                         viewModel.fetchCurrentLocation()
-                    } else {
+                    }
+                    if viewModel.selection >= 0 && viewModel.selection < additionalLocations.locations.count {
                         print("pogoda dla --\(viewModel.selection)-- jest pobierana")
                         Task {
                             await viewModel.refreshWeatherForAdditionalLocation(index: viewModel.selection)
@@ -72,13 +73,6 @@ struct ContentView: View {
                 }
                 .tabViewStyle(.page)
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text(viewModel.navbarTitle)
-                            .bold()
-                            .foregroundStyle(.white)
-                    }
-                }
                 .toolbar {
                     ToolbarItemGroup(placement: .bottomBar) {
                         NavigationLink(destination: AllLocationsView(selection: $viewModel.selection, shouldRefresh: $viewModel.shouldRefresh)) {
@@ -121,7 +115,12 @@ struct ContentView: View {
             .toolbarBackgroundVisibility(.visible, for: .navigationBar)
             
             .alert(viewModel.errorTitle, isPresented: $viewModel.showingError) {
-                Button("OK") {}
+                Button("Ustawienia") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Anuluj", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage)
             }

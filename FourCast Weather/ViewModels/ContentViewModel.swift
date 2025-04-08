@@ -9,6 +9,8 @@ import Foundation
 
 @Observable
 class ContentViewModel {
+    static var shared = ContentViewModel()
+    
     var currentLocationWeatherData: WeatherData?
     var currentLocationLastFetchTime: Date?
     
@@ -61,7 +63,11 @@ class ContentViewModel {
             return ""
         }
         
-        return "Ostatnia aktualizacja"
+        return "Ostatnia aktualizacja:"
+    }
+    
+    private init() {
+        
     }
     
     func fetchCurrentLocation() {
@@ -69,7 +75,7 @@ class ContentViewModel {
             try locationManager.checkLocationAuthorization()
         } catch {
             errorTitle = "Daj lokalizację pls"
-            errorMessage = "Ustawienia > Aplikacje > FourCast Weather > Miejsce"
+            errorMessage = "Daj lokalizację to damy pogodę"
             showingError = true
         }
     }
@@ -101,8 +107,10 @@ class ContentViewModel {
     private func handleWeatherError(_ error: Error) {
         switch error {
         case OpenWeatherError.invalidData:
-            errorTitle = "Błąd danych"
-            errorMessage = "Nie udało się pobrać poprawnych danych."
+//            errorTitle = "Błąd danych"
+//            errorMessage = "Nie udało się pobrać poprawnych danych."
+            print("Invalid data")
+            return
         case OpenWeatherError.alreadyInUse:
             print("Already in use")
             return
@@ -110,9 +118,11 @@ class ContentViewModel {
             print("Not necessary")
             return
         default:
-            errorTitle = "Błąd"
-            errorMessage = "Coś poszło nie tak."
+//            errorTitle = "Błąd"
+//            errorMessage = "Coś poszło nie tak."
+            print("Unknown weather error")
+            return
         }
-        showingError = true
+//        showingError = true
     }
 }

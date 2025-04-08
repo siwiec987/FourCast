@@ -50,7 +50,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        try? checkLocationAuthorization()
+        let contentViewModel = ContentViewModel.shared
+        
+        do {
+            try checkLocationAuthorization()
+        } catch {
+            contentViewModel.errorTitle = "Daj lokalizację pls"
+            contentViewModel.errorMessage = "Daj lokalizację to damy pogodę"
+            contentViewModel.showingError = true
+        }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -62,9 +70,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             return
         }
         
+        let lastLocationName = self.locationName
+        
         self.location = location
         self.getLocationName { name in
-            self.locationName = name ?? "Nieznana lokalizacja"
+            self.locationName = name ?? lastLocationName
         }
         
         self.locationReady = true
