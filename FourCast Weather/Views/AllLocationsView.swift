@@ -9,11 +9,12 @@ import SwiftUI
 
 struct AllLocationsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AdditionalLocations.self) private var additionalLocations
     
     @Binding var selection: Int
     @Binding var shouldRefresh: Bool
     
-    @State private var additionalLocations = AdditionalLocations.shared
+//    @State private var additionalLocations = AdditionalLocations.shared
     @State private var showingSheet = false
     
     private let columns = [
@@ -28,28 +29,49 @@ struct AllLocationsView: View {
         } else {
             ScrollView {
                 LazyVGrid(columns: columns) {
-                    ForEach(additionalLocations.locations.indices, id: \.self) { index in
-                        if index < additionalLocations.locations.count {
-                            LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
+//                    ForEach(additionalLocations.locations.indices, id: \.self) { index in
+//                        if index < additionalLocations.locations.count {
+//                            LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
+////                                .transition(.move(edge: .trailing))
+//                                .onTapGesture {
+//                                    selection = index
+//                                    shouldRefresh.toggle()
+//                                    dismiss()
+//                                    print(index)
+//                                }
+//                                .contextMenu {
+//                                    Button("Delete", systemImage: "trash", role: .destructive) {
+//                                        additionalLocations.locations.remove(at: index)
+//                                        selection = additionalLocations.locations.count - 1
+//                                        shouldRefresh.toggle()
+//                                        print(index)
+//                                    }
+//                                }
+//                        }
+//                    }
+                    
+                    ForEach(Array(additionalLocations.locations.enumerated()), id: \.element.id) { index, location in
+                        LocationView(name: location.name, weatherData: location.weatherData)
 //                                .transition(.move(edge: .trailing))
-                                .onTapGesture {
-                                    selection = index
+                            .onTapGesture {
+                                selection = index
+                                shouldRefresh.toggle()
+                                dismiss()
+                                print(index)
+                            }
+                            .contextMenu {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    additionalLocations.locations.remove(at: index)
+//                                    selection = additionalLocations.locations.count - 1
+                                    selection = -1
                                     shouldRefresh.toggle()
-                                    dismiss()
                                     print(index)
                                 }
-                                .contextMenu {
-                                    Button("Delete", systemImage: "trash", role: .destructive) {
-                                        additionalLocations.locations.remove(at: index)
-                                        selection = additionalLocations.locations.count - 1
-                                        shouldRefresh.toggle()
-                                        print(index)
-                                    }
-                                }
-                        }
+                            }
                     }
+                    
                 }
-                .id(selection)
+//                .id(selection)
                 .padding()
             }
         }

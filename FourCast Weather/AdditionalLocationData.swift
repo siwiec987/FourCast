@@ -8,7 +8,9 @@
 import Foundation
 import CoreLocation
 
-struct AdditionalLocationData: Codable {
+struct AdditionalLocationData: Identifiable, Codable {
+    var id = UUID()
+    
     let name: String
     let coordinate: Coordinate //CLLocationCoordinate2D nie jest Codable i trzeba było kombinować
     var weatherData: WeatherData?
@@ -31,7 +33,7 @@ struct Coordinate: Codable {
 
 @Observable
 class AdditionalLocations {
-    static let shared = AdditionalLocations()
+//    static let shared = AdditionalLocations()
     
     private let filePath = "locations"
     
@@ -41,7 +43,7 @@ class AdditionalLocations {
         }
     }
     
-    private init() {
+    /*private */init() {
         loadFromJSON()
     }
     

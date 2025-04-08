@@ -9,11 +9,13 @@ import SwiftUI
 
 struct SearchLocationView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(AdditionalLocations.self) private var additionalLocations
     
     @Binding var selection: Int
     
     @State private var locationSearchService = LocationSearchService()
-    @State private var additionalLocations = AdditionalLocations.shared
+//    @State private var additionalLocations = AdditionalLocations.shared
+    
     @State private var weatherService = WeatherService.shared
     @State private var locationManager: LocationManager = LocationManager.shared
     

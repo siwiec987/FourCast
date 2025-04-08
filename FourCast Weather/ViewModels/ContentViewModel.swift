@@ -23,7 +23,7 @@ class ContentViewModel {
     
     private let weatherService = WeatherService.shared
     private let locationManager = LocationManager.shared
-    private let additionalLocations = AdditionalLocations.shared
+    let additionalLocations = AdditionalLocations()
     
     var navbarTitle: String {
         if selection == -1 {
@@ -93,7 +93,14 @@ class ContentViewModel {
     }
     
     func refreshWeatherForAdditionalLocation(index: Int) async {
-        guard index < additionalLocations.locations.count else { return }
+        guard index >= 0 else {
+            print("refreshWeatherForAdditionalLocation index < 0")
+            return
+        }
+        guard index < additionalLocations.locations.count else {
+            print("refreshWeatherForAdditionalLocation index > count")
+            return
+        }
         
         do {
             (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) =
