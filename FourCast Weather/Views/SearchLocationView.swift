@@ -14,17 +14,14 @@ struct SearchLocationView: View {
     @Binding var selection: Int
     
     @State private var locationSearchService = LocationSearchService()
-//    @State private var additionalLocations = AdditionalLocations.shared
-    
     @State private var weatherService = WeatherService.shared
-    @State private var locationManager: LocationManager = LocationManager.shared
     
     var body: some View {
         NavigationStack {
             List(locationSearchService.results) {result in
                 VStack(alignment: .leading) {
                     Button(result.title) {
-                        locationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
+                        LocationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
                             print(coordinate)
                             
                             if additionalLocations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {

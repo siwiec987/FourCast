@@ -10,7 +10,7 @@ import CoreLocation
 
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
-    static let shared = LocationManager()
+//    static let shared = LocationManager()
     
     private var locationManager: CLLocationManager?
     
@@ -18,7 +18,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var locationName = ". . ."
     var locationReady = false
     
-    private override init() {
+    override init() {
         super.init()
         self.locationManager = CLLocationManager()
         self.locationManager!.delegate = self
@@ -101,7 +101,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
     
-    func getCoordinate(addressString: String, completion: @escaping(CLLocationCoordinate2D, NSError?) -> Void) {
+    static func getCoordinate(addressString: String, completion: @escaping(CLLocationCoordinate2D, NSError?) -> Void) {
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(addressString) { (placemarks, error) in
             if let placemark = placemarks?.first, error == nil {

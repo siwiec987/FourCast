@@ -10,13 +10,11 @@ import EventKit
 
 @Observable
 class CalendarManager {
-    static let shared = CalendarManager()
-    
     var events: [EKEvent] = []
    
     private let store = EKEventStore()
     
-    private init() {
+    init() {
         checkCalendarAuthorization()
         subscribeToNotifications()
     }

@@ -10,25 +10,23 @@ import CoreLocation
 
 struct ContentView: View {
     @State private var viewModel = ContentViewModel.shared
-    @State private var locationManager = LocationManager.shared
-    @State private var calendarManager = CalendarManager.shared
     
     var body: some View {
         NavigationStack {
             ZStack {
                 BackgroundView()
                 TabView(selection: $viewModel.selection) {
-                    if !calendarManager.events.isEmpty {
+                    if !viewModel.calendarManager.events.isEmpty {
                         Tab("Calendar", systemImage: "calendar", value: -2) {
-                            Text(calendarManager.events[0].title)
+                            Text(viewModel.calendarManager.events[0].title)
                         }
                     }
                     
                     Tab("Current", systemImage: "location", value: -1) {
                         ScrollView(showsIndicators: false) {
-                            WeatherView(weatherData: viewModel.currentLocationWeatherData, locationName: locationManager.locationName)
+                            WeatherView(weatherData: viewModel.currentLocationWeatherData, locationName: viewModel.locationManager.locationName)
                         }
-                        .onChange(of: locationManager.location, initial: false) {
+                        .onChange(of: viewModel.locationManager.location, initial: false) {
                             viewModel.fetchWeatherForCurrentLocation()
                         }
                     }
@@ -57,7 +55,7 @@ struct ContentView: View {
                     for: UIScene.willEnterForegroundNotification)) { _ in
                         print("\nCame back to foreground")
                         if viewModel.selection == -1 {
-                            print("City: \(locationManager.locationName)")
+                            print("City: \(viewModel.locationManager.locationName)")
                             viewModel.fetchCurrentLocation()
                         } else {
 //                        if viewModel.selection >= 0 && viewModel.selection < viewModel.additionalLocations.locations.count {

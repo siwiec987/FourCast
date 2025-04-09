@@ -22,8 +22,9 @@ class ContentViewModel {
     var showingError = false
     
     private let weatherService = WeatherService.shared
-    private let locationManager = LocationManager.shared
+    let locationManager = LocationManager()
     let additionalLocations = AdditionalLocations()
+    let calendarManager = CalendarManager()
     
     var navbarTitle: String {
         if selection == -1 {
