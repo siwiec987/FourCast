@@ -71,13 +71,16 @@ class ContentViewModel {
         
     }
     
-    func fetchCurrentLocation() {
-        do {
-            try locationManager.checkLocationAuthorization()
-        } catch {
-            errorTitle = "Daj lokalizację pls"
-            errorMessage = "Daj lokalizację to damy pogodę"
-            showingError = true
+    func fetchCurrentLocationOrWeather() {
+        if selection == -1 {
+            fetchCurrentLocation()
+        } else if selection == -2 {
+            
+        } else {
+            print("pogoda dla --\(selection)-- jest pobierana")
+            Task {
+                await refreshWeatherForAdditionalLocation(index: selection)
+            }
         }
     }
     
@@ -93,7 +96,17 @@ class ContentViewModel {
         }
     }
     
-    func refreshWeatherForAdditionalLocation(index: Int) async {
+    private func fetchCurrentLocation() {
+        do {
+            try locationManager.checkLocationAuthorization()
+        } catch {
+            errorTitle = "Daj lokalizację pls"
+            errorMessage = "Daj lokalizację to damy pogodę"
+            showingError = true
+        }
+    }
+    
+    private func refreshWeatherForAdditionalLocation(index: Int) async {
         guard index >= 0 else {
             print("refreshWeatherForAdditionalLocation index < 0")
             return
