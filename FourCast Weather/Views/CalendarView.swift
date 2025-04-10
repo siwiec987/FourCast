@@ -12,11 +12,7 @@ struct CalendarView: View {
     var data: EKEvent
     
     var body: some View {
-        VStack {
-            Text(data.location ?? "pusto")
-            Text("\(data.structuredLocation.unsafelyUnwrapped.geoLocation.unsafelyUnwrapped.coordinate)")
-        }
-        .onAppear{print("kalendarz sie pojawia")}
+        WeatherView(weatherData: SampleWeatherData().data)
     }
 }
 
@@ -28,3 +24,8 @@ struct CalendarView: View {
     return CalendarView(data: data)
         .preferredColorScheme(.dark)
 }
+
+//TODO
+//pogodę pobierz dla lokalizacji
+//wymyśl w jaki sposób chcesz te wydarzenia obsługiwać (kiedy wyświetlasz jakie itp)
+//potem wymyśl co chcesz dalej zrobić

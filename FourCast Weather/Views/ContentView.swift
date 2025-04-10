@@ -20,7 +20,7 @@ struct ContentView: View {
                 }
                 
                 Tab("Current", systemImage: "location", value: -1) {
-                    WeatherView(weatherData: viewModel.currentLocationWeatherData, locationName: viewModel.locationManager.locationName)
+                    WeatherView(weatherData: viewModel.currentLocationWeatherData)
                         .onChange(of: viewModel.locationManager.location, initial: false) {
                             viewModel.fetchWeatherForCurrentLocation()
                         }
@@ -28,7 +28,7 @@ struct ContentView: View {
                 
                 ForEach(Array(viewModel.additionalLocations.locations.enumerated()), id: \.element.id) { index, location in
                     Tab(value: index) {
-                        WeatherView(weatherData: location.weatherData, locationName: location.name)
+                        WeatherView(weatherData: location.weatherData)
                     }
                 }
             }
@@ -98,24 +98,3 @@ struct ContentView: View {
     ContentView()
         .preferredColorScheme(.dark)
 }
-
-struct WeatherView: View {
-    var weatherData: WeatherData?
-    var locationName: String
-    
-    var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 15) {
-                CurrentWeatherView(weatherData: weatherData, locationName: locationName)
-                HourlyForecastView(weatherData: weatherData)
-                DailyForecastView(weatherData: weatherData)
-                SunriseSunsetView(weatherData: weatherData)
-                MoonriseMoonsetView(weatherData: weatherData)
-                Spacer()
-                    .frame(height: 30)
-            }
-            .padding()
-        }
-    }
-}
-

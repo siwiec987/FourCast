@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CurrentWeatherView: View {
     let weatherData: WeatherData?
-    var locationName: String
     
     private var temperature: Int {
         if let temp = weatherData?.current.temp {
@@ -29,8 +28,6 @@ struct CurrentWeatherView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-//            Text(locationName)
-//                .bold()
             
             Text("\(temperature)°")
                 .font(.system(size: 80, weight: .light))
@@ -46,6 +43,6 @@ struct CurrentWeatherView: View {
 #Preview {
     ZStack {
         BackgroundView()
-        CurrentWeatherView(weatherData: SampleWeatherData().data, locationName: "aaaa")
+        CurrentWeatherView(weatherData: SampleWeatherData().data)
     }
 }
