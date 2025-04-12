@@ -15,7 +15,7 @@ struct ContentView: View {
             TabView(selection: $viewModel.selection) {
                 if !viewModel.calendarManager.events.isEmpty {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
-                        CalendarView(data: viewModel.calendarManager.events[0])
+                        CalendarEventView(weatherData: viewModel.calendarEventLocation?.weatherData, data: viewModel.calendarManager.events[0])
                     }
                 }
                 
@@ -35,7 +35,7 @@ struct ContentView: View {
             .background(BackgroundView())
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in
-                    print("\nCame back to foreground")
+                    print("\nCame back to foreground, selection = \(viewModel.selection)")
                     viewModel.fetchCurrentLocationOrWeather()
             }
             .onChange(of: viewModel.selection) {

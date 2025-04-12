@@ -73,7 +73,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let lastLocationName = self.locationName
         
         self.location = location
-        self.getLocationName { name in
+        self.getLocationName(location: self.location) { name in
             self.locationName = name ?? lastLocationName
         }
         
@@ -85,14 +85,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         print("Błąd pobierania lokalizacji: \(error.localizedDescription)")
     }
 
-    private func getLocationName(completion: @escaping (String?) -> Void) {
-        guard let location = self.location else {
+    func getLocationName(location: CLLocation?, completion: @escaping (String?) -> Void) {
+        guard let safeLocation = location else {
             completion(nil)
             return
         }
 
         let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+        geocoder.reverseGeocodeLocation(safeLocation) { (placemarks, error) in
             if let firstLocation = placemarks?.first, error == nil {
                 completion(firstLocation.locality)
             } else {

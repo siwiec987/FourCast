@@ -6,13 +6,27 @@
 //
 
 import Foundation
+import CoreLocation
 
 @Observable
 class ContentViewModel {
     static var shared = ContentViewModel()
     
+    private let weatherService = WeatherService.shared
+    let locationManager = LocationManager()
+    let additionalLocations = AdditionalLocations()
+    let calendarManager = CalendarManager()
+    
     var currentLocationWeatherData: WeatherData?
     var currentLocationLastFetchTime: Date?
+    
+//    var calendarEventLocationCoordinate: CLLocationCoordinate2D? {
+//        calendarManager.events[0].structuredLocation?.geoLocation?.coordinate
+//    }
+//    var calendarEventLocationWeatherData: WeatherData?
+//    var calendarEventLocationLastFetchTime: Date?
+    
+    var calendarEventLocation: AdditionalLocationData?
     
     var selection = -1
     var shouldRefresh = false
@@ -21,17 +35,14 @@ class ContentViewModel {
     var errorMessage = ""
     var showingError = false
     
-    private let weatherService = WeatherService.shared
-    let locationManager = LocationManager()
-    let additionalLocations = AdditionalLocations()
-    let calendarManager = CalendarManager()
-    
     var navbarTitle: String {
         if selection == -1 {
             return locationManager.locationName
         }
         if selection == -2 {
-            return "Kalendarz"
+//            return "Następne wydarzenie: " + (calendarManager.events[0].title)
+            guard let name = calendarEventLocation?.name else { return "" }
+            return "Następne wydarzenie: " + (name)
         }
         if selection < additionalLocations.locations.count {
             return additionalLocations.locations[selection].name
@@ -42,10 +53,9 @@ class ContentViewModel {
     
     var bottomToolbarMessage: String {
         guard let lastFetch =
-                (selection == -1) ?
-                currentLocationLastFetchTime : (
-                    selection >= 0 && selection < additionalLocations.locations.count ?
-                    additionalLocations.locations[selection].lastFetchTime : nil)
+                (selection == -1) ? currentLocationLastFetchTime :
+                    (selection == -2) ? calendarEventLocation?.lastFetchTime :
+                (selection >= 0 && selection < additionalLocations.locations.count ? additionalLocations.locations[selection].lastFetchTime : nil)
         else {
             return ""
         }
@@ -68,14 +78,22 @@ class ContentViewModel {
     }
     
     private init() {
+        guard let coordinate = calendarManager.events.first?.structuredLocation?.geoLocation?.coordinate,
+        let name = calendarManager.events.first?.structuredLocation?.title else {
+            return
+        }
         
+        calendarEventLocation = AdditionalLocationData(name: name, coordinate: Coordinate(coordinate))
+        print("git")
     }
     
     func fetchCurrentLocationOrWeather() {
         if selection == -1 {
             fetchCurrentLocation()
         } else if selection == -2 {
-            
+            Task {
+                await fetchWeatherForCalendarEventLocation()
+            }
         } else {
             print("pogoda dla --\(selection)-- jest pobierana")
             Task {
@@ -93,6 +111,20 @@ class ContentViewModel {
             } catch {
                 handleWeatherError(error)
             }
+        }
+    }
+    
+    private func fetchWeatherForCalendarEventLocation() async {
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+        guard var event = calendarEventLocation else { return }
+        print("po guardzie!!!!!!!!!!!!!!!!!!!!!!!!!")
+        do {
+            let (data, time) = try await weatherService.fetchWeatherData(coordinate: event.coordinateObject, lastFetchTime: event.lastFetchTime)
+            event.weatherData = data
+            event.lastFetchTime = time
+            calendarEventLocation = event
+        } catch {
+            handleWeatherError(error)
         }
     }
     

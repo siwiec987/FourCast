@@ -1,5 +1,5 @@
 //
-//  CalendarView.swift
+//  CalendarEventView.swift
 //  FourCast Weather
 //
 //  Created by Jakub Siwiec on 10/04/2025.
@@ -8,11 +8,12 @@
 import SwiftUI
 import EventKit
 
-struct CalendarView: View {
+struct CalendarEventView: View {
+    var weatherData: WeatherData?
     var data: EKEvent
     
     var body: some View {
-        WeatherView(weatherData: SampleWeatherData().data)
+        WeatherView(weatherData: weatherData)
     }
 }
 
@@ -21,7 +22,7 @@ struct CalendarView: View {
     data.title = "AAA"
 //    data.loca
 
-    return CalendarView(data: data)
+    return CalendarEventView(weatherData: SampleWeatherData().data, data: data)
         .preferredColorScheme(.dark)
 }
 

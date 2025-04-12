@@ -41,7 +41,8 @@ class CalendarManager {
         NotificationCenter.default.addObserver(self, selector: #selector(storeChanged(_:)), name: .EKEventStoreChanged, object: nil)
     }
     
-    @objc private func storeChanged(_ notification: Notification) {
+    @objc
+    private func storeChanged(_ notification: Notification) {
         fetchEvents()
     }
     
