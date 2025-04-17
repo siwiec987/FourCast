@@ -12,13 +12,13 @@ struct SearchLocationView: View {
     @Environment(AdditionalLocations.self) private var additionalLocations
     
     @Binding var selection: Int
+    @Binding var locationSearchService: LocationSearchService
     
-    @State private var locationSearchService = LocationSearchService()
     @State private var weatherService = WeatherService.shared
     
     var body: some View {
-        NavigationStack {
-            List(locationSearchService.results) {result in
+        LazyVStack(alignment: .leading) {
+            ForEach(locationSearchService.results) {result in
                 VStack(alignment: .leading) {
                     Button(result.title) {
                         LocationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
@@ -55,25 +55,16 @@ struct SearchLocationView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-            }
-            .navigationTitle("Szukaj")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-//                    Button("Done", systemImage: "x.circle.fill") {
-                    Button("Gotowe") {
-                        dismiss()
-                    }
-                }
+                .padding(.vertical, 5)
             }
         }
-        .searchable(text: $locationSearchService.query, prompt: "Szukaj miasta")
-//        .padding(.top, 10)
+        .padding(.horizontal)
     }
 }
 
 #Preview {
     @Previewable @State var selection = 1
-    SearchLocationView(selection: $selection)
+    @Previewable @State var locationSearchService = LocationSearchService()
+    SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
         .environment(AdditionalLocations())
 }

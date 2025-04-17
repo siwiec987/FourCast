@@ -14,8 +14,8 @@ struct AllLocationsView: View {
     @Binding var selection: Int
     @Binding var shouldRefresh: Bool
     
-//    @State private var additionalLocations = AdditionalLocations.shared
-    @State private var showingSheet = false
+    @State private var locationSearchService = LocationSearchService()
+    @State private var showingSearchResults = false
     
     private let columns = [
         GridItem(.flexible()),
@@ -24,35 +24,13 @@ struct AllLocationsView: View {
     ]
     
     var body: some View {
-        if additionalLocations.locations.isEmpty {
-            ContentUnavailableView("Brak lokalizacji", systemImage: "", description: Text("Dodaj lokalizację używając '+'"))
-        } else {
-            ScrollView {
+        ScrollView {
+            if showingSearchResults {
+                SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
+            } else {
                 LazyVGrid(columns: columns) {
-//                    ForEach(additionalLocations.locations.indices, id: \.self) { index in
-//                        if index < additionalLocations.locations.count {
-//                            LocationView(name: additionalLocations.locations[index].name, weatherData: additionalLocations.locations[index].weatherData)
-////                                .transition(.move(edge: .trailing))
-//                                .onTapGesture {
-//                                    selection = index
-//                                    shouldRefresh.toggle()
-//                                    dismiss()
-//                                    print(index)
-//                                }
-//                                .contextMenu {
-//                                    Button("Delete", systemImage: "trash", role: .destructive) {
-//                                        additionalLocations.locations.remove(at: index)
-//                                        selection = additionalLocations.locations.count - 1
-//                                        shouldRefresh.toggle()
-//                                        print(index)
-//                                    }
-//                                }
-//                        }
-//                    }
-                    
                     ForEach(Array(additionalLocations.locations.enumerated()), id: \.element.id) { index, location in
                         LocationView(name: location.name, weatherData: location.weatherData)
-//                                .transition(.move(edge: .trailing))
                             .onTapGesture {
                                 selection = index
                                 shouldRefresh.toggle()
@@ -62,33 +40,17 @@ struct AllLocationsView: View {
                             .contextMenu {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     additionalLocations.locations.remove(at: index)
-//                                    selection = additionalLocations.locations.count - 1
                                     selection = -1
                                     shouldRefresh.toggle()
                                     print(index)
                                 }
                             }
                     }
-                    
                 }
-//                .id(selection)
-                .padding()
+                .padding(.horizontal, 8)
             }
         }
-            
-        Spacer()
-            
-        .toolbar {
-            Button {
-                showingSheet = true
-            } label: {
-                Image(systemName: "plus")
-            }
-        }
-        .sheet(isPresented: $showingSheet) {
-            SearchLocationView(selection: $selection)
-            .presentationDragIndicator(.hidden)
-        }
+        .searchable(text: $locationSearchService.query, isPresented: $showingSearchResults, placement: .navigationBarDrawer(displayMode: .always), prompt: "Szukaj miasta")
     }
 }
 
@@ -108,7 +70,7 @@ struct LocationView: View {
             return WeatherService.getConvertedTemperature(from: temp)
         }
         
-         return 0
+        return 0
     }
     
     var body: some View {
