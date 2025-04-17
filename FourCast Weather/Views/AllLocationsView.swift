@@ -96,6 +96,7 @@ struct AllLocationsView: View {
     @Previewable @State var selection = 1
     @Previewable @State var shouldRefresh = false
     AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)
+        .environment(AdditionalLocations())
 }
 
 struct LocationView: View {

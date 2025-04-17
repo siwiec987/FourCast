@@ -56,9 +56,14 @@ struct SearchLocationView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .navigationTitle("Szukaj")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                Button("Done", systemImage: "x.circle.fill") {
-                    dismiss()
+                ToolbarItem(placement: .confirmationAction) {
+//                    Button("Done", systemImage: "x.circle.fill") {
+                    Button("Gotowe") {
+                        dismiss()
+                    }
                 }
             }
         }
@@ -70,4 +75,5 @@ struct SearchLocationView: View {
 #Preview {
     @Previewable @State var selection = 1
     SearchLocationView(selection: $selection)
+        .environment(AdditionalLocations())
 }
