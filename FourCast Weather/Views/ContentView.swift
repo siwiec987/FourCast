@@ -22,7 +22,9 @@ struct ContentView: View {
                 Tab("Current", systemImage: "location", value: -1) {
                     WeatherView(weatherData: viewModel.currentLocationWeatherData)
                         .onChange(of: viewModel.locationManager.location, initial: false) {
-                            viewModel.fetchWeatherForCurrentLocation()
+                            Task {
+                                await viewModel.fetchWeatherForCurrentLocation()
+                            }
                         }
                 }
                 
@@ -38,12 +40,16 @@ struct ContentView: View {
                     print("\nCame back to foreground, selection = \(viewModel.selection)")
                     viewModel.getEventLocation()
                     viewModel.calendarManager.checkCalendarAuthorization()
-                    viewModel.fetchCurrentLocationOrWeather()
+                    Task {
+                        await viewModel.fetchCurrentLocationOrWeather()
+                    }
             }
             .onChange(of: viewModel.selection) {
                 viewModel.getEventLocation()
                 viewModel.calendarManager.checkCalendarAuthorization()
-                viewModel.fetchCurrentLocationOrWeather()
+                Task {
+                    await viewModel.fetchCurrentLocationOrWeather()
+                }
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))

@@ -87,30 +87,24 @@ class ContentViewModel {
         print("git")
     }
     
-    func fetchCurrentLocationOrWeather() {
+    func fetchCurrentLocationOrWeather() async {
         if selection == -1 {
             fetchCurrentLocation()
         } else if selection == -2 {
-            Task {
-                await fetchWeatherForCalendarEventLocation()
-            }
+            await fetchWeatherForCalendarEventLocation()
         } else {
             print("pogoda dla --\(selection)-- jest pobierana")
-            Task {
-                await refreshWeatherForAdditionalLocation(index: selection)
-            }
+            await refreshWeatherForAdditionalLocation(index: selection)
         }
     }
     
-    func fetchWeatherForCurrentLocation() {
+    func fetchWeatherForCurrentLocation() async {
         guard let location = locationManager.location, locationManager.locationReady else { return }
         
-        Task {
-            do {
-                (currentLocationWeatherData, currentLocationLastFetchTime) = try await weatherService.fetchWeatherData(coordinate: location.coordinate, lastFetchTime: currentLocationLastFetchTime)
-            } catch {
-                handleWeatherError(error)
-            }
+        do {
+            (currentLocationWeatherData, currentLocationLastFetchTime) = try await weatherService.fetchWeatherData(coordinate: location.coordinate, lastFetchTime: currentLocationLastFetchTime)
+        } catch {
+            handleWeatherError(error)
         }
     }
     
