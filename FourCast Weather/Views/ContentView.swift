@@ -36,16 +36,20 @@ struct ContentView: View {
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in
                     print("\nCame back to foreground, selection = \(viewModel.selection)")
+                    viewModel.getEventLocation()
+                    viewModel.calendarManager.checkCalendarAuthorization()
                     viewModel.fetchCurrentLocationOrWeather()
             }
             .onChange(of: viewModel.selection) {
+                viewModel.getEventLocation()
+                viewModel.calendarManager.checkCalendarAuthorization()
                 viewModel.fetchCurrentLocationOrWeather()
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection, shouldRefresh: $viewModel.shouldRefresh)) {
+                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection)) {
                         Image(systemName: "square.fill.on.square.fill")
                             .renderingMode(.original)
                     }
@@ -64,10 +68,16 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    NavigationLink(destination: SettingsView()) {
-                        Image(systemName: "gearshape.fill")
-                            .renderingMode(.original)
+                    NavigationLink(destination: SettingsView(calendarNotAuthorized: viewModel.calendarManager.notAuthorized, locationNotAuthorized: viewModel.locationManager.notAuthorized)) {
+                        if viewModel.calendarManager.notAuthorized || viewModel.locationManager.notAuthorized {
+                            Image(systemName: "gear.badge")
+                                .renderingMode(.original)
+                        } else {
+                            Image(systemName: "gear")
+                                .foregroundStyle(.white)
+                        }
                     }
+                    .fontWeight(.black)
                 }
             }
             .toolbarBackground(Color.accentColor, for: .bottomBar)

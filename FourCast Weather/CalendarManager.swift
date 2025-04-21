@@ -11,7 +11,7 @@ import EventKit
 @Observable
 class CalendarManager {
     var events: [EKEvent] = []
-   
+    var notAuthorized = true
     private let store = EKEventStore()
     
     init() {
@@ -23,14 +23,19 @@ class CalendarManager {
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined:
             store.requestFullAccessToEvents() {success, error in
-                self.fetchEvents()
-                print("Działam szefie")
+                if success {
+                    self.notAuthorized = false
+                    self.fetchEvents()
+                    print("Calendar authorized")
+                } else {
+                    self.notAuthorized = true
+                    print("Calendar not authorized")
+                }
             }
-        case .restricted:
-            print("Calendar Restricted")
-        case .denied, .writeOnly:
-            print("Calendar Denied or Write Only")
+        case .restricted, .denied, .writeOnly:
+            notAuthorized = true
         case .fullAccess:
+            notAuthorized = false
             fetchEvents()
         @unknown default:
             fatalError("FatalError: Coś się porządnie popsuło")
@@ -47,11 +52,13 @@ class CalendarManager {
     }
     
     private func fetchEvents() {
-        if let interval = Calendar.current.dateInterval(of: .day, for: Date()) {
+        let now = Date()
+        if let interval = Calendar.current.dateInterval(of: .day, for: now) {
             let predicate = store.predicateForEvents(withStart: interval.start, end: interval.end, calendars: nil)
             let events = store.events(matching: predicate)
             let filteredEvents = events.filter {
                 $0.structuredLocation != nil
+                && $0.endDate > now
             }
             let sortedEvents = filteredEvents.sorted {
                 $0.compareStartDate(with: $1) == .orderedAscending

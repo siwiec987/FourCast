@@ -10,13 +10,12 @@ import CoreLocation
 
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
-//    static let shared = LocationManager()
-    
     private var locationManager: CLLocationManager?
     
     var location: CLLocation?
     var locationName = ". . ."
     var locationReady = false
+    var notAuthorized = true
     
     override init() {
         super.init()
@@ -34,12 +33,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .restricted:
+            notAuthorized = true
             print("location restricted")
             throw LocationManagerError.locationRestricted
         case .denied:
+            notAuthorized = true
             print("location denied")
             throw LocationManagerError.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
+            notAuthorized = false
 //            locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
             self.locationReady = false
@@ -53,11 +55,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let contentViewModel = ContentViewModel.shared
         
         do {
+            print("Didchangeauth pobiera lokalizacje")
             try checkLocationAuthorization()
         } catch {
             contentViewModel.errorTitle = "Daj lokalizację pls"
             contentViewModel.errorMessage = "Daj lokalizację to damy pogodę"
             contentViewModel.showingError = true
+            print("didchangeauth rzuca błędami")
         }
     }
     
