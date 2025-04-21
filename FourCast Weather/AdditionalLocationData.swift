@@ -33,8 +33,6 @@ struct Coordinate: Codable {
 
 @Observable
 class AdditionalLocations {
-//    static let shared = AdditionalLocations()
-    
     private let filePath = "locations"
     
     var locations: [AdditionalLocationData] = [] {
@@ -43,7 +41,7 @@ class AdditionalLocations {
         }
     }
     
-    /*private */init() {
+    init() {
         loadFromJSON()
     }
     
