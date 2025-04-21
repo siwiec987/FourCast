@@ -27,6 +27,6 @@ struct CalendarEventView: View {
 }
 
 //TODO
-//pogodę pobierz dla lokalizacji
+//pogodę pobierz dla lokalizacji ✅
 //wymyśl w jaki sposób chcesz te wydarzenia obsługiwać (kiedy wyświetlasz jakie itp)
 //potem wymyśl co chcesz dalej zrobić

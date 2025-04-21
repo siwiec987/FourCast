@@ -12,7 +12,6 @@ struct AllLocationsView: View {
     @Environment(AdditionalLocations.self) private var additionalLocations
     
     @Binding var selection: Int
-    @Binding var shouldRefresh: Bool
     
     @State private var locationSearchService = LocationSearchService()
     @State private var showingSearchResults = false
@@ -33,7 +32,6 @@ struct AllLocationsView: View {
                         LocationView(name: location.name, weatherData: location.weatherData)
                             .onTapGesture {
                                 selection = index
-                                shouldRefresh.toggle()
                                 dismiss()
                                 print(index)
                             }
@@ -41,7 +39,6 @@ struct AllLocationsView: View {
                                 Button("Delete", systemImage: "trash", role: .destructive) {
                                     additionalLocations.locations.remove(at: index)
                                     selection = -1
-                                    shouldRefresh.toggle()
                                     print(index)
                                 }
                             }
@@ -56,8 +53,7 @@ struct AllLocationsView: View {
 
 #Preview {
     @Previewable @State var selection = 1
-    @Previewable @State var shouldRefresh = false
-    AllLocationsView(selection: $selection, shouldRefresh: $shouldRefresh)
+    AllLocationsView(selection: $selection)
         .environment(AdditionalLocations())
 }
 
