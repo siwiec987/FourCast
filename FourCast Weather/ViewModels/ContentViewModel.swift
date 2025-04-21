@@ -20,16 +20,9 @@ class ContentViewModel {
     var currentLocationWeatherData: WeatherData?
     var currentLocationLastFetchTime: Date?
     
-//    var calendarEventLocationCoordinate: CLLocationCoordinate2D? {
-//        calendarManager.events[0].structuredLocation?.geoLocation?.coordinate
-//    }
-//    var calendarEventLocationWeatherData: WeatherData?
-//    var calendarEventLocationLastFetchTime: Date?
-    
     var calendarEventLocation: AdditionalLocationData?
     
     var selection = -1
-    var shouldRefresh = false
     
     var errorTitle = ""
     var errorMessage = ""
@@ -39,8 +32,11 @@ class ContentViewModel {
         if selection == -1 {
             return locationManager.locationName
         }
+        if selection == -2 && calendarManager.events.isEmpty {
+            selection = -1
+            return locationManager.locationName
+        }
         if selection == -2 {
-//            return "Następne wydarzenie: " + (calendarManager.events[0].title)
             guard let name = calendarEventLocation?.name else { return "" }
             return "Następne wydarzenie: " + (name)
         }
@@ -78,6 +74,10 @@ class ContentViewModel {
     }
     
     private init() {
+        getEventLocation()
+    }
+    
+    func getEventLocation() {
         guard let coordinate = calendarManager.events.first?.structuredLocation?.geoLocation?.coordinate,
         let name = calendarManager.events.first?.structuredLocation?.title else {
             return
@@ -132,9 +132,10 @@ class ContentViewModel {
         do {
             try locationManager.checkLocationAuthorization()
         } catch {
-            errorTitle = "Daj lokalizację pls"
-            errorMessage = "Daj lokalizację to damy pogodę"
-            showingError = true
+//            errorTitle = "Daj lokalizację pls"
+//            errorMessage = "Daj lokalizację to damy pogodę"
+//            showingError = true
+            print("TUTAJ CHYBA NIE TRZEBA ALERTA POKAZYWAĆ")
         }
     }
     
