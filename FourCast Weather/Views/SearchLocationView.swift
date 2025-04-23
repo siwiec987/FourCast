@@ -10,11 +10,10 @@ import SwiftUI
 struct SearchLocationView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(AdditionalLocations.self) private var additionalLocations
+    @Environment(WeatherService.self) private var weatherService
     
     @Binding var selection: Int
     @Binding var locationSearchService: LocationSearchService
-    
-    @State private var weatherService = WeatherService.shared
     
     var body: some View {
         LazyVStack(alignment: .leading) {

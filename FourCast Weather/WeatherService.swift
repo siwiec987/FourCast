@@ -10,12 +10,9 @@ import CoreLocation
 
 @Observable
 class WeatherService {
-    static let shared = WeatherService()
-    
-//    @Published public var weatherData: WeatherData?
     var isLoading = false
     
-    private init() {}
+    init() {}
     
     func fetchWeatherData(coordinate: CLLocationCoordinate2D, lastFetchTime: Date?) async throws  -> (WeatherData?, Date?) {
         if self.isLoading {

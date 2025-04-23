@@ -12,7 +12,7 @@ import CoreLocation
 class ContentViewModel {
     static var shared = ContentViewModel()
     
-    private let weatherService = WeatherService.shared
+    let weatherService = WeatherService()
     let locationManager = LocationManager()
     let additionalLocations = AdditionalLocations()
     let calendarManager = CalendarManager()

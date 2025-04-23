@@ -85,6 +85,7 @@ struct HourlyForecastItem: View {
             
             Text(formattedHour)
                 .font(.subheadline)
+                .fontWeight(.semibold)
             
             Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
                 .renderingMode(.original)

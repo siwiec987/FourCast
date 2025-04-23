@@ -105,6 +105,7 @@ struct ContentView: View {
             }
         }
         .environment(viewModel.additionalLocations)
+        .environment(viewModel.weatherService)
     }
 }
 
