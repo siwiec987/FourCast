@@ -47,7 +47,7 @@ class WeatherService {
             
             if let jsonString = String(data: data, encoding: .utf8) {
                         print("Raw JSON response (first 200 chars): \(String(jsonString.prefix(200)))...")
-                    }
+            }
             
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -86,7 +86,11 @@ class WeatherService {
         }
     }
     
-    static func getWeatherIcon(_ icon: String) -> String {
+    static func getWeatherIcon(_ icon: String?) -> String {
+        let defaultIcon = "ellipsis"
+        
+        guard let icon else {return defaultIcon}
+        
         switch(icon.last) {
         case "d":
             switch(icon) {
@@ -107,7 +111,7 @@ class WeatherService {
             case "50d":
                 return "sun.haze.fill"
             default:
-                return "ellipsis"
+                return defaultIcon
             }
         case "n":
             switch(icon) {
@@ -128,10 +132,10 @@ class WeatherService {
             case "50n":
                 return "moon.haze.fill"
             default:
-                return "ellipsis"
+                return defaultIcon
             }
         default:
-            return "ellipsis"
+            return defaultIcon
         }
     }
     
