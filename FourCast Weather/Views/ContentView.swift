@@ -15,6 +15,14 @@ struct ContentView: View {
             TabView(selection: $viewModel.selection) {
                 if !viewModel.calendarManager.events.isEmpty {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
+                        Button("Live activity") {
+                            viewModel.startActivity()
+                        }
+//                        Button("Stop LA") {
+//                            Task {
+//                                await viewModel.stopActivity()
+//                            }
+//                        }
                         CalendarEventView(weatherData: viewModel.calendarEventLocation?.weatherData, data: viewModel.calendarManager.events[0])
                     }
                 }
@@ -38,17 +46,35 @@ struct ContentView: View {
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in
                     print("\nCame back to foreground, selection = \(viewModel.selection)")
-                    viewModel.getEventLocation()
-                    viewModel.calendarManager.checkCalendarAuthorization()
+                    //jak coś nie będzie działać jak powinno to może przez to, bo żem se zakomentował, bo 25.04 stwierdziłem, że to nie ma sensu. Początek:
+//                    viewModel.getEventLocation()
+//                    viewModel.calendarManager.checkCalendarAuthorization()
+                    // Koniec
                     Task {
                         await viewModel.fetchCurrentLocationOrWeather()
                     }
             }
             .onChange(of: viewModel.selection) {
-                viewModel.getEventLocation()
-                viewModel.calendarManager.checkCalendarAuthorization()
+                //jak coś nie będzie działać jak powinno to może przez to, bo żem se zakomentował, bo 25.04 stwierdziłem, że to nie ma sensu. Początek:
+//                viewModel.getEventLocation()
+//                viewModel.calendarManager.checkCalendarAuthorization()
+                // Koniec
                 Task {
                     await viewModel.fetchCurrentLocationOrWeather()
+                }
+            }
+            .onChange(of: viewModel.calendarManager.events.first) {
+                viewModel.getEventLocation()
+                Task {
+                    await viewModel.fetchWeatherForCalendarEventLocation()
+                    await viewModel.updateActivity()
+                }
+            }
+            .onChange(of: viewModel.calendarManager.events.first?.structuredLocation) {
+                viewModel.getEventLocation()
+                Task {
+                    await viewModel.fetchWeatherForCalendarEventLocation()
+                    await viewModel.updateActivity()
                 }
             }
             .tabViewStyle(.page)

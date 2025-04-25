@@ -12,41 +12,60 @@ import SwiftUI
 struct CalendarEventWidgetAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // Dynamic stateful properties about your activity go here!
-//        var emoji: String
-        var endTime: Date
+        var eventDate: Date
+        var name: String
+        var temperature: Int
+        var iconName: String
     }
 
     // Fixed non-changing properties about your activity go here!
-    var name: String
 }
 
 struct CalendarEventWidgetLiveActivity: Widget {
+    let minScaleFactor = 1.0
+    let frameHeight: CGFloat = 70
+    
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: CalendarEventWidgetAttributes.self) { context in
             // Lock screen/banner UI goes here
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(context.attributes.name)
+            VStack {
+                HStack {
+                    Text(context.state.name)
+                        .fontWeight(.semibold)
                         
-//                    Text(context.state.endTime, style: .timer)
-                    Text(timerInterval: Date.now...context.state.endTime, pauseTime: nil)
-                        .bold()
+                    Spacer()
+                    
+                    Text("\(context.state.temperature)°")
+                        .font(.largeTitle)
+                        .fontWeight(.semibold)
+                    
+                    Image(systemName: context.state.iconName)
+//                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40)
                 }
+                .padding(.bottom, -15)
                 
-                Spacer()
-                
-//                HStack {
-//                    if let data = SampleWeatherData().data {
-//                        HourlyForecastItem(hourlyForecast: data.hourly[10], timezoneOffset: data.timezoneOffset)
-//                        HourlyForecastItem(hourlyForecast: data.hourly[11], timezoneOffset: data.timezoneOffset)
-//                        HourlyForecastItem(hourlyForecast: data.hourly[12], timezoneOffset: data.timezoneOffset)
-//                    }
-//                }
-//                .scaleEffect(0.8)
+                HStack {
+                    Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
+                        .font(.largeTitle)
+                        .bold()
+                    
+                    Spacer()
+                    
+                    HStack {
+                        ForEach(0..<3) { _ in
+                            Image(systemName: "dog.fill")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                        }
+                    }
+                    .scaledToFit()
+                }
             }
-            .padding(.leading)
-//            .activityBackgroundTint(Color.red)
-//            .activitySystemActionForegroundColor(Color.white)
+            .padding(10)
+            .activityBackgroundTint(Color.blue)
             .foregroundStyle(.white)
             .background(BackgroundView())
             
@@ -56,24 +75,72 @@ struct CalendarEventWidgetLiveActivity: Widget {
                 // Expanded UI goes here.  Compose the expanded UI through
                 // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Text(context.state.name)
+                        .fontWeight(.semibold)
+                        .padding(.leading, 5)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    HStack {
+                        Text("\(context.state.temperature)°")
+                            .font(.largeTitle)
+                            .fontWeight(.semibold)
+                            .padding(.trailing, -5)
+                            .scaledToFit()
+                            .minimumScaleFactor(0.5)
+                        
+                        Image(systemName: context.state.iconName)
+                            .renderingMode(.original)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                    }
+                    .padding(.trailing, 5)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.endTime)")
-                    // more content
+                    HStack {
+                        Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
+                            .font(.largeTitle)
+                            .bold()
+                        
+                        Spacer()
+                        
+                        HStack {
+                            ForEach(0..<3) { _ in
+                                Image(systemName: "dog.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                            }
+                        }
+                        .scaledToFit()
+                    }
                 }
             } compactLeading: {
-                Text("L")
+                Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
+                    .bold()
             } compactTrailing: {
-                Text("T \(context.state.endTime)")
+                HStack {
+                    Text("\(context.state.temperature)°")
+                        .fontWeight(.semibold)
+                        .padding(.trailing, -5)
+                    
+                    Image(systemName: context.state.iconName)
+                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 20)
+                }
             } minimal: {
-                Image(systemName: "cloud.fill")
+                Image(systemName: context.state.iconName)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
+                    .overlay {
+                        Text("\(context.state.temperature)°")
+                            .font(.caption2)
+                            .bold()
+                            .foregroundStyle(.white)
+                            .shadow(color: .black, radius: 1.5)
+                    }
             }
         }
     }
@@ -81,14 +148,14 @@ struct CalendarEventWidgetLiveActivity: Widget {
 
 extension CalendarEventWidgetAttributes {
     fileprivate static var preview: CalendarEventWidgetAttributes {
-        CalendarEventWidgetAttributes(name: "Będzińska 39")
+        CalendarEventWidgetAttributes()
     }
 }
 
 extension CalendarEventWidgetAttributes.ContentState {
     fileprivate static var tenMins: CalendarEventWidgetAttributes.ContentState {
 //        CalendarEventWidgetAttributes.ContentState(emoji: "😀")
-        CalendarEventWidgetAttributes.ContentState(endTime: Date().addingTimeInterval(60 * 10))
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: 19, iconName: "cloud.fill")
      }
      
 //     fileprivate static var starEyes: CalendarEventWidgetAttributes.ContentState {
