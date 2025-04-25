@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		2D24A1732DB6A9BC00F531B0 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D24A1722DB6A9BC00F531B0 /* WidgetKit.framework */; };
 		2D24A1752DB6A9BC00F531B0 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D24A1742DB6A9BC00F531B0 /* SwiftUI.framework */; };
-		2D24A1902DB6B29300F531B0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2D24A18F2DB6B29300F531B0 /* FirebaseFirestore */; };
 		2D24A1912DB717A300F531B0 /* CalendarEventWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2D24A1702DB6A9BC00F531B0 /* CalendarEventWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -80,12 +79,20 @@
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
 		};
+		2D24A1AB2DBAB1EA00F531B0 /* Exceptions for "CalendarEventWidget" folder in "FourCast Weather" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				CalendarEventWidgetLiveActivity.swift,
+			);
+			target = 2DF9F4B82D5D39290089598D /* FourCast Weather */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2D24A1762DB6A9BC00F531B0 /* CalendarEventWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				2D24A1AB2DBAB1EA00F531B0 /* Exceptions for "CalendarEventWidget" folder in "FourCast Weather" target */,
 				2D24A1872DB6A9BD00F531B0 /* Exceptions for "CalendarEventWidget" folder in "CalendarEventWidgetExtension" target */,
 			);
 			path = CalendarEventWidget;
@@ -115,7 +122,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2D24A1902DB6B29300F531B0 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,7 +195,6 @@
 			);
 			name = "FourCast Weather";
 			packageProductDependencies = (
-				2D24A18F2DB6B29300F531B0 /* FirebaseFirestore */,
 			);
 			productName = "FourCast Weather";
 			productReference = 2D0848252D6E071100BCB561 /* FourCast Weather.app */;
@@ -224,7 +229,6 @@
 			mainGroup = 2DF9F4B02D5D39290089598D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				2D24A18E2DB6B29300F531B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2DF9F4B02D5D39290089598D;
@@ -306,7 +310,7 @@
 				INFOPLIST_FILE = CalendarEventWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CalendarEventWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -333,7 +337,7 @@
 				INFOPLIST_FILE = CalendarEventWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = CalendarEventWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -495,7 +499,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -536,7 +540,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -585,25 +589,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		2D24A18E2DB6B29300F531B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.11.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		2D24A18F2DB6B29300F531B0 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2D24A18E2DB6B29300F531B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2DF9F4B12D5D39290089598D /* Project object */;
 }
