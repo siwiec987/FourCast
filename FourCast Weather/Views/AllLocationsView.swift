@@ -91,7 +91,7 @@ struct LocationView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon ?? "ellipsis"))
+            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon))
                 .renderingMode(.original)
                 .padding(8)
         }
