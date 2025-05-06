@@ -32,10 +32,6 @@ struct SettingsView: View {
         return result
     }
     
-    private var temperatureUnits = ["°C", "°F", "K"]
-    private var windSpeedUnits = ["m/s", "km/h", "mph"]
-    
-    
     var body: some View {
             Form {
                 if !permissionProblems.isEmpty {
@@ -50,15 +46,25 @@ struct SettingsView: View {
                 
                 Section("Jednostki") {
                     Picker("Temperatura", selection: $userSettings.settings.temperatureUnitString) {
-                        ForEach(temperatureUnits, id: \.self) { unit in
-                            Text(unit)
-                        }
+                        Text(UnitTemperature.celsius.symbol)
+                            .tag("celsius")
+                        
+                        Text(UnitTemperature.fahrenheit.symbol)
+                            .tag("fahrenheit")
+                        
+                        Text(UnitTemperature.kelvin.symbol)
+                            .tag("kelvin")
                     }
                     
                     Picker("Prędkość wiatru", selection: $userSettings.settings.windSpeedUnitString) {
-                        ForEach(windSpeedUnits, id: \.self) {unit in
-                            Text(unit)
-                        }
+                        Text(UnitSpeed.kilometersPerHour.symbol)
+                            .tag("km/h")
+                        
+                        Text(UnitSpeed.metersPerSecond.symbol)
+                            .tag("m/s")
+                        
+                        Text(UnitSpeed.milesPerHour.symbol)
+                            .tag("mph")
                     }
                     
                     Text("Jednostki")

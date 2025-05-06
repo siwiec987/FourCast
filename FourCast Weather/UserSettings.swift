@@ -13,9 +13,9 @@ struct UserSettingsModel: Codable {
     
     var temperatureUnit: UnitTemperature {
         switch(temperatureUnitString) {
-        case "°C":
+        case "celsius":
             return .celsius
-        case "°F":
+        case "fahrenheit":
             return .fahrenheit
         default:
             return .kelvin
@@ -30,6 +30,26 @@ struct UserSettingsModel: Codable {
             return .milesPerHour
         default:
             return .metersPerSecond
+        }
+    }
+    
+    init(tempUnit: UnitTemperature, speedUnit: UnitSpeed) {
+        switch(tempUnit) {
+        case .celsius: 
+            temperatureUnitString = "celsius"
+        case .fahrenheit:
+            temperatureUnitString = "fahrenheit"
+        default:
+            temperatureUnitString = "kelvin"
+        }
+        
+        switch(speedUnit) {
+        case .kilometersPerHour:
+            windSpeedUnitString = "km/h"
+        case .milesPerHour:
+            windSpeedUnitString = "mph"
+        default:
+            windSpeedUnitString = "m/s"
         }
     }
 }
@@ -54,13 +74,10 @@ class UserSettings {
             }
         }
         
-        let tempLocale = UnitTemperature.init(forLocale: .current)
-        let speedLocale = UnitSpeed.init(forLocale: .current)
+        let tempLocale = UnitTemperature(forLocale: .current, usage: .weather)
+        let speedLocale = UnitSpeed(forLocale: .current, usage: .wind)
         
-        let defaultTemperature = tempLocale == .celsius ? "°C" : tempLocale == .fahrenheit ? "°F" : "K"
-        let defaultSpeed = speedLocale == .milesPerHour ? "mph" : "m/s"
-
-        settings = UserSettingsModel(temperatureUnitString: defaultTemperature, windSpeedUnitString: defaultSpeed)
+        settings = UserSettingsModel(tempUnit: tempLocale, speedUnit: speedLocale)
     }
     
     private func saveToUserDefaults() {
