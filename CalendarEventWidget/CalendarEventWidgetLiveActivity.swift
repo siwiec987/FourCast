@@ -115,8 +115,10 @@ struct CalendarEventWidgetLiveActivity: Widget {
                     }
                 }
             } compactLeading: {
-                Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
-                    .bold()
+//                Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
+                Text(context.state.name)
+                    .font(.caption2)
+//                    .bold()
             } compactTrailing: {
                 HStack {
                     Text("\(context.state.temperature)°")

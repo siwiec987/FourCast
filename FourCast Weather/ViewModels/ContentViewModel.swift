@@ -32,6 +32,11 @@ class ContentViewModel {
     
     var activity: Activity<CalendarEventWidgetAttributes>?
     
+    var hasEventStarted: Bool {
+        guard let startDate = calendarManager.events.first?.startDate else { return false }
+        return startDate < Date()
+    }
+    
     var navbarTitle: String {
         if selection == -1 {
             return locationManager.locationName
@@ -42,7 +47,8 @@ class ContentViewModel {
         }
         if selection == -2 {
             guard let name = calendarEventLocation?.name else { return "" }
-            return "Następne wydarzenie: " + (name)
+            
+            return (hasEventStarted ? "W trakcie: " : "Następne wydarzenie: ") + (name)
         }
         if selection < additionalLocations.locations.count {
             return additionalLocations.locations[selection].name
@@ -106,6 +112,7 @@ class ContentViewModel {
         
         let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp)
         let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
+//        let travelTime = calendarManager.events.first?.value(forKey: "travelTime")
         
         let attributes = CalendarEventWidgetAttributes()
         let content = ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: startDate, name: calendarEventLocation.name, temperature: temp, iconName: icon), staleDate: startDate)
@@ -118,38 +125,12 @@ class ContentViewModel {
         print("powinno być")
     }
     
-//    func stopActivity() async {
-//        guard let activity else { return }
-//        await activity.end(ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: .now), staleDate: nil))
-//        self.activity = nil
-//        print("Skończone")
-//    }
-    
-    func updateActivity() async {
-        guard let activity else { print("Guard activity poszło");return }
-        guard let calendarEventLocation else { print("Guard calendarEventLocation poszło");return }
-        guard let weatherData = calendarEventLocation.weatherData else { print("Guard weatherData poszło");return }
-        guard let startDate = calendarManager.events.first?.startDate else { print("Guard startDate poszło");return }
+    func stopActivity() async {
+        guard let activity else { return }
         
-        var eventStartDateWeatherData: HourlyWeather?
-        for hour in weatherData.hourly {
-            let timeInterval = TimeInterval(hour.dt)
-            let weatherDate = Date(timeIntervalSince1970: timeInterval)
-            
-            if Calendar.current.isDate(weatherDate, equalTo: startDate, toGranularity: .hour) {
-                eventStartDateWeatherData = hour
-            }
-        }
-        
-        guard let eventStartDateWeatherData else { return }
-        
-        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp)
-        let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
-        
-        let content = ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: startDate, name: calendarEventLocation.name, temperature: temp, iconName: icon), staleDate: startDate)
-        
-        await activity.update(content)
-        print("Update zrobiony")
+        await activity.end(ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: .now, name: "AAA", temperature: 112, iconName: "dog.fill"), staleDate: nil), dismissalPolicy: .immediate)
+        self.activity = nil
+        print("Skończone")
     }
     
     func getEventLocation() {
@@ -159,7 +140,6 @@ class ContentViewModel {
         }
         
         calendarEventLocation = AdditionalLocationData(name: name, coordinate: Coordinate(coordinate))
-        print("git")
     }
     
     func fetchCurrentLocationOrWeather() async {
@@ -184,9 +164,8 @@ class ContentViewModel {
     }
     
     func fetchWeatherForCalendarEventLocation() async {
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!")
         guard var event = calendarEventLocation else { return }
-        print("po guardzie!!!!!!!!!!!!!!!!!!!!!!!!!")
+
         do {
             let (data, time) = try await weatherService.fetchWeatherData(coordinate: event.coordinateObject, lastFetchTime: event.lastFetchTime)
             event.weatherData = data
