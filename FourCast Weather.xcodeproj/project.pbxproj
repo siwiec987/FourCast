@@ -72,13 +72,6 @@
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
 		};
-		2D24A19C2DB805BD00F531B0 /* Exceptions for "FourCast Weather" folder in "CalendarEventWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Views/BackgroundView.swift,
-			);
-			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
-		};
 		2D24A1AB2DBAB1EA00F531B0 /* Exceptions for "CalendarEventWidget" folder in "FourCast Weather" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -100,9 +93,6 @@
 		};
 		2DF9F4BB2D5D39290089598D /* FourCast Weather */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				2D24A19C2DB805BD00F531B0 /* Exceptions for "FourCast Weather" folder in "CalendarEventWidgetExtension" target */,
-			);
 			path = "FourCast Weather";
 			sourceTree = "<group>";
 		};
