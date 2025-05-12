@@ -67,7 +67,6 @@ struct CalendarEventWidgetLiveActivity: Widget {
             .padding(10)
             .activityBackgroundTint(Color.blue)
             .foregroundStyle(.white)
-            .background(BackgroundView())
             
 
         } dynamicIsland: { context in
