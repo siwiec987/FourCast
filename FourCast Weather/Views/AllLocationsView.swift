@@ -71,7 +71,7 @@ struct LocationView: View {
     
     var body: some View {
         ZStack {
-            Color.blue
+            BackgroundView(weatherData: weatherData)
             
             Text("\(temperature)°")
                 .font(.largeTitle)

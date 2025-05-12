@@ -36,6 +36,7 @@ struct ContentView: View {
                 
                 Tab("Current", systemImage: "location", value: -1) {
                     WeatherView(weatherData: viewModel.currentLocationWeatherData)
+                        .redacted(reason: viewModel.currentLocationWeatherData == nil ? .placeholder : [])
                         .onChange(of: viewModel.locationManager.location, initial: false) {
                             Task {
                                 await viewModel.fetchWeatherForCurrentLocation()
@@ -49,7 +50,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .background(BackgroundView())
+            .background(BackgroundView(weatherData: viewModel.currentLocationWeatherData))
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in
                     print("\nCame back to foreground, selection = \(viewModel.selection)")
@@ -104,13 +105,15 @@ struct ContentView: View {
                     .fontWeight(.black)
                 }
             }
-            .toolbarBackground(Color.accentColor, for: .bottomBar)
-            .toolbarBackgroundVisibility(.visible, for: .bottomBar)
+//            .toolbarBackground(Color.accentColor, for: .bottomBar)
+//            .toolbarBackground(Material.regular, for: .bottomBar)
+//            .toolbarBackgroundVisibility(.visible, for: .bottomBar)
             .tint(.white)
             .navigationTitle(viewModel.navbarTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(red: 0.400, green: 0.750, blue: 1), for: .navigationBar)
-            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
+//            .toolbarBackground(Color(red: 0.400, green: 0.750, blue: 1), for: .navigationBar)
+//            .toolbarBackground(Material.regular, for: .navigationBar)
+//            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
             .alert(viewModel.errorTitle, isPresented: $viewModel.showingError) {
                 Button("Ustawienia") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {

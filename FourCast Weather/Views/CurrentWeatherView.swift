@@ -28,7 +28,6 @@ struct CurrentWeatherView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-            
             Text("\(temperature)°")
                 .font(.system(size: 80, weight: .light))
             

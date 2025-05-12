@@ -18,6 +18,7 @@ struct WeatherView: View {
                 DailyForecastView(weatherData: weatherData)
                 SunriseSunsetView(weatherData: weatherData)
                 MoonriseMoonsetView(weatherData: weatherData)
+                WindInfoView(weatherData: weatherData)
                 Spacer()
                     .frame(height: 30)
             }
