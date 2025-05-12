@@ -93,43 +93,43 @@ class WeatherService {
         
         switch(icon.last) {
         case "d":
-            switch(icon) {
-            case "01d":
+            switch(icon.dropLast()) {
+            case "01":
                 return "sun.max.fill"
-            case "02d":
+            case "02":
                 return "cloud.sun.fill"
-            case "03d", "04d":
+            case "03", "04":
                 return "cloud.fill"
-            case "09d":
+            case "09":
                 return "cloud.drizzle.fill"
-            case "10d":
+            case "10":
                 return "cloud.sun.rain.fill"
-            case "11d":
+            case "11":
                 return "cloud.bolt.fill"
-            case "13d":
+            case "13":
                 return "snowflake"
-            case "50d":
+            case "50":
                 return "sun.haze.fill"
             default:
                 return defaultIcon
             }
         case "n":
-            switch(icon) {
-            case "01n":
+            switch(icon.dropLast()) {
+            case "01":
                 return "moon.fill"
-            case "02n":
+            case "02":
                 return "cloud.moon.fill"
-            case "03n", "04n":
+            case "03", "04":
                 return "cloud.fill"
-            case "09n":
+            case "09":
                 return "cloud.drizzle.fill"
-            case "10n":
+            case "10":
                 return "cloud.moon.rain.fill"
-            case "11n":
+            case "11":
                 return "cloud.bolt.fill"
-            case "13n":
+            case "13":
                 return "snowflake"
-            case "50n":
+            case "50":
                 return "moon.haze.fill"
             default:
                 return defaultIcon
@@ -142,6 +142,11 @@ class WeatherService {
     static func getConvertedTemperature(from temp: Double) -> Int {
         let userSettings = UserSettings.shared
         return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
+    }
+    
+    static func getConvertedWindSpeed(from speed: Double) -> Int {
+        let userSettings = UserSettings.shared
+        return Int(Measurement(value: speed, unit: UnitSpeed.metersPerSecond).converted(to: userSettings.settings.windSpeedUnit).value)
     }
 }
 
