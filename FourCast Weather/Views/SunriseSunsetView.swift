@@ -29,7 +29,7 @@ private struct SunriseSunsetItem: View {
                 Image(systemName: role)
                     .renderingMode(.original)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    .scaledToFit()
                 
                 Text((role == "sunrise" ? "Wschód" : "Zachód") + " słońca")
             }

@@ -40,6 +40,7 @@ struct WindInfoView: View {
         
             ZStack {
                 let overlayPadding: CGFloat = 5
+                
                 Circle()
                     .stroke(.secondary, lineWidth: 2)
                     .overlay(alignment: .top) {
@@ -64,6 +65,7 @@ struct WindInfoView: View {
                     .scaledToFit()
                     .frame(width: 40, height: 40)
                     .rotationEffect(Angle(degrees: Double(weatherData?.current.windDeg ?? 0)))
+                    .fontWeight(.thin)
                     .padding()
             }
             .frame(width: 100, height: 100)
@@ -82,7 +84,9 @@ struct WindInfoView: View {
         var body: some View {
             HStack {
                 Text(title)
+                
                 Spacer()
+                
                 Text(content)
                     .bold()
             }
