@@ -10,25 +10,35 @@ import SwiftUI
 struct MoonriseMoonsetView: View {
     let weatherData: WeatherData?
 
+    var iconName: String {
+        let (iconName, _) = getMoonPhaseIconAndName()
+        
+        return iconName
+    }
+    
+    var moonPhaseName: String {
+        let (_, moonPhaseName) = getMoonPhaseIconAndName()
+        
+        return moonPhaseName
+    }
+    
     var body: some View {
         HStack {
-            Spacer()
-            
-            Image(systemName: getMoonPhaseIcon())
+            Image(systemName: iconName)
                 .symbolRenderingMode(.monochrome)
                 .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 50, height: 50)
+                .scaledToFit()
+                .frame(width: 100, height: 100)
                 .foregroundStyle(.white)
+                .padding(.trailing)
             
-            Spacer()
-            
-            VStack {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(moonPhaseName)
+                    .bold()
+                
                 MoonriseMoonsetItem(role: "moonrise", time: weatherData?.daily[0].moonrise, timezoneOffset: weatherData?.timezoneOffset)
                 MoonriseMoonsetItem(role: "moonset", time: weatherData?.daily[0].moonset, timezoneOffset: weatherData?.timezoneOffset)
             }
-            
-            Spacer()
         }
         .padding()
         .foregroundStyle(.white)
@@ -36,37 +46,37 @@ struct MoonriseMoonsetView: View {
         .clipShape(.rect(cornerRadius: 15))
     }
     
-    private func getMoonPhaseIcon() -> String {
+    private func getMoonPhaseIconAndName() -> (iconName: String, name: String) {
         guard let moonPhase = weatherData?.daily[0].moonPhase else {
-            return ""
+            return ("", "")
         }
         
         if moonPhase == 0 || moonPhase == 1 {
-            return "moonphase.new.moon"
+            return ("moonphase.new.moon", "Nów")
         }
         if moonPhase < 0.25 {
-            return "moonphase.waxing.crescent"
+            return ("moonphase.waxing.crescent", "Po nowiu")
         }
         if moonPhase == 0.25 {
-            return "moonphase.first.quarter"
+            return ("moonphase.first.quarter", "Pierwsza kwadra")
         }
         if moonPhase < 0.5 {
-            return "moonphase.waxing.gibbous"
+            return ("moonphase.waxing.gibbous", "Po pierwszej kwadrze")
         }
         if moonPhase == 0.5 {
-            return "moonphase.full.moon"
+            return ("moonphase.full.moon", "Pełnia")
         }
         if moonPhase < 0.75 {
-            return "moonphase.waning.gibbous"
+            return ("moonphase.waning.gibbous", "Po pełni")
         }
         if moonPhase == 0.75 {
-            return "moonphase.last.quarter"
+            return ("moonphase.last.quarter", "Ostatnia kwadra")
         }
         if moonPhase < 1 {
-            return "moonphase.waning.crescent"
+            return ("moonphase.waning.crescent", "Po ostatniej kwadrze")
         }
         
-        return ""
+        return ("", "")
     }
 }
 
@@ -77,21 +87,13 @@ private struct MoonriseMoonsetItem: View {
     
     var body: some View {
         HStack {
-//                Image(systemName: role)
-//                    .renderingMode(.original)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fit)
-            
             Text((role == "moonrise" ? "Wschód" : "Zachód") + " księżyca")
         
+            Spacer()
+            
             Text(Date.getFormattedHour(from: time ?? 0, with: timezoneOffset ?? 0))
                 .bold()
-            
         }
-//        .padding()
-//        .foregroundStyle(.white)
-//        .background(.tertiary.opacity(0.5))
-//        .clipShape(.rect(cornerRadius: 15))
     }
 }
 
