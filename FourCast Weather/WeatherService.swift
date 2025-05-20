@@ -31,8 +31,15 @@ class WeatherService {
         do {
             let latitude = coordinate.latitude
             let longitude = coordinate.longitude
-            let apiKey = "792cfab2b422b4dbd5795ced996a90b0"
-//            let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&units=metric&appid=\(apiKey)"
+
+            guard let apiKeyURL = Bundle.main.url(forResource: "OpenWeatherApiKey", withExtension: "txt") else {
+                throw OpenWeatherError.keyNotFound
+            }
+                
+            guard let apiKey = try? String(contentsOf: apiKeyURL, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines) else {
+                throw OpenWeatherError.invalidKey
+            }
+            print(apiKey)
             let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&appid=\(apiKey)"
             
             guard let url = URL(string: urlString) else {
@@ -46,7 +53,7 @@ class WeatherService {
             }
             
             if let jsonString = String(data: data, encoding: .utf8) {
-                        print("Raw JSON response (first 200 chars): \(String(jsonString.prefix(200)))...")
+                print("Raw JSON response (first 200 chars): \(String(jsonString.prefix(200)))...")
             }
             
             let decoder = JSONDecoder()
@@ -55,8 +62,6 @@ class WeatherService {
             let result = try decoder.decode(WeatherData.self, from: data)
             
             await MainActor.run {
-//                weatherData = try decoder.decode(WeatherData.self, from: data)
-//                lastFetchTime = Date.now
                 isLoading = false
             }
             
@@ -156,4 +161,6 @@ enum OpenWeatherError: Error {
     case invalidData
     case alreadyInUse
     case fetchNotNecessary
+    case keyNotFound
+    case invalidKey
 }
