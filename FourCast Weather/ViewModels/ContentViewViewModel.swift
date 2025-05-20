@@ -10,8 +10,8 @@ import CoreLocation
 import ActivityKit
 
 @Observable
-class ContentViewModel {
-    static var shared = ContentViewModel()
+class ContentViewViewModel {
+    static var shared = ContentViewViewModel()
     
     let weatherService = WeatherService()
     let locationManager = LocationManager()

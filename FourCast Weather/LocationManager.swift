@@ -52,15 +52,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let contentViewModel = ContentViewModel.shared
+        let contentViewViewModel = ContentViewViewModel.shared
         
         do {
             print("Didchangeauth pobiera lokalizacje")
             try checkLocationAuthorization()
         } catch {
-            contentViewModel.errorTitle = "Daj lokalizację pls"
-            contentViewModel.errorMessage = "Daj lokalizację to damy pogodę"
-            contentViewModel.showingError = true
+            contentViewViewModel.errorTitle = "Daj lokalizację pls"
+            contentViewViewModel.errorMessage = "Daj lokalizację to damy pogodę"
+            contentViewViewModel.showingError = true
             print("didchangeauth rzuca błędami")
         }
     }
