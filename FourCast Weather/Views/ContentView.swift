@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = ContentViewModel.shared
+    @State private var viewModel = ContentViewViewModel.shared
     
     var body: some View {
         NavigationStack {
             TabView(selection: $viewModel.selection) {
-                if !viewModel.calendarManager.events.isEmpty {
+                if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
                         Button("Live activity") {
                             viewModel.startActivity()
@@ -30,7 +30,7 @@ struct ContentView: View {
                             }
                         }
 
-                        CalendarEventView(weatherData: viewModel.calendarEventLocation?.weatherData, data: viewModel.calendarManager.events[0])
+                        CalendarEventView(weatherData: calendarEventLocation.weatherData, data: viewModel.calendarManager.events[0])
                     }
                 }
                 
@@ -50,7 +50,10 @@ struct ContentView: View {
                     }
                 }
             }
-            .background(BackgroundView(weatherData: viewModel.currentLocationWeatherData))
+            .background(
+                BackgroundView(weatherData: viewModel.weatherDataForSelectedTab)
+                    .animation(.default, value: viewModel.selection)
+            )
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in
                     print("\nCame back to foreground, selection = \(viewModel.selection)")
