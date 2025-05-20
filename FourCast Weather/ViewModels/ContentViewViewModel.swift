@@ -37,6 +37,20 @@ class ContentViewViewModel {
         return startDate < Date()
     }
     
+    var weatherDataForSelectedTab: WeatherData? {
+        if let calendarEventLocation, selection == -2 {
+            return calendarEventLocation.weatherData
+        }
+        if selection == -1 {
+            return currentLocationWeatherData
+        }
+        if selection < additionalLocations.locations.count {
+            return additionalLocations.locations[selection].weatherData
+        }
+        
+        return nil
+    }
+    
     var navbarTitle: String {
         if selection == -1 {
             return locationManager.locationName
