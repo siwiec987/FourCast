@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = ContentViewViewModel.shared
+    @Environment(UserSettings.self) private var userSettings
+    @State private var viewModel = ContentViewViewModel()
     
     var body: some View {
         NavigationStack {
@@ -117,7 +118,7 @@ struct ContentView: View {
 //            .toolbarBackground(Color(red: 0.400, green: 0.750, blue: 1), for: .navigationBar)
 //            .toolbarBackground(Material.regular, for: .navigationBar)
 //            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
-            .alert(viewModel.errorTitle, isPresented: $viewModel.showingError) {
+            .alert(viewModel.errorTitle, isPresented: $viewModel.locationManager.authError) {
                 Button("Ustawienia") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(url)

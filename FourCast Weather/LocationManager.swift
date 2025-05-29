@@ -16,6 +16,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     var locationName = ". . ."
     var locationReady = false
     var notAuthorized = true
+    var authError = false
     
     override init() {
         super.init()
@@ -52,16 +53,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let contentViewViewModel = ContentViewViewModel.shared
-        
         do {
             print("Didchangeauth pobiera lokalizacje")
             try checkLocationAuthorization()
         } catch {
-            contentViewViewModel.errorTitle = "Daj lokalizację pls"
-            contentViewViewModel.errorMessage = "Daj lokalizację to damy pogodę"
-            contentViewViewModel.showingError = true
-            print("didchangeauth rzuca błędami")
+            authError = true
         }
     }
     

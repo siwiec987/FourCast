@@ -11,10 +11,8 @@ import ActivityKit
 
 @Observable
 class ContentViewViewModel {
-    static var shared = ContentViewViewModel()
-    
     let weatherService = WeatherService()
-    let locationManager = LocationManager()
+    var locationManager = LocationManager()
     let additionalLocations = AdditionalLocations()
     let calendarManager = CalendarManager()
     
@@ -96,7 +94,7 @@ class ContentViewViewModel {
         return "Ostatnia aktualizacja:"
     }
     
-    private init() {
+    init() {
         getEventLocation()
     }
     
