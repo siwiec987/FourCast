@@ -16,7 +16,7 @@ struct ContentView: View {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
                         Button("Live activity") {
-                            viewModel.startActivity()
+                            viewModel.startActivity(userSettings: userSettings)
                         }
                         .padding()
                         .background(.blue)

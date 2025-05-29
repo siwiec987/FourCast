@@ -9,10 +9,13 @@ import SwiftUI
 
 @main
 struct FourCast_WeatherApp: App {
+    @State private var userSettings = UserSettings()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(.dark)
         }
+        .environment(userSettings)
     }
 }

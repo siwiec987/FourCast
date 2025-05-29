@@ -17,7 +17,6 @@ class ContentViewViewModel {
     let locationManager = LocationManager()
     let additionalLocations = AdditionalLocations()
     let calendarManager = CalendarManager()
-    let userSettings = UserSettings.shared
     
     var currentLocationWeatherData: WeatherData?
     var currentLocationLastFetchTime: Date?
@@ -101,7 +100,7 @@ class ContentViewViewModel {
         getEventLocation()
     }
     
-    func startActivity() {
+    func startActivity(userSettings: UserSettings) {
         guard activity == nil else {
             print("już jest")
             return
@@ -124,7 +123,7 @@ class ContentViewViewModel {
         
         guard let eventStartDateWeatherData else { return }
         
-        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp)
+        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
         let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
 //        let travelTime = calendarManager.events.first?.value(forKey: "travelTime")
         

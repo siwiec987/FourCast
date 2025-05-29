@@ -144,13 +144,11 @@ class WeatherService {
         }
     }
     
-    static func getConvertedTemperature(from temp: Double) -> Int {
-        let userSettings = UserSettings.shared
+    static func getConvertedTemperature(from temp: Double, userSettings: UserSettings) -> Int {
         return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
     }
     
-    static func getConvertedWindSpeed(from speed: Double) -> Int {
-        let userSettings = UserSettings.shared
+    static func getConvertedWindSpeed(from speed: Double, userSettings: UserSettings) -> Int {
         return Int(Measurement(value: speed, unit: UnitSpeed.metersPerSecond).converted(to: userSettings.settings.windSpeedUnit).value)
     }
 }

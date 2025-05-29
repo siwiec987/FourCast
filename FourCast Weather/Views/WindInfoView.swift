@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WindInfoView: View {
+    @Environment(UserSettings.self) private var userSettings
     var weatherData: WeatherData?
     
     private var windDegree: String {
@@ -29,9 +30,9 @@ struct WindInfoView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 10) {
-                DetailView(title: "Prędkość", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.current.windSpeed ?? 0.0)) \(UserSettings.shared.settings.windSpeedUnit.symbol)")
+                DetailView(title: "Prędkość", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.current.windSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
                 
-                DetailView(title: "Porywy", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.daily[0].windSpeed ?? 0.0)) \(UserSettings.shared.settings.windSpeedUnit.symbol)")
+                DetailView(title: "Porywy", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.daily[0].windSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
                 
                 DetailView(title: "Kierunek", content: windDegree)
             }

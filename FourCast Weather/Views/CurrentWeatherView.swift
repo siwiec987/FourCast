@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct CurrentWeatherView: View {
+    @Environment(UserSettings.self) private var userSettings
+    
     let weatherData: WeatherData?
     
     private var temperature: Int {
         if let temp = weatherData?.current.temp {
-            return WeatherService.getConvertedTemperature(from: temp)
+            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
         }
         
          return 0
@@ -20,7 +22,7 @@ struct CurrentWeatherView: View {
     
     private var feelsLike: Int {
         if let temp = weatherData?.current.feelsLike {
-            return WeatherService.getConvertedTemperature(from: temp)
+            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
         }
         
          return 0

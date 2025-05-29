@@ -72,12 +72,13 @@ struct DayForecastView: View {
 }
 
 struct HourlyForecastItem: View {
+    @Environment(UserSettings.self) private var userSettings
     let hourlyForecast: HourlyWeather
     let timezoneOffset: Int?
     
     private var temperature: Int {
         let temp = hourlyForecast.temp
-        return WeatherService.getConvertedTemperature(from: temp)
+        return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
     }
     var body: some View {
         VStack {

@@ -56,8 +56,6 @@ struct UserSettingsModel: Codable {
 
 @Observable
 class UserSettings {
-    static let shared = UserSettings()
-    
     private let saveKey = "userSettings"
     
     var settings: UserSettingsModel {
@@ -66,7 +64,7 @@ class UserSettings {
         }
     }
     
-    private init() {
+    init() {
         if let data = UserDefaults.standard.data(forKey: saveKey) {
             if let decoded = try? JSONDecoder().decode(UserSettingsModel.self, from: data) {
                 settings = decoded

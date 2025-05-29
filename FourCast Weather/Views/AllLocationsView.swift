@@ -58,12 +58,13 @@ struct AllLocationsView: View {
 }
 
 struct LocationView: View {
+    @Environment(UserSettings.self) private var userSettings
     @State var name: String
     @State var weatherData: WeatherData?
     
     private var temperature: Int {
         if let temp = weatherData?.current.temp {
-            return WeatherService.getConvertedTemperature(from: temp)
+            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
         }
         
         return 0

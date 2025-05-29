@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct DailyForecastView: View {
+    @Environment(UserSettings.self) private var userSettings
     let weatherData: WeatherData?
     
     var body: some View {
@@ -27,11 +28,11 @@ struct DailyForecastView: View {
                     
                     Spacer()
                     
-                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.min))°")
+                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.min, userSettings: userSettings))°")
                     
                     Text(". . .")
                     
-                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.max))°")
+                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.max, userSettings: userSettings))°")
                 }
             }
             .foregroundStyle(.white)
