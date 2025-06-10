@@ -29,5 +29,5 @@ struct WeatherView: View {
 
 #Preview {
     WeatherView(weatherData: SampleWeatherData().data)
-        .background(BackgroundView())
+        .background(.blue)
 }

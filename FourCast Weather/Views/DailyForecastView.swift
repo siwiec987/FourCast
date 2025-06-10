@@ -45,8 +45,6 @@ struct DailyForecastView: View {
 }
 
 #Preview {
-    ZStack {
-        BackgroundView()
-        DailyForecastView(weatherData: SampleWeatherData().data)
-    }
+    DailyForecastView(weatherData: SampleWeatherData().data)
+        .background(.blue)
 }

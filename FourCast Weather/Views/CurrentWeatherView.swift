@@ -42,8 +42,6 @@ struct CurrentWeatherView: View {
 }
 
 #Preview {
-    ZStack {
-        BackgroundView()
-        CurrentWeatherView(weatherData: SampleWeatherData().data)
-    }
+    CurrentWeatherView(weatherData: SampleWeatherData().data)
+        .background(.blue)
 }

@@ -101,8 +101,6 @@ struct HourlyForecastItem: View {
 }
 
 #Preview {
-    ZStack {
-        BackgroundView()
-        HourlyForecastView(weatherData: SampleWeatherData().data)
-    }
+    HourlyForecastView(weatherData: SampleWeatherData().data)
+        .background(.blue)
 }
