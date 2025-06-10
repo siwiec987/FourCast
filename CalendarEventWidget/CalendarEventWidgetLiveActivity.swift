@@ -16,6 +16,11 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
         var name: String
         var temperature: Int
         var iconName: String
+        
+        var timezoneOffset: Int?
+        var weatherIcon: String?
+        var sunrise: Int?
+        var sunset: Int?
     }
 
     // Fixed non-changing properties about your activity go here!
@@ -47,7 +52,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                 }
                 .padding(.bottom, -15)
                 
-                HStack {
+                HStack(alignment: .lastTextBaseline) {
                     Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
                         .font(.largeTitle)
                         .bold()
@@ -67,6 +72,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
             .padding(10)
             .activityBackgroundTint(Color.blue)
             .foregroundStyle(.white)
+            .background(BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, style: .gradientOnly))
             
 
         } dynamicIsland: { context in
@@ -96,7 +102,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                     .padding(.trailing, 5)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    HStack {
+                    HStack(alignment: .lastTextBaseline) {
                         Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
                             .font(.largeTitle)
                             .bold()

@@ -120,13 +120,26 @@ class ContentViewViewModel {
         }
         
         guard let eventStartDateWeatherData else { return }
+        let weatherIcon = eventStartDateWeatherData.weather.first?.icon
         
         let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
-        let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
+        let icon = WeatherService.getWeatherIcon(weatherIcon)
 //        let travelTime = calendarManager.events.first?.value(forKey: "travelTime")
         
         let attributes = CalendarEventWidgetAttributes()
-        let content = ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: startDate, name: calendarEventLocation.name, temperature: temp, iconName: icon), staleDate: startDate)
+        let content = ActivityContent(
+            state: CalendarEventWidgetAttributes.ContentState(
+                eventDate: startDate,
+                name: calendarEventLocation.name,
+                temperature: temp,
+                iconName: icon,
+                timezoneOffset: weatherData.timezoneOffset,
+                weatherIcon: weatherIcon,
+                sunrise: weatherData.current.sunrise,
+                sunset: weatherData.current.sunset
+            ),
+            staleDate: startDate
+        )
         
         do {
             activity = try Activity<CalendarEventWidgetAttributes>.request(attributes: attributes, content: content, pushType: nil)
