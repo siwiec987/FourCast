@@ -56,8 +56,13 @@ struct ContentView: View {
                 }
             }
             .background(
-                BackgroundView(weatherData: viewModel.weatherDataForSelectedTab)
-                    .animation(.default, value: viewModel.selection)
+                BackgroundView(
+                    timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
+                    weatherIcon: viewModel.weatherDataForSelectedTab?.current.weather.first?.icon,
+                    sunrise: viewModel.weatherDataForSelectedTab?.current.sunrise,
+                    sunset: viewModel.weatherDataForSelectedTab?.current.sunset
+                )
+                .animation(.default, value: viewModel.selection)
             )
             .onReceive(NotificationCenter.default.publisher(
                 for: UIScene.willEnterForegroundNotification)) { _ in

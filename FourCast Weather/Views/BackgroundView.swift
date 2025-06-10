@@ -10,7 +10,11 @@
 import SwiftUI
 
 struct BackgroundView: View {
-    var weatherData: WeatherData?
+//    var weatherData: WeatherData?
+    let timezoneOffset: Int?
+    let weatherIcon: String?
+    let sunrise: Int?
+    let sunset: Int?
     var style: Style = .allEffects
     
     #if DEBUG
@@ -32,9 +36,8 @@ struct BackgroundView: View {
             return debugTime
         }
         #endif
-        guard let weatherData else { return 0.0 }
         
-        let timeZone = TimeZone(secondsFromGMT: weatherData.timezoneOffset) ?? .current
+        let timeZone = TimeZone(secondsFromGMT: timezoneOffset ?? 0) ?? .current
         var calendar = Calendar.current
         calendar.timeZone = timeZone
         
@@ -49,10 +52,11 @@ struct BackgroundView: View {
             return debugCloudThickness
         }
         #endif
-        guard let icon = weatherData?.current.weather.first?.icon else { return .regular }
 
+        guard let weatherIcon else { return .none }
+        
         let result: Cloud.Thickness
-        switch icon.dropLast() {
+        switch weatherIcon.dropLast() {
         case "02": result = .thin
         case "03": result = .light
         case "04": fallthrough
@@ -107,7 +111,7 @@ struct BackgroundView: View {
         #endif
     }
     
-    private func getStops(type: StopType) -> [Gradient.Stop] {
+    private func getStops(type: StopType, default: Bool = false) -> [Gradient.Stop] {
         let resultTop: [Gradient.Stop] = [
             .init(color: .clearSkyNightStart, location: 0),
             .init(color: .clearSkyNightStart, location: 0.25),
@@ -131,6 +135,11 @@ struct BackgroundView: View {
         ]
         
         var result = (type == .top) ? resultTop : resultBottom
+        
+        guard let timezoneOffset else { return result }
+        guard let weatherIcon else { return result }
+        guard let sunrise else { return result }
+        guard let sunset else { return result }
         
         let colorsDayNightStart: [String: [Color]] = [
             "01": [.clearSkyDayStart, .clearSkyNightStart],
@@ -156,22 +165,19 @@ struct BackgroundView: View {
             "50": [.mistDayEnd, .mistNightEnd],
         ]
         
-        guard let weatherData else { return result }
-        
-        let timeZone = TimeZone(secondsFromGMT: weatherData.timezoneOffset) ?? .current
+        let timeZone = TimeZone(secondsFromGMT: timezoneOffset) ?? .current
         var calendar = Calendar.current
         calendar.timeZone = timeZone
 
-        let sunriseDate = Date(timeIntervalSince1970: TimeInterval(weatherData.current.sunrise))
-        let sunsetDate = Date(timeIntervalSince1970: TimeInterval(weatherData.current.sunset))
+        let sunriseDate = Date(timeIntervalSince1970: TimeInterval(sunrise))
+        let sunsetDate = Date(timeIntervalSince1970: TimeInterval(sunset))
 
         let startOfDay = calendar.startOfDay(for: sunriseDate)
 
         let sunriseLocation = sunriseDate.timeIntervalSince(startOfDay) / 86_400
         let sunsetLocation = sunsetDate.timeIntervalSince(startOfDay) / 86_400
         
-        guard let iconSubstring = weatherData.current.weather.first?.icon.dropLast() else { return result }
-        let icon = String(iconSubstring)
+        let icon = String(weatherIcon.dropLast())
         
         guard let colors = (type == .top) ? colorsDayNightStart[icon] : colorsDayNightEnd[icon] else { return result }
         
@@ -238,9 +244,6 @@ struct BackgroundView: View {
             }
         }
         
-        print(result)
-        print(cloudTopColors)
-        print(cloudBottomColors)
         return result
     }
     
@@ -257,6 +260,6 @@ struct BackgroundView: View {
 
 #Preview {
     NavigationStack {
-        BackgroundView(weatherData: SampleWeatherData().data!)
+//        BackgroundView(weatherData: SampleWeatherData().data!)
     }
 }

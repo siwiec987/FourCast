@@ -72,7 +72,12 @@ struct LocationView: View {
     
     var body: some View {
         ZStack {
-            BackgroundView(weatherData: weatherData)
+            BackgroundView(
+                timezoneOffset: weatherData?.timezoneOffset,
+                weatherIcon: weatherData?.current.weather.first?.icon,
+                sunrise: weatherData?.current.sunrise,
+                sunset: weatherData?.current.sunset
+            )
             
             Text("\(temperature)°")
                 .font(.largeTitle)
