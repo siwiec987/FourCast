@@ -23,7 +23,7 @@ struct HourlyForecastView: View {
         }
         .foregroundStyle(.white)
         .contentMargins(0)
-        .background(.tertiary.opacity(0.5))
+        .background(.clear.mix(with: .black, by: 0.1))
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     

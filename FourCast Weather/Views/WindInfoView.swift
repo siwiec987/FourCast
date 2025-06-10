@@ -74,7 +74,7 @@ struct WindInfoView: View {
             .padding(.leading)
         }
         .padding()
-        .background(.tertiary.opacity(0.5))
+        .background(.clear.mix(with: .black, by: 0.1))
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     

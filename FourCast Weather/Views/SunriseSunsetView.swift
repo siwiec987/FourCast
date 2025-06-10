@@ -40,7 +40,7 @@ private struct SunriseSunsetItem: View {
         }
         .padding()
         .foregroundStyle(.white)
-        .background(.tertiary.opacity(0.5))
+        .background(.clear.mix(with: .black, by: 0.1))
         .clipShape(.rect(cornerRadius: 15))
     }
 }
