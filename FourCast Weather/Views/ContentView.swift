@@ -16,19 +16,23 @@ struct ContentView: View {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
-                        Button("Live activity") {
-                            viewModel.startActivity(userSettings: userSettings)
-                        }
-                        .padding()
-                        .background(.blue)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .padding(.top, 10)
-                        .disabled(viewModel.hasEventStarted)
-                        
-                        Button("Stop") {
-                            Task {
-                                await viewModel.stopActivity()
+                        HStack {
+                            Button("Live activity") {
+                                viewModel.startActivity(userSettings: userSettings)
                             }
+                            .padding()
+                            .background(.clear.mix(with: .black, by: 0.25))
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                            .disabled(viewModel.hasEventStarted)
+                            
+                            Button("Stop") {
+                                Task {
+                                    await viewModel.stopActivity()
+                                }
+                            }
+                            .padding()
+                            .background(.clear.mix(with: .black, by: 0.25))
+                            .clipShape(RoundedRectangle(cornerRadius: 15))
                         }
 
                         CalendarEventView(weatherData: calendarEventLocation.weatherData, data: viewModel.calendarManager.events[0])
