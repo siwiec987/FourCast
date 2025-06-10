@@ -8,11 +8,11 @@
 import SwiftUI
 
 extension Color {
-    static let clearSunriseStart = Color(red: 1.00, green: 0.65, blue: 0.30)
-    static let clearSunriseEnd = Color(red: 1.00, green: 0.85, blue: 0.60)
+    static let sunriseStart = Color(red: 1.00, green: 0.65, blue: 0.30)
+    static let sunriseEnd = Color(red: 1.00, green: 0.85, blue: 0.60)
     
-    static let clearSunsetStart = Color(red: 0.85, green: 0.40, blue: 0.40)
-    static let clearSunsetEnd = Color(red: 0.50, green: 0.20, blue: 0.30)
+    static let sunsetStart = Color(red: 0.85, green: 0.40, blue: 0.40)
+    static let sunsetEnd = Color(red: 0.50, green: 0.20, blue: 0.30)
     
     static let clearSkyDayStart = Color(red: 0.40, green: 0.80, blue: 1.00)
     static let clearSkyDayEnd = Color(red: 0.70, green: 0.90, blue: 1.00)
@@ -67,4 +67,13 @@ extension Color {
     
     static let mistNightStart = Color(red: 0.20, green: 0.22, blue: 0.26)
     static let mistNightEnd = Color(red: 0.12, green: 0.13, blue: 0.16)
+    
+    static let darkCloudStart = Color(red: 0.21, green: 0.23, blue: 0.30)  /*Color(hue: 0.65, saturation: 0.3, brightness: 0.3)*/
+    static let darkCloudEnd = Color(red: 0.48, green: 0.51, blue: 0.60)    /*Color(hue: 0.65, saturation: 0.3, brightness: 0.7)*/
+    static let lightCloudStart = Color.white
+    static let lightCloudEnd = Color(white: 0.75)
+    static let sunriseCloudStart = Color.lightCloudStart
+    static let sunriseCloudEnd = Color.sunriseEnd
+    static let sunsetCloudStart = Color.lightCloudStart
+    static let sunsetCloudEnd = Color.sunsetEnd
 }

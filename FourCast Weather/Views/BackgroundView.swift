@@ -5,10 +5,13 @@
 //  Created by Jakub Siwiec on 12/05/2025.
 //
 
+
+// TODO: make clouds' movement according to speed and direction of the wind
 import SwiftUI
 
 struct BackgroundView: View {
     var weatherData: WeatherData?
+    var style: Style = .allEffects
     
     #if DEBUG
     @State private var debugCloudThickness = Cloud.Thickness.regular
@@ -64,13 +67,21 @@ struct BackgroundView: View {
     
     var body: some View {
         ZStack {
+            let topStops = getStops(type: .top)
+            let bottomStops = getStops(type: .bottom)
             LinearGradient(colors: [
-                getStops(for: .top).interpolated(amount: time),
-                getStops(for: .bottom).interpolated(amount: time)
+                topStops.interpolated(amount: time),
+                bottomStops.interpolated(amount: time)
             ], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
-            CloudsView(thickness: cloudThickness)
+            if style == .allEffects {
+                CloudsView(
+                    thickness: cloudThickness,
+                    topTint: getCloudStops(for: topStops, type: .top).interpolated(amount: time),
+                    bottomTint: getCloudStops(for: bottomStops, type: .bottom).interpolated(amount: time)
+                )
+            }
         }
         #if DEBUG
         .onChange(of: debugTime) {
@@ -96,17 +107,30 @@ struct BackgroundView: View {
         #endif
     }
     
-    private func getStops(for type: StopType) -> [Gradient.Stop] {
-        var result: [Gradient.Stop] = [
+    private func getStops(type: StopType) -> [Gradient.Stop] {
+        let resultTop: [Gradient.Stop] = [
             .init(color: .clearSkyNightStart, location: 0),
             .init(color: .clearSkyNightStart, location: 0.25),
-            .init(color: .clearSunriseStart, location: 0.33),
+            .init(color: .sunriseStart, location: 0.33),
             .init(color: .clearSkyDayStart, location: 0.38),
             .init(color: .clearSkyDayStart, location: 0.7),
-            .init(color: .clearSunsetStart, location: 0.78),
+            .init(color: .sunsetStart, location: 0.78),
             .init(color: .clearSkyNightStart, location: 0.82),
             .init(color: .clearSkyNightStart, location: 1)
         ]
+        
+        let resultBottom: [Gradient.Stop] = [
+            .init(color: .clearSkyNightEnd, location: 0),
+            .init(color: .clearSkyNightEnd, location: 0.25),
+            .init(color: .sunriseEnd, location: 0.33),
+            .init(color: .clearSkyDayEnd, location: 0.38),
+            .init(color: .clearSkyDayEnd, location: 0.7),
+            .init(color: .sunsetEnd, location: 0.78),
+            .init(color: .clearSkyNightEnd, location: 0.82),
+            .init(color: .clearSkyNightEnd, location: 1)
+        ]
+        
+        var result = (type == .top) ? resultTop : resultBottom
         
         let colorsDayNightStart: [String: [Color]] = [
             "01": [.clearSkyDayStart, .clearSkyNightStart],
@@ -132,7 +156,7 @@ struct BackgroundView: View {
             "50": [.mistDayEnd, .mistNightEnd],
         ]
         
-        guard let weatherData else { print("weatherData sie wywaliło"); return result }
+        guard let weatherData else { return result }
         
         let timeZone = TimeZone(secondsFromGMT: weatherData.timezoneOffset) ?? .current
         var calendar = Calendar.current
@@ -146,35 +170,88 @@ struct BackgroundView: View {
         let sunriseLocation = sunriseDate.timeIntervalSince(startOfDay) / 86_400
         let sunsetLocation = sunsetDate.timeIntervalSince(startOfDay) / 86_400
         
-        guard let iconSubstring = weatherData.current.weather.first?.icon.dropLast() else { print("icon = ... sie wywaliło"); return result }
+        guard let iconSubstring = weatherData.current.weather.first?.icon.dropLast() else { return result }
         let icon = String(iconSubstring)
         
-        guard let colors = (type == .top) ? colorsDayNightStart[icon] : colorsDayNightEnd[icon] else { print("colors = ... sie wywaliło"); return result }
+        guard let colors = (type == .top) ? colorsDayNightStart[icon] : colorsDayNightEnd[icon] else { return result }
         
         let day = colors[0]
         let night = colors[1]
         
+        let sunriseColor: Color = (type == .top) ? .sunriseStart : .sunriseEnd
+        let sunsetColor: Color = (type == .top) ? .sunsetStart : .sunsetEnd
+        
         result = [
             .init(color: night, location: 0),
             .init(color: night, location: sunriseLocation - 0.05),
-            .init(color: .clearSunriseStart, location: sunriseLocation),
+            .init(color: sunriseColor, location: sunriseLocation),
             .init(color: day, location: sunriseLocation + 0.05),
             .init(color: day, location: sunsetLocation - 0.05),
-            .init(color: .clearSunsetStart, location: sunsetLocation),
+            .init(color: sunsetColor, location: sunsetLocation),
             .init(color: night, location: sunsetLocation + 0.05),
             .init(color: night, location: 1)
         ]
         
         print("Type: \(type)")
-        print("Sunrise: \(sunriseLocation) = \(sunriseLocation * 86400/60/60)")
-        print("Sunset: \(sunsetLocation) = \(sunsetLocation * 86400/60/60)")
+        print("Sunrise: \(sunriseLocation) = \(sunriseLocation * 24)")
+        print("Sunset: \(sunsetLocation) = \(sunsetLocation * 24)")
         
+        return result
+    }
+    
+    private func getCloudStops(for backgroundStops: [Gradient.Stop], type: StopType) -> [Gradient.Stop] {
+        let cloudTopColors: [Color] = [
+            .darkCloudStart,
+            .darkCloudStart,
+            .sunriseCloudStart,
+            .lightCloudStart,
+            .lightCloudStart,
+            .sunsetCloudStart,
+            .darkCloudStart,
+            .darkCloudStart
+        ]
+        
+        let cloudBottomColors: [Color] = [
+            .darkCloudEnd,
+            .darkCloudEnd,
+            .sunriseCloudEnd,
+            .lightCloudEnd,
+            .lightCloudEnd,
+            .sunsetCloudEnd,
+            .darkCloudEnd,
+            .darkCloudEnd
+        ]
+        
+        let result: [Gradient.Stop]
+        
+        var i = -1
+        switch type {
+        case .top:
+            result = backgroundStops.map { stop in
+                i += 1
+                return Gradient.Stop(color: cloudTopColors[i], location: stop.location)
+            }
+        case .bottom:
+            result = backgroundStops.map { stop in
+                i += 1
+                return Gradient.Stop(color: cloudBottomColors[i], location: stop.location)
+            }
+        }
+        
+        print(result)
+        print(cloudTopColors)
+        print(cloudBottomColors)
         return result
     }
     
     enum StopType {
         case top
         case bottom
+    }
+    
+    enum Style {
+        case gradientOnly
+        case allEffects
     }
 }
 
