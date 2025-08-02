@@ -17,8 +17,8 @@ class Cloud {
         self.imageNumber = imageNumber
         self.scale = scale
         
-        let startX = Double.random(in: -400...400)
-        let startY = Double.random(in: -50...200)
+        let startX = Double.random(in: -200...400)
+        let startY = Double.random(in: -50...350)
         position = CGPoint(x: startX, y: startY)
     }
     

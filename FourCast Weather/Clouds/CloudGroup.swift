@@ -28,22 +28,22 @@ class CloudGroup {
             cloudScale = 0.2...0.4
             
         case .light:
-            cloudsToCreate = 10
+            cloudsToCreate = 20
             opacity = 0.7
             cloudScale = 0.4...0.6
             
         case .regular:
-            cloudsToCreate = 15
-            opacity = 0.8
+            cloudsToCreate = 30
+            opacity = 0.85
             cloudScale = 0.7...0.9
             
         case .thick:
-            cloudsToCreate = 25
+            cloudsToCreate = 40
             opacity = 0.9
             cloudScale = 1.0...1.3
             
         case .ultraThick:
-            cloudsToCreate = 40
+            cloudsToCreate = 50
             opacity = 1
             cloudScale = 1.2...1.6
         }
