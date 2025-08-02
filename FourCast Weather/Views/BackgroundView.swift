@@ -12,8 +12,9 @@ struct BackgroundView: View {
     let weatherIcon: String?
     let sunrise: Int?
     let sunset: Int?
-    var windSpeed: Double?
-    var style: Style = .allEffects
+    let windSpeed: Double?
+    let effects: Effects
+    let miniature: Bool
     
     #if DEBUG
     @State private var debugCloudThickness = Cloud.Thickness.regular
@@ -132,7 +133,7 @@ struct BackgroundView: View {
         default: result = 350.0
         }
         
-        return result
+        return miniature ? result / 10 : result
     }
     
     var rainAngleWindSpeed: Double {
@@ -170,7 +171,7 @@ struct BackgroundView: View {
             ], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
-            if style == .allEffects {
+            if effects == .allEffects {
                 StarsView()
                     .opacity(starOpacity)
                 
@@ -412,22 +413,23 @@ struct BackgroundView: View {
         case bottom
     }
     
-    enum Style {
+    enum Effects {
         case gradientOnly
         case allEffects
     }
     
-    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, style: Style = .allEffects, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
+    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, effects: Effects = .allEffects, miniature: Bool = false, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
         self.timezoneOffset = timezoneOffset
         self.weatherIcon = weatherIcon
         self.sunrise = sunrise
         self.sunset = sunset
-        self.style = style
+        self.effects = effects
         self.debugCloudThickness = debugCloudThickness
         self.debugTime = debugTime
         self.useDebugTime = useDebugTime
         self.useDebugCloudThickness = useDebugCloudThickness
         self.windSpeed = windSpeed
+        self.miniature = miniature
     }
 }
 

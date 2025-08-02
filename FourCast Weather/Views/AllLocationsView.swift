@@ -76,7 +76,9 @@ struct LocationView: View {
                 timezoneOffset: weatherData?.timezoneOffset,
                 weatherIcon: weatherData?.current.weather.first?.icon,
                 sunrise: weatherData?.current.sunrise,
-                sunset: weatherData?.current.sunset
+                sunset: weatherData?.current.sunset,
+                windSpeed: weatherData?.current.windSpeed,
+                miniature: true
             )
             
             Text("\(temperature)°")
