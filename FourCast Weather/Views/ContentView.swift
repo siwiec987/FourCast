@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(UserSettings.self) private var userSettings
-    @State private var viewModel = ContentViewViewModel()
+    @State private var viewModel = ContentViewModel()
     
     var body: some View {
         NavigationStack {
@@ -41,7 +41,6 @@ struct ContentView: View {
                 
                 Tab("Current", systemImage: "location", value: -1) {
                     WeatherView(weatherData: viewModel.currentLocationWeatherData)
-                        .redacted(reason: viewModel.currentLocationWeatherData == nil ? .placeholder : [])
                         .onChange(of: viewModel.locationManager.location, initial: false) {
                             Task {
                                 await viewModel.fetchWeatherForCurrentLocation()

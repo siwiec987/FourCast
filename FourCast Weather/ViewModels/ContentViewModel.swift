@@ -10,7 +10,7 @@ import CoreLocation
 import ActivityKit
 
 @Observable
-class ContentViewViewModel {
+class ContentViewModel {
     let weatherService = WeatherService()
     var locationManager = LocationManager()
     let additionalLocations = AdditionalLocations()
@@ -39,12 +39,14 @@ class ContentViewViewModel {
             return calendarEventLocation.weatherData
         }
         if selection == -1 {
+            print("CURRENT LOCATION WEATHER DATA")
             return currentLocationWeatherData
         }
         if selection < additionalLocations.locations.count {
             return additionalLocations.locations[selection].weatherData
         }
         
+        print("NIL NIE MA WEATHER DATA DLA \(selection)")
         return nil
     }
     
