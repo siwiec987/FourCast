@@ -36,7 +36,7 @@ struct AllLocationsView: View {
                                 print(index)
                             }
                             .contextMenu {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                Button("Usuń", systemImage: "trash", role: .destructive) {
                                     additionalLocations.locations.remove(at: index)
                                     selection = -1
                                     print(index)
