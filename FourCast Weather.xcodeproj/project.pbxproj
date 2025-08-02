@@ -87,6 +87,13 @@
 				Clouds/CloudsView.swift,
 				"Extensions/Array+Extensions.swift",
 				"Extensions/Colors+Extensions.swift",
+				"Extensions/View+Modifiers.swift",
+				Stars/Star.swift,
+				Stars/StarField.swift,
+				Stars/StarsView.swift,
+				Storm/Storm.swift,
+				Storm/StormDrop.swift,
+				Storm/StormView.swift,
 				Views/BackgroundView.swift,
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;

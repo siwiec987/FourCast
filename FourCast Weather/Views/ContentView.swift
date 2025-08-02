@@ -5,6 +5,8 @@
 //  Created by Jakub Siwiec on 12/02/2025.
 //
 
+// TODO: Czasami przy zmianie lokalizacji w allLocationsView jest dziwny bug, niby się zmienia, ale wyświetla dane poprzedniej lokalizacji i nie wiadomo o co chodzi ziomek napraw to oki??
+
 import SwiftUI
 
 struct ContentView: View {
@@ -59,7 +61,8 @@ struct ContentView: View {
                     timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
                     weatherIcon: viewModel.weatherDataForSelectedTab?.current.weather.first?.icon,
                     sunrise: viewModel.weatherDataForSelectedTab?.current.sunrise,
-                    sunset: viewModel.weatherDataForSelectedTab?.current.sunset
+                    sunset: viewModel.weatherDataForSelectedTab?.current.sunset,
+                    windSpeed: viewModel.weatherDataForSelectedTab?.current.windSpeed
                 )
                 .animation(.default, value: viewModel.selection)
             )

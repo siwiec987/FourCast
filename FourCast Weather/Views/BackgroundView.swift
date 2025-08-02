@@ -5,16 +5,14 @@
 //  Created by Jakub Siwiec on 12/05/2025.
 //
 
-
-// TODO: make clouds' movement according to speed and direction of the wind
 import SwiftUI
 
 struct BackgroundView: View {
-//    var weatherData: WeatherData?
     let timezoneOffset: Int?
     let weatherIcon: String?
     let sunrise: Int?
     let sunset: Int?
+    var windSpeed: Double?
     var style: Style = .allEffects
     
     #if DEBUG
@@ -22,6 +20,13 @@ struct BackgroundView: View {
     @State private var debugTime = 0.0 
     @State private var useDebugTime = false
     @State private var useDebugCloudThickness = false
+    @State private var showingDebugSliders = false
+    @State private var debugStormType = Storm.Contents.rain
+    @State private var useDebugStormType = false
+    @State private var debugRainIntensity = 350.0
+    @State private var useDebugRainIntensity = false
+    @State private var debugWindSpeed = 0.0
+    @State private var useDebugWindSpeed = false
     
     var formattedTime: String {
         let start = Calendar.current.startOfDay(for: .now)
@@ -42,7 +47,6 @@ struct BackgroundView: View {
         calendar.timeZone = timeZone
         
         let startOfDay = calendar.startOfDay(for: .now)
-        print("Time: \(startOfDay.timeIntervalSinceNow / 60/60)")
         return abs(startOfDay.timeIntervalSinceNow / 86_400)
     }
     
@@ -57,34 +61,128 @@ struct BackgroundView: View {
         
         let result: Cloud.Thickness
         switch weatherIcon.dropLast() {
-        case "02": result = .thin
+        case "02": result = .light
         case "03": result = .light
-        case "04": fallthrough
-        case "09": fallthrough
-        case "10": fallthrough
-        case "11": result = .regular
+        case "04": result = .regular
+        case "09": result = .regular
+        case "10": result = .regular
+        case "11": result = .thick
+        default: result = .thin
+        }
+        
+        return result
+    }
+    
+    var topColor: Color {
+        getStops(type: .top).interpolated(amount: time)
+    }
+    
+    var bottomColor: Color {
+        getStops(type: .bottom).interpolated(amount: time)
+    }
+    
+    var starOpacity: Double {
+        let color = getStarStops(for: getStops(type: .top)).interpolated(amount: time)
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        
+        let uiColor = UIColor(color)
+        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        return alpha
+    }
+    
+    var stormType: Storm.Contents {
+        #if DEBUG
+        if useDebugStormType {
+            return debugStormType
+        }
+        #endif
+        
+        guard let weatherIcon else { return .none }
+        
+        let result: Storm.Contents
+        switch weatherIcon.dropLast() {
+        case "09": result = .rain
+        case "10": result = .rain
+        case "11": result = .rain
+        case "13": result = .snow
         default: result = .none
         }
         
         return result
     }
     
+    var rainIntensity: Double {
+        #if DEBUG
+        if useDebugRainIntensity {
+            return debugRainIntensity
+        }
+        #endif
+        
+        guard let weatherIcon else { return 350.0 }
+        
+        let result: Double
+        switch weatherIcon.dropLast() {
+        case "09": result = 100.0
+        case "10": result = 300.0
+        case "11": result = 450.0
+        case "13": result = 250.0
+        default: result = 350.0
+        }
+        
+        return result
+    }
+    
+    var rainAngleWindSpeed: Double {
+        #if DEBUG
+        if useDebugWindSpeed {
+            return debugWindSpeed
+        }
+        #endif
+        
+        guard let windSpeed, windSpeed > 0 else {
+            return 0.001
+        }
+        
+        return windSpeed
+    }
+    
+    var rainAngle: Double {
+        var result = atan(9 / rainAngleWindSpeed)
+        result = result * 180 / .pi
+        
+        result = 90 - result
+        
+        return result
+    }
+    
     var body: some View {
         ZStack {
-            let topStops = getStops(type: .top)
-            let bottomStops = getStops(type: .bottom)
+//            let topStops = getStops(type: .top)
+//            let bottomStops = getStops(type: .bottom)
             LinearGradient(colors: [
-                topStops.interpolated(amount: time),
-                bottomStops.interpolated(amount: time)
+//                topStops.interpolated(amount: time),
+//                bottomStops.interpolated(amount: time)
+                topColor,
+                bottomColor
             ], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             
             if style == .allEffects {
+                StarsView()
+                    .opacity(starOpacity)
+                
                 CloudsView(
                     thickness: cloudThickness,
-                    topTint: getCloudStops(for: topStops, type: .top).interpolated(amount: time),
-                    bottomTint: getCloudStops(for: bottomStops, type: .bottom).interpolated(amount: time)
+                    topTint: getCloudStops(for: getStops(type: .top), type: .top).interpolated(amount: time),
+                    bottomTint: getCloudStops(for: getStops(type: .bottom), type: .bottom).interpolated(amount: time)
                 )
+                
+                if stormType != .none {
+                    StormView(type: stormType, direction: .degrees(rainAngle), strength: Int(rainIntensity))
+                }
             }
         }
         #if DEBUG
@@ -94,19 +192,62 @@ struct BackgroundView: View {
         .onChange(of: debugCloudThickness) {
             useDebugCloudThickness = true
         }
+        .onChange(of: debugStormType) {
+            useDebugStormType = true
+        }
+        .onChange(of: debugRainIntensity) {
+            useDebugRainIntensity = true
+            useDebugStormType = true
+        }
+        .onChange(of: debugWindSpeed) {
+            useDebugWindSpeed = true
+            useDebugStormType = true
+        }
         .toolbar {
             Menu("Debug") {
-                Toggle("Use debug cloud thickness", isOn: $useDebugCloudThickness)
-                Picker("Thickness", selection: $debugCloudThickness) {
-                    ForEach(Cloud.Thickness.allCases, id: \.self) { thickness in
-                        Text(String(describing: thickness).capitalized)
+                Section("CLOUDS") {
+                    Toggle("Use debug cloud thickness", isOn: $useDebugCloudThickness)
+                    Picker("Thickness", selection: $debugCloudThickness) {
+                        ForEach(Cloud.Thickness.allCases, id: \.self) { thickness in
+                            Text(String(describing: thickness).capitalized)
+                        }
                     }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
                 
-                Toggle("Use debug time", isOn: $useDebugTime)
-                Stepper("Time: \(formattedTime)", value: $debugTime, in: 0...1, step: 0.05)
+                Section("STORM") {
+                    Toggle("Use debug storm type", isOn: $useDebugStormType)
+                    Picker("Type", selection: $debugStormType) {
+                        ForEach(Storm.Contents.allCases, id: \.self) { stormType in
+                            Text(String(describing: stormType).capitalized)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    Toggle("Use debug rain intensity", isOn: $useDebugRainIntensity)
+                    Toggle("Use debug wind speed", isOn: $useDebugWindSpeed)
+                }
+                
+                Section("TIME") {
+                    Toggle("Use debug time", isOn: $useDebugTime)
+                }
+                
+                Section("MORE") {
+                    Toggle("Show sliders", isOn: $showingDebugSliders)
+                }
             }
+        }
+        .sheet(isPresented: $showingDebugSliders) {
+            VStack {
+                Text("Time: \(formattedTime)")
+                Slider(value: $debugTime, in: 0...1)
+                
+                Text("Rain intensity: \(debugRainIntensity)")
+                Slider(value: $debugRainIntensity, in: 0...1000)
+                Text("Wind speed: \(debugWindSpeed)")
+                Slider(value: $debugWindSpeed, in: 0...150)
+            }
+            .presentationDetents([.fraction(0.35)])
+            .padding()
         }
         #endif
     }
@@ -198,10 +339,6 @@ struct BackgroundView: View {
             .init(color: night, location: 1)
         ]
         
-        print("Type: \(type)")
-        print("Sunrise: \(sunriseLocation) = \(sunriseLocation * 24)")
-        print("Sunset: \(sunsetLocation) = \(sunsetLocation * 24)")
-        
         return result
     }
     
@@ -247,6 +384,29 @@ struct BackgroundView: View {
         return result
     }
     
+    private func getStarStops(for backgroundStops: [Gradient.Stop]) -> [Gradient.Stop] {
+        let starColors: [Color] = [
+            .white,
+            .white,
+            .clear,
+            .clear,
+            .clear,
+            .clear,
+            .white,
+            .white
+        ]
+        
+        let result: [Gradient.Stop]
+        
+        var i = -1
+        result = backgroundStops.map { stop in
+            i += 1
+            return Gradient.Stop(color: starColors[i], location: stop.location)
+        }
+        
+        return result
+    }
+    
     enum StopType {
         case top
         case bottom
@@ -255,6 +415,19 @@ struct BackgroundView: View {
     enum Style {
         case gradientOnly
         case allEffects
+    }
+    
+    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, style: Style = .allEffects, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
+        self.timezoneOffset = timezoneOffset
+        self.weatherIcon = weatherIcon
+        self.sunrise = sunrise
+        self.sunset = sunset
+        self.style = style
+        self.debugCloudThickness = debugCloudThickness
+        self.debugTime = debugTime
+        self.useDebugTime = useDebugTime
+        self.useDebugCloudThickness = useDebugCloudThickness
+        self.windSpeed = windSpeed
     }
 }
 
