@@ -9,10 +9,13 @@ import SwiftUI
 
 struct WindInfoView: View {
     @Environment(UserSettings.self) private var userSettings
-    var weatherData: WeatherData?
+    let windDeg: Int
+    let currentWindSpeed: Double
+    let dailyWindSpeed: Double?
+    let windGust: Double?
+    
     
     private var windDegree: String {
-        guard let windDeg = weatherData?.current.windDeg else {return "??"}
         var direction = "N"
         
         if windDeg < 360 { direction = "NW" }
@@ -30,9 +33,9 @@ struct WindInfoView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 10) {
-                DetailView(title: "Prędkość", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.current.windSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
+                DetailView(title: "Prędkość", content: "\(WeatherService.getConvertedWindSpeed(from: currentWindSpeed, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
                 
-                DetailView(title: "Porywy", content: "\(WeatherService.getConvertedWindSpeed(from: weatherData?.daily[0].windSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
+                DetailView(title: "Porywy", content: "\(WeatherService.getConvertedWindSpeed(from: windGust ?? dailyWindSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
                 
                 DetailView(title: "Kierunek", content: windDegree)
             }
@@ -65,7 +68,7 @@ struct WindInfoView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
-                    .rotationEffect(Angle(degrees: Double(weatherData?.current.windDeg ?? 0)))
+                    .rotationEffect(Angle(degrees: Double(windDeg)))
                     .fontWeight(.thin)
                     .padding()
             }
@@ -96,5 +99,7 @@ struct WindInfoView: View {
 }
 
 #Preview {
-    WindInfoView(weatherData: SampleWeatherData().data)
+    if let data = SampleWeatherData().data {
+        WindInfoView(windDeg: data.current.windDeg, currentWindSpeed: data.current.windSpeed, dailyWindSpeed: data.daily.first?.windSpeed, windGust: data.current.windGust)        
+    }
 }

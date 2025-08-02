@@ -10,30 +10,15 @@ import SwiftUI
 struct CurrentWeatherView: View {
     @Environment(UserSettings.self) private var userSettings
     
-    let weatherData: WeatherData?
-    
-    private var temperature: Int {
-        if let temp = weatherData?.current.temp {
-            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
-        }
-        
-         return 0
-    }
-    
-    private var feelsLike: Int {
-        if let temp = weatherData?.current.feelsLike {
-            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
-        }
-        
-         return 0
-    }
+    let temp: Double
+    let feelsLike: Double
     
     var body: some View {
         VStack(spacing: 5) {
-            Text("\(temperature)°")
-                .font(.system(size: 80, weight: .light))
+            Text("\(WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings))°")
+                .font(.system(size: 100, weight: .light))
             
-            Text("Odczuwalna: \(feelsLike)°")
+            Text("Odczuwalna: \(WeatherService.getConvertedTemperature(from: feelsLike, userSettings: userSettings))°")
         }
         .foregroundStyle(.white)
         .padding(.top, -20)
@@ -42,6 +27,8 @@ struct CurrentWeatherView: View {
 }
 
 #Preview {
-    CurrentWeatherView(weatherData: SampleWeatherData().data)
-        .background(.blue)
+    if let data = SampleWeatherData().data {
+        CurrentWeatherView(temp: data.current.temp, feelsLike: data.current.feelsLike)
+            .background(.blue)
+    }
 }

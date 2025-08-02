@@ -9,15 +9,16 @@ import SwiftUI
 import Foundation
 
 struct HourlyForecastView: View {
-    let weatherData: WeatherData?
+    let hourlyWeatherData: [HourlyWeather]
+    let timezoneOffset: Int
     
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 0) {
-                let weekdays = getWeekdays(forecasts: weatherData?.hourly ?? [])
+                let weekdays = getWeekdays(forecasts: hourlyWeatherData)
                 
                 ForEach(weekdays, id: \.self) { day in
-                    DayForecastView(day: day, hourlyForecast: weatherData?.hourly, timezoneOffset: weatherData?.timezoneOffset)
+                    DayForecastView(day: day, hourlyForecast: hourlyWeatherData, timezoneOffset: timezoneOffset)
                 }
             }
         }
@@ -31,7 +32,7 @@ struct HourlyForecastView: View {
         var result: [String] = []
         
         for forecast in forecasts {
-            let day = Date.getWeekday(from: forecast.dt, with: weatherData?.timezoneOffset ?? 0)
+            let day = Date.getWeekday(from: forecast.dt, with: timezoneOffset)
             if !result.contains(day) {
                 result.append(day)
             }
@@ -101,6 +102,8 @@ struct HourlyForecastItem: View {
 }
 
 #Preview {
-    HourlyForecastView(weatherData: SampleWeatherData().data)
-        .background(.blue)
+    if let data = SampleWeatherData().data {
+        HourlyForecastView(hourlyWeatherData: data.hourly, timezoneOffset: data.timezoneOffset)
+            .background(.blue)
+    }
 }

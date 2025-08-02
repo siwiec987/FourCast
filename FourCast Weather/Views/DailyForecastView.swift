@@ -9,13 +9,14 @@ import SwiftUI
 
 struct DailyForecastView: View {
     @Environment(UserSettings.self) private var userSettings
-    let weatherData: WeatherData?
+    let dailyWeatherData: [DailyWeather]
+    let timezoneOffset: Int
     
     var body: some View {
         VStack {
-            ForEach(weatherData?.daily ?? [], id: \.dt) {dailyForecast in
+            ForEach(dailyWeatherData, id: \.dt) {dailyForecast in
                 HStack {
-                    Text("\(Date.getWeekday(from: dailyForecast.dt, with: weatherData?.timezoneOffset ?? 0))")
+                    Text("\(Date.getWeekday(from: dailyForecast.dt, with: timezoneOffset))")
                         .frame(width: 100)
                     
                     Spacer()
@@ -45,6 +46,8 @@ struct DailyForecastView: View {
 }
 
 #Preview {
-    DailyForecastView(weatherData: SampleWeatherData().data)
-        .background(.blue)
+    if let data = SampleWeatherData().data {
+        DailyForecastView(dailyWeatherData: data.daily, timezoneOffset: data.timezoneOffset)
+            .background(.blue)
+    }
 }

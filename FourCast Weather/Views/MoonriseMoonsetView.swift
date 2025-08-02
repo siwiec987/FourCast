@@ -8,8 +8,11 @@
 import SwiftUI
 
 struct MoonriseMoonsetView: View {
-    let weatherData: WeatherData?
-
+    let moonrise: Int
+    let moonset: Int
+    let moonPhase: Double
+    let timezoneOffset: Int
+    
     var iconName: String {
         let (iconName, _) = getMoonPhaseIconAndName()
         
@@ -36,8 +39,8 @@ struct MoonriseMoonsetView: View {
                 Text(moonPhaseName)
                     .bold()
                 
-                MoonriseMoonsetItem(role: "moonrise", time: weatherData?.daily[0].moonrise, timezoneOffset: weatherData?.timezoneOffset)
-                MoonriseMoonsetItem(role: "moonset", time: weatherData?.daily[0].moonset, timezoneOffset: weatherData?.timezoneOffset)
+                MoonriseMoonsetItem(role: "moonrise", time: moonrise, timezoneOffset: timezoneOffset)
+                MoonriseMoonsetItem(role: "moonset", time: moonset, timezoneOffset: timezoneOffset)
             }
         }
         .padding()
@@ -47,10 +50,6 @@ struct MoonriseMoonsetView: View {
     }
     
     private func getMoonPhaseIconAndName() -> (iconName: String, name: String) {
-        guard let moonPhase = weatherData?.daily[0].moonPhase else {
-            return ("", "")
-        }
-        
         if moonPhase == 0 || moonPhase == 1 {
             return ("moonphase.new.moon", "Nów")
         }
@@ -98,5 +97,7 @@ private struct MoonriseMoonsetItem: View {
 }
 
 #Preview {
-    MoonriseMoonsetView(weatherData: SampleWeatherData().data)
+    if let data = SampleWeatherData().data, let moonData = data.daily.first {
+        MoonriseMoonsetView(moonrise: moonData.moonrise, moonset: moonData.moonset, moonPhase: moonData.moonPhase, timezoneOffset: data.timezoneOffset)
+    }
 }
