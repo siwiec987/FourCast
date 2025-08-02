@@ -76,9 +76,7 @@ struct WindInfoView: View {
             .font(.footnote)
             .padding(.leading)
         }
-        .padding()
-        .background(.clear.mix(with: .black, by: 0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .weatherComponent()
     }
     
     struct DetailView: View {

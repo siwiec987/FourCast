@@ -43,10 +43,7 @@ struct MoonriseMoonsetView: View {
                 MoonriseMoonsetItem(role: "moonset", time: moonset, timezoneOffset: timezoneOffset)
             }
         }
-        .padding()
-        .foregroundStyle(.white)
-        .background(.clear.mix(with: .black, by: 0.1))
-        .clipShape(.rect(cornerRadius: 15))
+        .weatherComponent()
     }
     
     private func getMoonPhaseIconAndName() -> (iconName: String, name: String) {

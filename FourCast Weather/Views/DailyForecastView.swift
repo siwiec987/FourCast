@@ -36,12 +36,9 @@ struct DailyForecastView: View {
                     Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.max, userSettings: userSettings))°")
                 }
             }
-            .foregroundStyle(.white)
             .padding(5)
         }
-        .padding()
-        .background(.clear.mix(with: .black, by: 0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 15))
+        .weatherComponent()
     }
 }
 
