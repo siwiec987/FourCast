@@ -108,7 +108,7 @@ class WeatherService {
             case "09":
                 return "cloud.drizzle.fill"
             case "10":
-                return "cloud.sun.rain.fill"
+                return "cloud.rain.fill"
             case "11":
                 return "cloud.bolt.fill"
             case "13":
@@ -121,7 +121,7 @@ class WeatherService {
         case "n":
             switch(icon.dropLast()) {
             case "01":
-                return "moon.fill"
+                return "moon.stars.fill"
             case "02":
                 return "cloud.moon.fill"
             case "03", "04":
@@ -129,7 +129,7 @@ class WeatherService {
             case "09":
                 return "cloud.drizzle.fill"
             case "10":
-                return "cloud.moon.rain.fill"
+                return "cloud.rain.fill"
             case "11":
                 return "cloud.bolt.fill"
             case "13":
