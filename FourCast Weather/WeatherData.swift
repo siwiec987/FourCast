@@ -23,10 +23,10 @@ struct CurrentWeather: Codable {
     let dewPoint: Double
     let uvi: Double
     let clouds: Int
-    let visibility: Int?
+    let visibility: Int
     let windSpeed: Double
     let windDeg: Int
-//    let windGust: Double?
+    let windGust: Double?
     let weather: [WeatherCondition]
 }
 
@@ -39,7 +39,7 @@ struct HourlyWeather: Codable {
     let dewPoint: Double
     let uvi: Double
     let clouds: Int
-    let visibility: Int?
+    let visibility: Int
     let windSpeed: Double
     let windDeg: Int
 //    let windGust: Double?
