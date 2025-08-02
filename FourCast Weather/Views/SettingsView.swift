@@ -67,13 +67,6 @@ struct SettingsView: View {
                     Text(UnitSpeed.milesPerHour.symbol)
                         .tag("mph")
                 }
-                
-                Text("Jednostki")
-                Text("Jednostki")
-                Text("Jednostki")
-            }
-            Section("Monek") {
-                NavigationLink(destination: Text("Monke inside")) {Text("Monke")}
             }
         }
         .navigationTitle("Ustawienia")
