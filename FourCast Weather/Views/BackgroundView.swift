@@ -161,29 +161,29 @@ struct BackgroundView: View {
     
     var body: some View {
         ZStack {
-//            let topStops = getStops(type: .top)
-//            let bottomStops = getStops(type: .bottom)
-            LinearGradient(colors: [
-//                topStops.interpolated(amount: time),
-//                bottomStops.interpolated(amount: time)
-                topColor,
-                bottomColor
-            ], startPoint: .top, endPoint: .bottom)
+            if effects.contains(.gradient) {
+                LinearGradient(colors: [
+                    topColor,
+                    bottomColor
+                ], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
+            }
             
-            if effects == .allEffects {
+            if effects.contains(.stars) {
                 StarsView()
                     .opacity(starOpacity)
-                
+            }
+            
+            if effects.contains(.clouds) {
                 CloudsView(
                     thickness: cloudThickness,
                     topTint: getCloudStops(for: getStops(type: .top), type: .top).interpolated(amount: time),
                     bottomTint: getCloudStops(for: getStops(type: .bottom), type: .bottom).interpolated(amount: time)
                 )
-                
-                if stormType != .none {
-                    StormView(type: stormType, direction: .degrees(rainAngle), strength: Int(rainIntensity))
-                }
+            }
+            
+            if effects.contains(.storm) && stormType != .none {
+                StormView(type: stormType, direction: .degrees(rainAngle), strength: Int(rainIntensity))
             }
         }
         #if DEBUG
@@ -413,12 +413,18 @@ struct BackgroundView: View {
         case bottom
     }
     
-    enum Effects {
-        case gradientOnly
-        case allEffects
+    struct Effects: OptionSet {
+        let rawValue: Int
+        
+        static let gradient = Effects(rawValue: 1 << 0)
+        static let clouds = Effects(rawValue: 1 << 1)
+        static let stars = Effects(rawValue: 1 << 2)
+        static let storm = Effects(rawValue: 1 << 3)
+        
+        static let all: Effects = [.gradient, .stars, .clouds, .storm]
     }
     
-    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, effects: Effects = .allEffects, miniature: Bool = false, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
+    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, effects: Effects = .all, miniature: Bool = false, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
         self.timezoneOffset = timezoneOffset
         self.weatherIcon = weatherIcon
         self.sunrise = sunrise

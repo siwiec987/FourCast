@@ -72,7 +72,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
             .padding(10)
             .activityBackgroundTint(Color.blue)
             .foregroundStyle(.white)
-            .background(BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradientOnly))
+            .background(BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient))
             
 
         } dynamicIsland: { context in

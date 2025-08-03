@@ -78,6 +78,7 @@ struct LocationView: View {
                 sunrise: weatherData?.current.sunrise,
                 sunset: weatherData?.current.sunset,
                 windSpeed: weatherData?.current.windSpeed,
+                effects: [.gradient, .stars, .clouds],
                 miniature: true
             )
             
