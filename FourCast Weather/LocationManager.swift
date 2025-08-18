@@ -13,7 +13,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private var locationManager: CLLocationManager?
     
     var location: CLLocation?
-    var locationName = ". . ."
+    var locationName: String?
     var locationReady = false
     var notAuthorized = true
     var authError = false
@@ -35,18 +35,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         case .restricted:
             notAuthorized = true
-            print("location restricted")
             throw LocationManagerError.locationRestricted
         case .denied:
             notAuthorized = true
-            print("location denied")
             throw LocationManagerError.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
             notAuthorized = false
 //            locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
             self.locationReady = false
-            print("zaczyna pobieranie lokalizacji")
         @unknown default:
             break
         }
@@ -54,7 +51,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         do {
-            print("Didchangeauth pobiera lokalizacje")
             try checkLocationAuthorization()
         } catch {
             authError = true
@@ -70,15 +66,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             return
         }
         
-        let lastLocationName = self.locationName
+//        let lastLocationName = self.locationName
         
         self.location = location
         self.getLocationName(location: self.location) { name in
-            self.locationName = name ?? lastLocationName
+            self.locationName = name
         }
         
         self.locationReady = true
-        print("kończy pobieranie lokalizacji")
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {

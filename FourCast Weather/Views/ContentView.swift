@@ -5,57 +5,67 @@
 //  Created by Jakub Siwiec on 12/02/2025.
 //
 
-// TODO: Czasami przy zmianie lokalizacji w allLocationsView jest dziwny bug, niby się zmienia, ale wyświetla dane poprzedniej lokalizacji i nie wiadomo o co chodzi ziomek napraw to oki??
-
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(UserSettings.self) private var userSettings
     @State private var viewModel = ContentViewModel()
+    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami
     
     var body: some View {
         NavigationStack {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("Calendar", systemImage: "calendar", value: -2) {
-                        HStack {
-                            Button("Live activity") {
-                                viewModel.startActivity(userSettings: userSettings)
-                            }
-                            .padding()
-                            .background(.clear.mix(with: .black, by: 0.25))
-                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                            .disabled(viewModel.hasEventStarted)
-                            
-                            Button("Stop") {
-                                Task {
-                                    await viewModel.stopActivity()
-                                }
-                            }
-                            .padding()
-                            .background(.clear.mix(with: .black, by: 0.25))
-                            .clipShape(RoundedRectangle(cornerRadius: 15))
-                        }
+//                        HStack {
+//                            Button("Live activity") {
+//                                viewModel.startActivity(userSettings: userSettings)
+//                            }
+//                            .padding()
+//                            .background(.clear.mix(with: .black, by: 0.25))
+//                            .clipShape(RoundedRectangle(cornerRadius: 15))
+//                            .disabled(viewModel.hasEventStarted)
+//                            
+//                            Button("Stop") {
+//                                Task {
+//                                    await viewModel.stopActivity()
+//                                }
+//                            }
+//                            .padding()
+//                            .background(.clear.mix(with: .black, by: 0.25))
+//                            .clipShape(RoundedRectangle(cornerRadius: 15))
+//                        }
 
-                        CalendarEventView(weatherData: calendarEventLocation.weatherData, data: viewModel.calendarManager.events[0])
+//                        CalendarEventView(weatherData: calendarEventLocation.weatherData, data: viewModel.calendarManager.events[0])
+                        WeatherView(weatherData: calendarEventLocation.weatherData)
                     }
                 }
                 
                 Tab("Current", systemImage: "location", value: -1) {
-                    WeatherView(weatherData: viewModel.currentLocationWeatherData)
-                        .onChange(of: viewModel.locationManager.location, initial: false) {
+                    WeatherView(weatherData: viewModel.currentLocation?.weatherData)
+                        .onChange(of: viewModel.locationManager.location, initial: false) { oldVal, newVal in
+                            viewModel.updateCurrentLocationCoordinate()
+                            viewModel.updateCurrentLocationName()
                             Task {
                                 await viewModel.fetchWeatherForCurrentLocation()
+                                await viewModel.fetchWeatherForCalendarEventLocation(userSettings: userSettings)
                             }
+                        }
+                        .onChange(of: viewModel.locationManager.locationName) {
+                            viewModel.updateCurrentLocationName()
                         }
                 }
                 
-                ForEach(Array(viewModel.additionalLocations.locations.enumerated()), id: \.element.id) { index, location in
-                    Tab(value: index) {
-                        WeatherView(weatherData: location.weatherData)
+                ForEach(Array(viewModel.locations.locations.enumerated()), id: \.element.id) { index, location in
+                    if let additionalLocationsStartIndex = viewModel.additionalLocationsStartIndex, index >= additionalLocationsStartIndex {
+                        Tab(value: index) {
+                            WeatherView(weatherData: location.weatherData)
+                        }
                     }
                 }
             }
+            .id(tabViewRebuild)
             .background(
                 BackgroundView(
                     timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
@@ -66,30 +76,23 @@ struct ContentView: View {
                 )
                 .animation(.default, value: viewModel.selection)
             )
-            .onReceive(NotificationCenter.default.publisher(
-                for: UIScene.willEnterForegroundNotification)) { _ in
-                    print("\nCame back to foreground, selection = \(viewModel.selection)")
-                    //jak coś nie będzie działać jak powinno to może przez to, bo żem se zakomentował, bo 25.04 stwierdziłem, że to nie ma sensu. W sumie to tu nawet może mieć sens
-                    viewModel.getEventLocation()
-                    viewModel.calendarManager.checkCalendarAuthorization()
+            .onChange(of: scenePhase) {
+                if scenePhase == .active {
                     Task {
-                        await viewModel.fetchCurrentLocationOrWeather()
+                        await viewModel.refreshWeatherData()
                     }
+                }
             }
             .onChange(of: viewModel.selection) {
-                //jak coś nie będzie działać jak powinno to może przez to, bo żem se zakomentował, bo 25.04 stwierdziłem, że to nie ma sensu. Początek:
-//                viewModel.getEventLocation()
-//                viewModel.calendarManager.checkCalendarAuthorization()
-                // Koniec
                 Task {
-                    await viewModel.fetchCurrentLocationOrWeather()
+                    await viewModel.refreshWeatherData()
                 }
             }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection)) {
+                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection, tabViewRebuild: $tabViewRebuild)) {
                         Image(systemName: "square.fill.on.square.fill")
                             .renderingMode(.original)
                     }
@@ -120,15 +123,9 @@ struct ContentView: View {
                     .fontWeight(.black)
                 }
             }
-//            .toolbarBackground(Color.accentColor, for: .bottomBar)
-//            .toolbarBackground(Material.regular, for: .bottomBar)
-//            .toolbarBackgroundVisibility(.visible, for: .bottomBar)
             .tint(.white)
             .navigationTitle(viewModel.navbarTitle)
             .navigationBarTitleDisplayMode(.inline)
-//            .toolbarBackground(Color(red: 0.400, green: 0.750, blue: 1), for: .navigationBar)
-//            .toolbarBackground(Material.regular, for: .navigationBar)
-//            .toolbarBackgroundVisibility(.visible, for: .navigationBar)
             .alert(viewModel.errorTitle, isPresented: $viewModel.locationManager.authError) {
                 Button("Ustawienia") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -140,7 +137,7 @@ struct ContentView: View {
                 Text(viewModel.errorMessage)
             }
         }
-        .environment(viewModel.additionalLocations)
+        .environment(viewModel.locations)
         .environment(viewModel.weatherService)
     }
 }

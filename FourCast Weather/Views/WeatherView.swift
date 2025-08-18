@@ -10,6 +10,12 @@ import SwiftUI
 struct WeatherView: View {
     var weatherData: WeatherData?
     
+    var visibilityUnwrapped: String {
+        guard let weatherData, let visibility = weatherData.current.visibility else { return "- -"}
+        
+        return Measurement<UnitLength>(value: Double(visibility), unit: .meters).formatted(.measurement(width: .abbreviated, usage: .visibility))
+    }
+    
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 15) {
@@ -36,7 +42,8 @@ struct WeatherView: View {
                     
                     HStack(spacing: 15) {
                         SmallComponentView(name: "Index UV", iconName: "sun.max.fill", info: String(weatherData.current.uvi))
-                        SmallComponentView(name: "Widoczność", iconName: "eye.fill", info: Measurement<UnitLength>(value: Double(weatherData.current.visibility), unit: .meters).formatted(.measurement(width: .abbreviated, usage: .visibility)))
+//                        SmallComponentView(name: "Widoczność", iconName: "eye.fill", info: Measurement<UnitLength>(value: Double(weatherData.current.visibility), unit: .meters).formatted(.measurement(width: .abbreviated, usage: .visibility)))
+                        SmallComponentView(name: "Widoczność", iconName: "eye.fill", info: visibilityUnwrapped)
                     }
                     
                     Spacer()

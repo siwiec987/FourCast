@@ -9,9 +9,10 @@ import SwiftUI
 
 struct AllLocationsView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(AdditionalLocations.self) private var additionalLocations
+    @Environment(Locations.self) private var locations
     
     @Binding var selection: Int
+    @Binding var tabViewRebuild: UUID
     
     @State private var locationSearchService = LocationSearchService()
     @State private var showingSearchResults = false
@@ -28,18 +29,27 @@ struct AllLocationsView: View {
                 SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
             } else {
                 LazyVGrid(columns: columns) {
-                    ForEach(Array(additionalLocations.locations.enumerated()), id: \.element.id) { index, location in
-                        LocationView(name: location.name, weatherData: location.weatherData)
+                    ForEach(Array(locations.locations.enumerated()), id: \.element.id) { index, location in
+                        LocationView(location: location)
                             .onTapGesture {
-                                selection = index
+                                switch location.role {
+                                case .calendarEvent:
+                                    selection = -2
+                                case .current:
+                                    selection = -1
+                                default:
+                                    selection = index
+                                }
+//                                tabViewRebuild = UUID()
+                                print(selection)
                                 dismiss()
-                                print(index)
                             }
                             .contextMenu {
-                                Button("Usuń", systemImage: "trash", role: .destructive) {
-                                    additionalLocations.locations.remove(at: index)
-                                    selection = -1
-                                    print(index)
+                                if location.role == .additional {
+                                    Button("Usuń", systemImage: "trash", role: .destructive) {
+                                        selection = -1
+                                        locations.locations.remove(at: index)
+                                    }
                                 }
                             }
                     }
@@ -47,23 +57,28 @@ struct AllLocationsView: View {
                 .padding(.horizontal, 8)
             }
         }
+        .onChange(of: selection) {
+            tabViewRebuild = UUID()
+        }
         .searchable(text: $locationSearchService.query, isPresented: $showingSearchResults, placement: .navigationBarDrawer(displayMode: .always), prompt: "Szukaj miasta")
     }
 }
 
 #Preview {
     @Previewable @State var selection = 1
-    AllLocationsView(selection: $selection)
-        .environment(AdditionalLocations())
+    @Previewable @State var tabViewRebuild = UUID()
+    AllLocationsView(selection: $selection, tabViewRebuild: $tabViewRebuild)
+        .environment(Locations())
 }
 
 struct LocationView: View {
     @Environment(UserSettings.self) private var userSettings
-    @State var name: String
-    @State var weatherData: WeatherData?
+//    @State var name: String
+//    @State var weatherData: WeatherData?
+    let location: Location
     
     private var temperature: Int {
-        if let temp = weatherData?.current.temp {
+        if let temp = location.weatherData?.current.temp {
             return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
         }
         
@@ -73,11 +88,11 @@ struct LocationView: View {
     var body: some View {
         ZStack {
             BackgroundView(
-                timezoneOffset: weatherData?.timezoneOffset,
-                weatherIcon: weatherData?.current.weather.first?.icon,
-                sunrise: weatherData?.current.sunrise,
-                sunset: weatherData?.current.sunset,
-                windSpeed: weatherData?.current.windSpeed,
+                timezoneOffset: location.weatherData?.timezoneOffset,
+                weatherIcon: location.weatherData?.current.weather.first?.icon,
+                sunrise: location.weatherData?.current.sunrise,
+                sunset: location.weatherData?.current.sunset,
+                windSpeed: location.weatherData?.current.windSpeed,
                 effects: [.gradient, .stars, .clouds],
                 miniature: true
             )
@@ -90,17 +105,30 @@ struct LocationView: View {
             VStack {
                 Spacer()
                 
-                Text(name)
+                Group {
+                    switch(location.role) {
+                    case .calendarEvent:
+                        Label(location.name, systemImage: "calendar")
+                    case .current:
+                        Label(location.name, systemImage: "location.fill")
+                    default:
+                        Text(location.name)
+                    }
+                }
                     .font(.footnote)
                     .fontWeight(.semibold)
                     .scaledToFit()
                     .minimumScaleFactor(0.6)
                     .foregroundStyle(.white)
-                    .padding(8)
+                    .frame(maxWidth: .infinity)
+                    .padding(3)
+                    .background(.thinMaterial.opacity(0.3))
+                    .clipShape(.capsule)
+                    .padding(4)
             }
         }
         .overlay(alignment: .topLeading) {
-            Image(systemName: WeatherService.getWeatherIcon(weatherData?.current.weather[0].icon))
+            Image(systemName: WeatherService.getWeatherIcon(location.weatherData?.current.weather[0].icon))
                 .renderingMode(.original)
                 .padding(8)
         }

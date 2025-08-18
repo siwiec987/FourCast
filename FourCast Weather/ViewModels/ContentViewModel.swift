@@ -13,13 +13,8 @@ import ActivityKit
 class ContentViewModel {
     let weatherService = WeatherService()
     var locationManager = LocationManager()
-    let additionalLocations = AdditionalLocations()
+    let locations = Locations()
     let calendarManager = CalendarManager()
-    
-    var currentLocationWeatherData: WeatherData?
-    var currentLocationLastFetchTime: Date?
-    
-    var calendarEventLocation: AdditionalLocationData?
     
     var selection = -1
     
@@ -27,57 +22,77 @@ class ContentViewModel {
     var errorMessage = ""
     var showingError = false
     
-    var activity: Activity<CalendarEventWidgetAttributes>?
+    var activity: Activity<CalendarEventWidgetAttributes>? = nil
     
-    var hasEventStarted: Bool {
-        guard let startDate = calendarManager.events.first?.startDate else { return false }
-        return startDate < Date()
+    var currentLocationIndex: Int? {
+        locations.locations.firstIndex { $0.role == .current }
+    }
+    var currentLocation: Location? {
+        guard let currentLocationIndex else { return nil}
+        
+        return locations.locations[currentLocationIndex]
+    }
+    
+    var additionalLocationsStartIndex: Int? {
+        locations.locations.firstIndex { $0.role == .additional }
+    }
+    
+    var calendarEventLocationIndex: Int? {
+        locations.locations.firstIndex { $0.role == .calendarEvent }
+    }
+    var calendarEventLocation: Location? {
+        guard let calendarEventLocationIndex else { return nil }
+        
+        return locations.locations[calendarEventLocationIndex]
     }
     
     var weatherDataForSelectedTab: WeatherData? {
-        if let calendarEventLocation, selection == -2 {
-            return calendarEventLocation.weatherData
-        }
-        if selection == -1 {
-            print("CURRENT LOCATION WEATHER DATA")
-            return currentLocationWeatherData
-        }
-        if selection < additionalLocations.locations.count {
-            return additionalLocations.locations[selection].weatherData
+        let result: WeatherData?
+        if selection == -2 {
+            result = calendarEventLocation?.weatherData
+        } else if selection == -1 {
+            result = currentLocation?.weatherData
+        } else if let additionalLocationsStartIndex, selection >= additionalLocationsStartIndex && selection < locations.locations.count {
+            result = locations.locations[selection].weatherData
+        } else {
+            result = nil
         }
         
-        print("NIL NIE MA WEATHER DATA DLA \(selection)")
-        return nil
+        return result
+    }
+    
+    var hasEventStarted: Bool {
+        guard let startDate = calendarManager.events.first?.startDate else { return false }
+        return startDate < Date.now
     }
     
     var navbarTitle: String {
-        if selection == -1 {
-            return locationManager.locationName
+        if selection == -2, let calendarEventLocation {
+            return hasEventStarted ? "W trakcie: " + calendarEventLocation.name : calendarEventLocation.name
         }
-        if selection == -2 && calendarManager.events.isEmpty {
-            selection = -1
-            return locationManager.locationName
+        if selection == -1, let currentLocation {
+            return currentLocation.name
         }
-        if selection == -2 {
-            guard let name = calendarEventLocation?.name else { return "" }
-            
-            return (hasEventStarted ? "W trakcie: " : "Następne wydarzenie: ") + (name)
-        }
-        if selection < additionalLocations.locations.count {
-            return additionalLocations.locations[selection].name
+        if let additionalLocationsStartIndex, selection >= additionalLocationsStartIndex && selection < locations.locations.count {
+            return locations.locations[selection].name
         }
         
         return ""
     }
     
     var bottomToolbarMessage: String {
-        guard let lastFetch =
-                (selection == -1) ? currentLocationLastFetchTime :
-                    (selection == -2) ? calendarEventLocation?.lastFetchTime :
-                (selection >= 0 && selection < additionalLocations.locations.count ? additionalLocations.locations[selection].lastFetchTime : nil)
-        else {
-            return ""
+        let lastFetch: Date?
+        if selection == -2 {
+            lastFetch = calendarEventLocation?.lastFetchTime
+        } else if selection == -1 {
+            lastFetch = currentLocation?.lastFetchTime
+        } else if let additionalLocationsStartIndex, selection >= additionalLocationsStartIndex && selection < locations.locations.count {
+            lastFetch = locations.locations[selection].lastFetchTime
+        } else {
+            lastFetch = nil
         }
+        
+        guard let lastFetch else { return "" }
         
         let calendar = Calendar.current
         if calendar.isDateInToday(lastFetch) {
@@ -86,7 +101,6 @@ class ContentViewModel {
         
         return lastFetch.formatted(date: .abbreviated, time: .shortened)
     }
-
     
     var bottomToolbarTitle: String {
         guard !bottomToolbarMessage.isEmpty else {
@@ -100,16 +114,13 @@ class ContentViewModel {
         getEventLocation()
     }
     
-    func startActivity(userSettings: UserSettings) {
-        guard activity == nil else {
-            print("już jest")
-            return
-        }
+    func startActivity(weatherData: WeatherData, userSettings: UserSettings) async {
+        guard activity == nil else { return }
+        print("startActivity(): pierwszy guard przeszedł")
         guard let calendarEventLocation else { return }
-        guard let weatherData = calendarEventLocation.weatherData else { return }
+        print("startActivity(): drugi guard przeszedł")
         guard let startDate = calendarManager.events.first?.startDate else { return }
-        
-        print("przeszło")
+        print("startActivity(): czwarty guard przeszedł")
         
         var eventStartDateWeatherData: HourlyWeather?
         for hour in weatherData.hourly {
@@ -122,6 +133,7 @@ class ContentViewModel {
         }
         
         guard let eventStartDateWeatherData else { return }
+        print("startActivity(): piąty guard przeszedł")
         let weatherIcon = eventStartDateWeatherData.weather.first?.icon
         
         let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
@@ -145,64 +157,73 @@ class ContentViewModel {
         
         do {
             activity = try Activity<CalendarEventWidgetAttributes>.request(attributes: attributes, content: content, pushType: nil)
+            print("Activity started successfully")
         } catch {
             print("Failed to assign an activity: \(error.localizedDescription)")
         }
-        print("powinno być")
     }
+    
+    func updateActivity(weatherData: WeatherData, userSettings: UserSettings) async {
+        guard let activity else { return }
+        guard let calendarEventLocation else { return }
+        guard let weatherData = calendarEventLocation.weatherData else { return }
+        guard let startDate = calendarManager.events.first?.startDate else { return }
+        
+        var eventStartDateWeatherData: HourlyWeather?
+        for hour in weatherData.hourly {
+            let timeInterval = TimeInterval(hour.dt)
+            let weatherDate = Date(timeIntervalSince1970: timeInterval)
+            
+            if Calendar.current.isDate(weatherDate, equalTo: startDate, toGranularity: .hour) {
+                eventStartDateWeatherData = hour
+            }
+        }
+        
+        guard let eventStartDateWeatherData else { return }
+        
+        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
+        let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
+        
+        let content = ActivityContent(
+            state: CalendarEventWidgetAttributes.ContentState(
+                eventDate: startDate,
+                name: calendarEventLocation.name,
+                temperature: temp,
+                iconName: icon
+            ),
+            staleDate: startDate
+        )
+        
+        await activity.update(content)
+        print("Activity updated successfully!")
+        }
     
     func stopActivity() async {
         guard let activity else { return }
         
         await activity.end(ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: .now, name: "AAA", temperature: 112, iconName: "dog.fill"), staleDate: nil), dismissalPolicy: .immediate)
         self.activity = nil
-        print("Skończone")
     }
     
     func getEventLocation() {
-        guard let coordinate = calendarManager.events.first?.structuredLocation?.geoLocation?.coordinate,
-        let name = calendarManager.events.first?.structuredLocation?.title else {
+        guard let coordinate = calendarManager.events.first?.structuredLocation?.geoLocation?.coordinate, let name = calendarManager.events.first?.structuredLocation?.title else {
+            if let calendarEventLocationIndex {
+                selection = -1
+                locations.locations.remove(at: calendarEventLocationIndex)
+            }
             return
         }
         
-        calendarEventLocation = AdditionalLocationData(name: name, coordinate: Coordinate(coordinate))
-    }
-    
-    func fetchCurrentLocationOrWeather() async {
-        if selection == -1 {
-            fetchCurrentLocation()
-        } else if selection == -2 {
-            await fetchWeatherForCalendarEventLocation()
+        if let calendarEventLocationIndex {
+            locations.locations[calendarEventLocationIndex].name = name
+            locations.locations[calendarEventLocationIndex].coordinate = Location.Coordinate(coordinate)
         } else {
-            print("pogoda dla --\(selection)-- jest pobierana")
-            await refreshWeatherForAdditionalLocation(index: selection)
+            let event = Location(name: name, coordinate: Location.Coordinate(coordinate), role: .calendarEvent)
+            locations.locations.insert(event, at: 0)
         }
     }
     
-    func fetchWeatherForCurrentLocation() async {
-        guard let location = locationManager.location, locationManager.locationReady else { return }
-        
-        do {
-            (currentLocationWeatherData, currentLocationLastFetchTime) = try await weatherService.fetchWeatherData(coordinate: location.coordinate, lastFetchTime: currentLocationLastFetchTime)
-        } catch {
-            handleWeatherError(error)
-        }
-    }
-    
-    func fetchWeatherForCalendarEventLocation() async {
-        guard var event = calendarEventLocation else { return }
-
-        do {
-            let (data, time) = try await weatherService.fetchWeatherData(coordinate: event.coordinateObject, lastFetchTime: event.lastFetchTime)
-            event.weatherData = data
-            event.lastFetchTime = time
-            calendarEventLocation = event
-        } catch {
-            handleWeatherError(error)
-        }
-    }
-    
-    private func fetchCurrentLocation() {
+    func fetchCurrentLocation() {
         do {
             try locationManager.checkLocationAuthorization()
         } catch {
@@ -213,30 +234,103 @@ class ContentViewModel {
         }
     }
     
-    private func refreshWeatherForAdditionalLocation(index: Int) async {
-        guard index >= 0 else {
-            print("refreshWeatherForAdditionalLocation index < 0")
-            return
+    func updateCurrentLocationCoordinate() {
+        guard let coordinate = locationManager.location?.coordinate, locationManager.locationReady else { return }
+        
+        if let currentLocationIndex {
+            locations.locations[currentLocationIndex].coordinate = Location.Coordinate(coordinate)
+        } else {
+            let location = Location(name: locationManager.locationName ?? ". . .", coordinate: Location.Coordinate(coordinate), role: .current)
+            let index = (calendarEventLocationIndex ?? -1) + 1
+            locations.locations.insert(location, at: index)
         }
-        guard index < additionalLocations.locations.count else {
-            print("refreshWeatherForAdditionalLocation index > count")
-            return
+    }
+    
+    func updateCurrentLocationName() {
+        guard let currentLocationIndex, let name = locationManager.locationName else { return }
+                        
+        locations.locations[currentLocationIndex].name = name
+    }
+    
+    func fetchWeatherForCurrentLocation(oldLocation: CLLocation, newLocation: CLLocation) async {
+        guard let currentLocationIndex, let currentLocation else { return }
+        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 10_000, lastFetchTime: currentLocation.lastFetchTime) else { return }
+        
+        let _ = await fetchWeather(for: currentLocationIndex)
+    }
+    
+    private func fetchWeatherForAdditionalLocation(index: Int) async {
+        guard let startIndex = additionalLocationsStartIndex, index >= startIndex, index < locations.locations.count else { return }
+        guard shouldFetchWeather(lastFetchTime: locations.locations[index].lastFetchTime) else { return }
+        
+        guard Date.now.timeIntervalSince(locations.locations[index].lastFetchTime ?? Date.distantPast) > 30 else { return }
+        
+        let _ = await fetchWeather(for: index)
+    }
+    
+    func fetchWeatherForCalendarEventLocation(oldLocation: CLLocation, newLocation: CLLocation, userSettings: UserSettings? = nil) async {  // trzeba zrobić computed propery w CalendarManager, które bedzie trzymać najbliższe wydarzenie. wtedy może bedzie mozna to wywołać na .onChange
+        guard let calendarEventLocationIndex, let calendarEventLocation else { return }
+        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 1, lastFetchTime: calendarEventLocation.lastFetchTime) else { return }
+
+        let data = await fetchWeather(for: calendarEventLocationIndex)
+        
+        guard let data, let userSettings else { return }
+        
+        if activity == nil {
+            await startActivity(weatherData: data, userSettings: userSettings)
+        } else {
+            await updateActivity(weatherData: data, userSettings: userSettings)
         }
+    }
+  
+    private func fetchWeather(for index: Int) async -> WeatherData? {
+        guard index >= 0, index < locations.locations.count else { return nil }
+        let location = locations.locations[index]
         
         do {
-            (additionalLocations.locations[index].weatherData, additionalLocations.locations[index].lastFetchTime) =
-            try await weatherService.fetchWeatherData(coordinate: additionalLocations.locations[index].coordinateObject,
-                                                      lastFetchTime: additionalLocations.locations[index].lastFetchTime)
+            let (data, time) = try await weatherService.fetchWeatherData(coordinate: location.coordinateObject, lastFetchTime: location.lastFetchTime)
+            
+            locations.locations[index].weatherData = data
+            locations.locations[index].lastFetchTime = time
+            
+            return data
         } catch {
             handleWeatherError(error)
+        }
+        
+        return nil
+    }
+    
+    private func shouldFetchWeather(oldLocation: CLLocation? = nil, newLocation: CLLocation? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 30) -> Bool {
+        if let oldLocation, let newLocation, let minDistance {
+            if oldLocation.distance(from: newLocation) > minDistance {
+                return true
+            }
+        }
+        
+        if Date.now.timeIntervalSince(lastFetchTime ?? .distantPast) > minInterval {
+            return true
+        }
+        
+        return false
+    }
+    
+    func refreshWeatherData() async {
+        getEventLocation()
+        
+        if selection == -2 {
+            await fetchWeatherForCalendarEventLocation()
+            // przenioslem bo jestem debil i sie dziwilem ze nie odswieza po dodaniu wydarzenia w kalendarzu czaisz
+        } else if selection == -1 {
+            fetchCurrentLocation()
+        } else {
+            await fetchWeatherForAdditionalLocation(index: selection)
         }
     }
     
     private func handleWeatherError(_ error: Error) {
         switch error {
         case OpenWeatherError.invalidData:
-//            errorTitle = "Błąd danych"
-//            errorMessage = "Nie udało się pobrać poprawnych danych."
             print("Invalid data")
             return
         case OpenWeatherError.alreadyInUse:
@@ -246,11 +340,8 @@ class ContentViewModel {
             print("Not necessary")
             return
         default:
-//            errorTitle = "Błąd"
-//            errorMessage = "Coś poszło nie tak."
             print("Unknown weather error")
             return
         }
-//        showingError = true
     }
 }

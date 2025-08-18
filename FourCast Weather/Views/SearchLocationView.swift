@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SearchLocationView: View {
     @Environment(\.dismiss) var dismiss
-    @Environment(AdditionalLocations.self) private var additionalLocations
+    @Environment(Locations.self) private var locations
     @Environment(WeatherService.self) private var weatherService
     
     @Binding var selection: Int
@@ -18,20 +18,17 @@ struct SearchLocationView: View {
     var body: some View {
         LazyVStack(alignment: .leading) {
             ForEach(locationSearchService.results) {result in
-                VStack(alignment: .leading) {
-                    Button(result.title) {
+                    Button {
                         LocationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
-                            print(coordinate)
-                            
-                            if additionalLocations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {
-                                print("Równe")
+                            if locations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {
                             } else {
                                 Task {
                                     do {
                                         let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
-                                        let newLocation = AdditionalLocationData(name: result.title, coordinate: Coordinate(coordinate), weatherData: response, lastFetchTime: time)
-                                        additionalLocations.locations.append(newLocation)
-                                        selection = additionalLocations.locations.count - 1
+                                        let newLocation = Location(name: result.title, coordinate: Location.Coordinate(coordinate), role: .additional, weatherData: response, lastFetchTime: time)
+                                        locations.locations.append(newLocation)
+                                        selection = locations.locations.count - 1
+                                        print("New location: selection == \(selection)")
                                         
                                     } catch OpenWeatherError.invalidData {
                                         print("Invalid data")
@@ -47,13 +44,16 @@ struct SearchLocationView: View {
                             
                             dismiss()
                         }
+                    } label: {
+                        VStack(alignment: .leading) {
+                            Text(result.title)
+                                .font(.headline)
+                            Text(result.subtitle)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .foregroundStyle(.primary)
                     
-                    Text(result.subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
                 .padding(.vertical, 5)
             }
         }
@@ -65,5 +65,5 @@ struct SearchLocationView: View {
     @Previewable @State var selection = 1
     @Previewable @State var locationSearchService = LocationSearchService()
     SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
-        .environment(AdditionalLocations())
+        .environment(Locations())
 }

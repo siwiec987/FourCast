@@ -14,14 +14,9 @@ class WeatherService {
     
     init() {}
     
-    func fetchWeatherData(coordinate: CLLocationCoordinate2D, lastFetchTime: Date?) async throws  -> (WeatherData?, Date?) {
+    func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData?, Date?) {
         if self.isLoading {
             throw OpenWeatherError.alreadyInUse
-        }
-        
-           if let lastTime = lastFetchTime,
-           Date().timeIntervalSince(lastTime) < 30 {
-               throw OpenWeatherError.fetchNotNecessary
         }
         
         await MainActor.run {
@@ -39,7 +34,6 @@ class WeatherService {
             guard let apiKey = try? String(contentsOf: apiKeyURL, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines) else {
                 throw OpenWeatherError.invalidKey
             }
-            print(apiKey)
             let urlString = "https://api.openweathermap.org/data/3.0/onecall?lat=\(latitude)&lon=\(longitude)&exclude=minutely&appid=\(apiKey)"
             
             guard let url = URL(string: urlString) else {
