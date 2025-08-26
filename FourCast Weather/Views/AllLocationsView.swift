@@ -12,7 +12,7 @@ struct AllLocationsView: View {
     @Environment(Locations.self) private var locations
     
     @Binding var selection: Int
-    @Binding var tabViewRebuild: UUID
+//    @Binding var tabViewRebuild: UUID
     
     @State private var locationSearchService = LocationSearchService()
     @State private var showingSearchResults = false
@@ -35,19 +35,16 @@ struct AllLocationsView: View {
                                 switch location.role {
                                 case .calendarEvent:
                                     selection = -2
-                                case .current:
-                                    selection = -1
                                 default:
                                     selection = index
                                 }
-//                                tabViewRebuild = UUID()
                                 print(selection)
                                 dismiss()
                             }
                             .contextMenu {
                                 if location.role == .additional {
                                     Button("Usuń", systemImage: "trash", role: .destructive) {
-                                        selection = -1
+                                        selection = 0
                                         locations.locations.remove(at: index)
                                     }
                                 }
@@ -57,9 +54,9 @@ struct AllLocationsView: View {
                 .padding(.horizontal, 8)
             }
         }
-        .onChange(of: selection) {
-            tabViewRebuild = UUID()
-        }
+//        .onChange(of: selection) {
+//            tabViewRebuild = UUID()
+//        }
         .searchable(text: $locationSearchService.query, isPresented: $showingSearchResults, placement: .navigationBarDrawer(displayMode: .always), prompt: "Szukaj miasta")
     }
 }
@@ -67,14 +64,12 @@ struct AllLocationsView: View {
 #Preview {
     @Previewable @State var selection = 1
     @Previewable @State var tabViewRebuild = UUID()
-    AllLocationsView(selection: $selection, tabViewRebuild: $tabViewRebuild)
+    AllLocationsView(selection: $selection/*, tabViewRebuild: $tabViewRebuild*/)
         .environment(Locations())
 }
 
 struct LocationView: View {
     @Environment(UserSettings.self) private var userSettings
-//    @State var name: String
-//    @State var weatherData: WeatherData?
     let location: Location
     
     private var temperature: Int {

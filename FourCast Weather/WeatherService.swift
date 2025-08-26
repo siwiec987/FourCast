@@ -10,19 +10,9 @@ import CoreLocation
 
 @Observable
 class WeatherService {
-    var isLoading = false
-    
     init() {}
     
-    func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData?, Date?) {
-        if self.isLoading {
-            throw OpenWeatherError.alreadyInUse
-        }
-        
-        await MainActor.run {
-            self.isLoading = true
-        }
-        
+    @MainActor func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData, Date) {
         do {
             let latitude = coordinate.latitude
             let longitude = coordinate.longitude
@@ -55,10 +45,6 @@ class WeatherService {
             
             let result = try decoder.decode(WeatherData.self, from: data)
             
-            await MainActor.run {
-                isLoading = false
-            }
-            
             return (data: result, fetchTime: Date.now)
             
         } catch {
@@ -76,9 +62,6 @@ class WeatherService {
                 @unknown default:
                     print("Unknown decoding error")
                 }
-            }
-            await MainActor.run {
-                self.isLoading = false
             }
             
             throw OpenWeatherError.invalidData
@@ -151,8 +134,6 @@ enum OpenWeatherError: Error {
     case invalidURL
     case invalidResponse
     case invalidData
-    case alreadyInUse
-    case fetchNotNecessary
     case keyNotFound
     case invalidKey
 }

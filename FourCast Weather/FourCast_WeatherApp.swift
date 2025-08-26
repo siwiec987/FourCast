@@ -13,7 +13,7 @@ struct FourCast_WeatherApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(userSettings: userSettings)
                 .preferredColorScheme(.dark)
         }
         .environment(userSettings)

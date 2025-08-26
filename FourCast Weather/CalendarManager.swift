@@ -10,61 +10,70 @@ import EventKit
 
 @Observable
 class CalendarManager {
-    var events: [EKEvent] = []
+    @ObservationIgnored private let store = EKEventStore()
+//    private var events: [EKEvent] = []
     var notAuthorized = true
-    private let store = EKEventStore()
+    
+//    var firstEvent: EKEvent? {
+//        events.first { $0.startDate > .now }
+//    }
     
     init() {
-        checkCalendarAuthorization()
-        subscribeToNotifications()
+//        handleAuthorizationStatus()
+//        subscribeToNotifications()
     }
     
-    func checkCalendarAuthorization() {
+    func getEventIfAuthorized() -> EKEvent? {
+        handleAuthorizationStatus()
+    }
+    
+    private func handleAuthorizationStatus() -> EKEvent? {
+        var event: EKEvent? = nil
+        
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined:
-            store.requestFullAccessToEvents() {success, error in
+            store.requestFullAccessToEvents() { success, error in
                 if success {
                     self.notAuthorized = false
-                    self.fetchEvents()
-                    print("Calendar authorized")
+                    event = self.getEvent()
                 } else {
                     self.notAuthorized = true
-                    print("Calendar not authorized")
                 }
             }
         case .restricted, .denied, .writeOnly:
             notAuthorized = true
         case .fullAccess:
             notAuthorized = false
-            fetchEvents()
+            event = getEvent()
         @unknown default:
             fatalError("FatalError: Coś się porządnie popsuło")
         }
+        
+        return event
     }
     
-    private func subscribeToNotifications() {
-        NotificationCenter.default.addObserver(self, selector: #selector(storeChanged(_:)), name: .EKEventStoreChanged, object: nil)
-    }
+//    private func subscribeToNotifications() {
+//        NotificationCenter.default.addObserver(self, selector: #selector(storeChanged(_:)), name: .EKEventStoreChanged, object: nil)
+//    }
+//    
+//    @objc
+//    private func storeChanged(_ notification: Notification) {
+//        handleAuthorizationStatus()
+//    }
     
-    @objc
-    private func storeChanged(_ notification: Notification) {
-        fetchEvents()
-    }
-    
-    private func fetchEvents() {
-        let now = Date()
-        if let interval = Calendar.current.dateInterval(of: .day, for: now) {
-            let predicate = store.predicateForEvents(withStart: interval.start, end: interval.end, calendars: nil)
-            let events = store.events(matching: predicate)
-            let filteredEvents = events.filter {
-                $0.structuredLocation != nil
-                && $0.endDate > now
-            }
-            let sortedEvents = filteredEvents.sorted {
-                $0.compareStartDate(with: $1) == .orderedAscending
-            }
-            
-            self.events = sortedEvents
+    private func getEvent() -> EKEvent? {
+        let now = Date.now
+        let predicate = store.predicateForEvents(withStart: now, end: now.addingTimeInterval(86_400), calendars: nil)
+        let events = store.events(matching: predicate)
+        let filteredEvents = events.filter {
+            !$0.isAllDay &&
+            $0.structuredLocation != nil &&
+            $0.startDate > now
         }
+        let sortedEvents = filteredEvents.sorted {
+            $0.compareStartDate(with: $1) == .orderedAscending
+        }
+        
+        return sortedEvents.first
     }
 }

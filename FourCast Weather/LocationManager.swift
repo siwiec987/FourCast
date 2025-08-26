@@ -8,90 +8,105 @@
 import Foundation
 import CoreLocation
 
+// TODO: Naprawić didChangeAuthorization, bo wywaliłem i teraz po nadaniu uprawnień nie pobiera lokalizacji :(((
+
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
-    private var locationManager: CLLocationManager?
+    @ObservationIgnored private let locationManager = CLLocationManager()
+    @ObservationIgnored private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>? = nil
     
-    var location: CLLocation?
-    var locationName: String?
-    var locationReady = false
     var notAuthorized = true
-    var authError = false
     
     override init() {
         super.init()
-        self.locationManager = CLLocationManager()
-        self.locationManager!.delegate = self
+        self.locationManager.delegate = self
     }
     
-    func checkLocationAuthorization() throws {
-        guard let locationManager = self.locationManager else {
-            return
-        }
+    @MainActor func getCurrentLocationIfAuthorized() async throws -> CLLocationCoordinate2D {
+        guard locationContinuation == nil else { throw LocationManagerError.alreadyInUse }
         
-        switch locationManager.authorizationStatus {
+        return try await withCheckedThrowingContinuation { continuation in
+            locationContinuation = continuation
             
+            handleAuthorizationStatus()
+        }
+    }
+    
+    private func handleAuthorizationStatus() {
+        switch locationManager.authorizationStatus {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
-        case .restricted:
+        case .restricted, .denied:
             notAuthorized = true
-            throw LocationManagerError.locationRestricted
-        case .denied:
-            notAuthorized = true
-            throw LocationManagerError.locationDenied
+            locationContinuation?.resume(throwing: LocationManagerError.permissionDenied)
+            locationContinuation = nil
         case .authorizedAlways, .authorizedWhenInUse:
             notAuthorized = false
-//            locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
+//                locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
-            self.locationReady = false
         @unknown default:
-            break
+            locationContinuation?.resume(throwing: LocationManagerError.unknown)
+            locationContinuation = nil
         }
     }
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        do {
-            try checkLocationAuthorization()
-        } catch {
-            authError = true
-        }
+        guard locationContinuation != nil else { return }
+        
+        handleAuthorizationStatus()
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let locationManager = locationManager {
-            locationManager.stopUpdatingLocation()
-        }
+        locationManager.stopUpdatingLocation()
         
         guard let location = locations.last else {
+            locationContinuation?.resume(throwing: LocationManagerError.noLocationFound)
+            locationContinuation = nil
             return
         }
         
-//        let lastLocationName = self.locationName
-        
-        self.location = location
-        self.getLocationName(location: self.location) { name in
-            self.locationName = name
-        }
-        
-        self.locationReady = true
+        locationContinuation?.resume(returning: location.coordinate)
+        locationContinuation = nil
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        locationContinuation?.resume(throwing: error)
+        locationContinuation = nil
         print("Błąd pobierania lokalizacji: \(error.localizedDescription)")
     }
 
-    func getLocationName(location: CLLocation?, completion: @escaping (String?) -> Void) {
-        guard let safeLocation = location else {
+    static func getLocationName(for location: CLLocation?) async -> String? {
+        await withCheckedContinuation { continuation in
+            getLocationName(location: location) { name in
+                continuation.resume(returning: name)
+            }
+        }
+    }
+    
+    static func getLocationName(location: CLLocation?, completion: @escaping (String?) -> Void) {
+        guard let location else {
             completion(nil)
             return
         }
 
         let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(safeLocation) { (placemarks, error) in
-            if let firstLocation = placemarks?.first, error == nil {
-                completion(firstLocation.locality)
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if let first = placemarks?.first, error == nil {
+                completion(first.locality)
             } else {
                 completion(nil)
+            }
+        }
+    }
+    
+    static func getCoordinate(address: String) async throws -> CLLocationCoordinate2D {
+        try await withCheckedThrowingContinuation { continuation in
+            getCoordinate(addressString: address) { coordinate, error in
+                if error != nil {
+                    continuation.resume(throwing: LocationManagerError.noLocationFound)
+                } else {
+                    continuation.resume(returning: coordinate)
+                }
             }
         }
     }
@@ -113,6 +128,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 }
 
 enum LocationManagerError: Error {
-    case locationRestricted
-    case locationDenied
+    case permissionDenied
+    case noLocationFound
+    case alreadyInUse
+    case unknown
 }

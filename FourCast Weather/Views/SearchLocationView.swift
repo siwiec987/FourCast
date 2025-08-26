@@ -17,14 +17,14 @@ struct SearchLocationView: View {
     
     var body: some View {
         LazyVStack(alignment: .leading) {
-            ForEach(locationSearchService.results) {result in
+            ForEach(locationSearchService.results) { result in
                     Button {
                         LocationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
                             if locations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {
                             } else {
                                 Task {
                                     do {
-                                        let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate, lastFetchTime: nil)
+                                        let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate)
                                         let newLocation = Location(name: result.title, coordinate: Location.Coordinate(coordinate), role: .additional, weatherData: response, lastFetchTime: time)
                                         locations.locations.append(newLocation)
                                         selection = locations.locations.count - 1
@@ -32,10 +32,6 @@ struct SearchLocationView: View {
                                         
                                     } catch OpenWeatherError.invalidData {
                                         print("Invalid data")
-                                    } catch OpenWeatherError.alreadyInUse {
-                                        print("Aready fetching")
-                                    } catch OpenWeatherError.fetchNotNecessary {
-                                        print("Not necessary")
                                     } catch {
                                         print("coś innego")
                                     }

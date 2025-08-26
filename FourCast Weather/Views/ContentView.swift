@@ -9,63 +9,45 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(UserSettings.self) private var userSettings
-    @State private var viewModel = ContentViewModel()
-    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami
+    
+    private let userSettings: UserSettings
+    
+    @State private var viewModel: ContentViewModel
+//    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami.
+    // UPDATE: jednak bez tego też się zaczęło z jakiegoś powodu odświeżać poprawnie XDDDDDDDD
+    
+    init(userSettings: UserSettings) {
+        self.userSettings = userSettings
+        self.viewModel = ContentViewModel(userSettings: userSettings)
+    }
     
     var body: some View {
         NavigationStack {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
-                    Tab("Calendar", systemImage: "calendar", value: -2) {
-//                        HStack {
-//                            Button("Live activity") {
-//                                viewModel.startActivity(userSettings: userSettings)
-//                            }
-//                            .padding()
-//                            .background(.clear.mix(with: .black, by: 0.25))
-//                            .clipShape(RoundedRectangle(cornerRadius: 15))
-//                            .disabled(viewModel.hasEventStarted)
-//                            
-//                            Button("Stop") {
-//                                Task {
-//                                    await viewModel.stopActivity()
-//                                }
-//                            }
-//                            .padding()
-//                            .background(.clear.mix(with: .black, by: 0.25))
-//                            .clipShape(RoundedRectangle(cornerRadius: 15))
-//                        }
-
-//                        CalendarEventView(weatherData: calendarEventLocation.weatherData, data: viewModel.calendarManager.events[0])
+                    Tab("calendar", systemImage: "calendar", value: -2) {
                         WeatherView(weatherData: calendarEventLocation.weatherData)
                     }
                 }
                 
-                Tab("Current", systemImage: "location", value: -1) {
-                    WeatherView(weatherData: viewModel.currentLocation?.weatherData)
-                        .onChange(of: viewModel.locationManager.location, initial: false) { oldVal, newVal in
-                            viewModel.updateCurrentLocationCoordinate()
-                            viewModel.updateCurrentLocationName()
-                            Task {
-                                await viewModel.fetchWeatherForCurrentLocation()
-                                await viewModel.fetchWeatherForCalendarEventLocation(userSettings: userSettings)
-                            }
-                        }
-                        .onChange(of: viewModel.locationManager.locationName) {
-                            viewModel.updateCurrentLocationName()
-                        }
-                }
-                
                 ForEach(Array(viewModel.locations.locations.enumerated()), id: \.element.id) { index, location in
-                    if let additionalLocationsStartIndex = viewModel.additionalLocationsStartIndex, index >= additionalLocationsStartIndex {
+                    if location.role == .current {
+                        Tab("current", systemImage: "location", value: index) {
+                            WeatherView(weatherData: location.weatherData)
+                        }
+                    } else {
                         Tab(value: index) {
                             WeatherView(weatherData: location.weatherData)
                         }
                     }
                 }
             }
-            .id(tabViewRebuild)
+//            .onAppear {
+//                Task {
+//                    await viewModel.refreshData()
+//                }
+//            }
+//            .id(tabViewRebuild)
             .background(
                 BackgroundView(
                     timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
@@ -77,22 +59,23 @@ struct ContentView: View {
                 .animation(.default, value: viewModel.selection)
             )
             .onChange(of: scenePhase) {
-                if scenePhase == .active {
+                if /*!viewModel.initialization &&*/ scenePhase == .active {
+                    print("ScenePhase == .active!!!")
                     Task {
-                        await viewModel.refreshWeatherData()
+                        await viewModel.refreshData()
                     }
                 }
             }
-            .onChange(of: viewModel.selection) {
-                Task {
-                    await viewModel.refreshWeatherData()
-                }
-            }
+//            .onChange(of: viewModel.selection) {
+//                Task {
+//                    await viewModel.refreshData()
+//                }
+//            }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection, tabViewRebuild: $tabViewRebuild)) {
+                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection/*, tabViewRebuild: $tabViewRebuild*/)) {
                         Image(systemName: "square.fill.on.square.fill")
                             .renderingMode(.original)
                     }
@@ -126,7 +109,7 @@ struct ContentView: View {
             .tint(.white)
             .navigationTitle(viewModel.navbarTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .alert(viewModel.errorTitle, isPresented: $viewModel.locationManager.authError) {
+            .alert(viewModel.errorTitle, isPresented: $viewModel.showingError) {
                 Button("Ustawienia") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(url)
@@ -145,6 +128,6 @@ struct ContentView: View {
 
 
 #Preview {
-    ContentView()
+    ContentView(userSettings: UserSettings())
         .preferredColorScheme(.dark)
 }

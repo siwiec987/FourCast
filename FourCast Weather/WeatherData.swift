@@ -5,14 +5,14 @@
 //  Created by Jakub Siwiec on 23/02/2025.
 //
 
-struct WeatherData: Codable {
+struct WeatherData: Codable, Equatable {
     let timezoneOffset: Int
     let current: CurrentWeather
     let hourly: [HourlyWeather]
     let daily: [DailyWeather]
 }
 
-struct CurrentWeather: Codable {
+struct CurrentWeather: Codable, Equatable {
     let dt: Int
     let sunrise: Int
     let sunset: Int
@@ -30,7 +30,7 @@ struct CurrentWeather: Codable {
     let weather: [WeatherCondition]
 }
 
-struct HourlyWeather: Codable {
+struct HourlyWeather: Codable, Equatable {
     let dt: Int
     let temp: Double
     let feelsLike: Double
@@ -46,7 +46,7 @@ struct HourlyWeather: Codable {
     let weather: [WeatherCondition]
 }
 
-struct DailyWeather: Codable {
+struct DailyWeather: Codable, Equatable {
     let dt: Int
     let sunrise: Int
     let sunset: Int
@@ -65,7 +65,7 @@ struct DailyWeather: Codable {
     let weather: [WeatherCondition]
 }
 
-struct DailyTemp: Codable {
+struct DailyTemp: Codable, Equatable {
     let day: Double
     let min: Double
     let max: Double
@@ -74,14 +74,14 @@ struct DailyTemp: Codable {
     let morn: Double
 }
 
-struct DailyFeelsLike: Codable {
+struct DailyFeelsLike: Codable, Equatable {
     let day: Double
     let night: Double
     let eve: Double
     let morn: Double
 }
 
-struct WeatherCondition: Codable {
+struct WeatherCondition: Codable, Equatable {
     let id: Int
     let main: String
     let description: String
