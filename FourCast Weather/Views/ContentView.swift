@@ -59,7 +59,7 @@ struct ContentView: View {
                 .animation(.default, value: viewModel.selection)
             )
             .onChange(of: scenePhase) {
-                if /*!viewModel.initialization &&*/ scenePhase == .active {
+                if scenePhase == .active {
                     print("ScenePhase == .active!!!")
                     Task {
                         await viewModel.refreshData()
