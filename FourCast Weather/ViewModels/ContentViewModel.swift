@@ -9,6 +9,12 @@ import Foundation
 import CoreLocation
 import ActivityKit
 
+struct CalendarEventLocation {
+    var location: Location
+    var startDate: Date
+    var travelTime: Any? // pole "czas ruszać" w szczegółach eventu
+}
+
 @MainActor @Observable
 class ContentViewModel {
     @ObservationIgnored let weatherService = WeatherService()
@@ -16,14 +22,13 @@ class ContentViewModel {
     let locations = Locations()
     let calendarManager = CalendarManager()
     let userSettings: UserSettings
+    let liveActivityManager: LiveActivityManager
     
     var selection = 0
     
     var errorTitle = ""
     var errorMessage = ""
     var showingError = false
-    
-    var activity: Activity<CalendarEventWidgetAttributes>? = nil
     
     var currentLocationIndex: Int? {
         locations.locations.firstIndex { $0.role == .current }
@@ -38,12 +43,12 @@ class ContentViewModel {
         locations.locations.firstIndex { $0.role == .additional }
     }
     
-    var calendarEventLocation: Location? = nil
+    var calendarEventLocation: CalendarEventLocation? = nil
     
     var weatherDataForSelectedTab: WeatherData? {
         let result: WeatherData?
         if selection == -2 {
-            result = calendarEventLocation?.weatherData
+            result = calendarEventLocation?.location.weatherData
         } else if selection >= 0 && selection < locations.locations.count {
             result = locations.locations[selection].weatherData
         } else {
@@ -55,7 +60,7 @@ class ContentViewModel {
     
     var navbarTitle: String {
         if selection == -2, let calendarEventLocation {
-            return calendarEventLocation.name
+            return calendarEventLocation.location.name
         }
         if selection >= 0 && selection < locations.locations.count {
             return locations.locations[selection].name
@@ -67,7 +72,7 @@ class ContentViewModel {
     var bottomToolbarMessage: String {
         let lastFetch: Date?
         if selection == -2 {
-            lastFetch = calendarEventLocation?.lastFetchTime
+            lastFetch = calendarEventLocation?.location.lastFetchTime
         } else if selection >= 0 && selection < locations.locations.count {
             lastFetch = locations.locations[selection].lastFetchTime
         } else {
@@ -92,8 +97,9 @@ class ContentViewModel {
         return "Ostatnia aktualizacja:"
     }
     
-    init(userSettings: UserSettings) {
+    init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
         self.userSettings = userSettings
+        self.liveActivityManager = liveActivityManager
     }
     
     func refreshData() async {
@@ -112,7 +118,8 @@ class ContentViewModel {
         print("initializeData called!")
         await fetchWeatherForCurrentLocation()
         await fetchWeatherForCalendarEventLocation()
-//        await startOrUpdateActivity()
+        // TODO: trzeba dodać do ustawień wybór offsetu dla startu live activity, np. 30 minut przed startem wydarzenia
+        await liveActivityManager.startOrUpdateActivity(calendarEventLocation: calendarEventLocation, userSettings: userSettings)
         print("initializeData done!")
     }
     
@@ -130,9 +137,9 @@ class ContentViewModel {
                 locations.locations.insert(location, at: 0)
             }
             
-            Task {
+//            Task {
                 await updateCurrentLocationName(coordinate: coordinate)
-            }
+//            }
         } catch LocationManagerError.permissionDenied {
             errorTitle = "Brak dostępu do lokalizacji"
             errorMessage = "Aby wyświetlić prognozę pogody dla Twojej lokalizacji, włącz dostęp w Ustawieniach"
@@ -172,7 +179,7 @@ class ContentViewModel {
     
     private func getCalendarEventLocation() /*async*/ {
         print("getCalendarEventLocation called!")
-        guard let event = calendarManager.getEventIfAuthorized(), let coordinate = event.structuredLocation?.geoLocation?.coordinate, let name = event.structuredLocation?.title else {
+        guard let calendarEvent = calendarManager.getEventIfAuthorized(), let coordinate = calendarEvent.structuredLocation?.geoLocation?.coordinate, let name = calendarEvent.structuredLocation?.title else {
             if let _ = calendarEventLocation {
                 selection = 0
                 calendarEventLocation = nil
@@ -180,127 +187,28 @@ class ContentViewModel {
             print("getCalendarEventLocation done: no calendar event found")
             return
         }
-        
+
         if var copy = calendarEventLocation {
-            copy.name = name
-            copy.coordinate = Location.Coordinate(coordinate)
+            copy.location.name = name
+            copy.location.coordinate = Location.Coordinate(coordinate)
+            copy.startDate = calendarEvent.startDate
+            copy.travelTime = calendarEvent.value(forKey: "travelTime")
             calendarEventLocation = copy
         } else {
-            let event = Location(name: name, coordinate: Location.Coordinate(coordinate), role: .calendarEvent)
+            let event = CalendarEventLocation(
+                location: Location(name: name, coordinate: Location.Coordinate(coordinate), role: .calendarEvent),
+                startDate: calendarEvent.startDate,
+                travelTime: calendarEvent.value(forKey: "travelTime")
+            )
             calendarEventLocation = event
         }
         print("getCalendarEventLocation done!")
     }
     
-//    func startOrUpdateActivity() async {
-//        print("startOrUpdateActivity wywołane")
-//        if activity != nil {
-//            print("update")
-//            await updateActivity(userSettings: userSettings)
-//        } else {
-//            print("start")
-//            await startActivityIfNeeded(userSettings: userSettings)
-//        }
-//    }
-//
-//    func startActivityIfNeeded(userSettings: UserSettings) async {
-//        guard activity == nil else { return }
-//        print("startActivity(): pierwszy guard przeszedł")
-//        guard let calendarEventLocation else { return }
-//        print("startActivity(): drugi guard przeszedł")
-//        guard let startDate = calendarManager.firstEvent?.startDate else { return }
-//        print("startActivity(): czwarty guard przeszedł")
-//        guard let weatherData = calendarEventLocation.weatherData else { return }
-//        print("startActivity(): piąty guard przeszedł")
-//
-//        var eventStartDateWeatherData: HourlyWeather?
-//        for hour in weatherData.hourly {
-//            let timeInterval = TimeInterval(hour.dt)
-//            let weatherDate = Date(timeIntervalSince1970: timeInterval)
-//
-//            if Calendar.current.isDate(weatherDate, equalTo: startDate, toGranularity: .hour) {
-//                eventStartDateWeatherData = hour
-//            }
-//        }
-//
-//        guard let eventStartDateWeatherData else { return }
-//        print("startActivity(): szósty guard przeszedł")
-//        let weatherIcon = eventStartDateWeatherData.weather.first?.icon
-//
-//        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
-//        let icon = WeatherService.getWeatherIcon(weatherIcon)
-////        let travelTime = calendarManager.events.first?.value(forKey: "travelTime")
-//
-//        let attributes = CalendarEventWidgetAttributes()
-//        let content = ActivityContent(
-//            state: CalendarEventWidgetAttributes.ContentState(
-//                eventDate: startDate,
-//                name: calendarEventLocation.name,
-//                temperature: temp,
-//                iconName: icon,
-//                timezoneOffset: weatherData.timezoneOffset,
-//                weatherIcon: weatherIcon,
-//                sunrise: weatherData.current.sunrise,
-//                sunset: weatherData.current.sunset
-//            ),
-//            staleDate: startDate
-//        )
-//
-//        do {
-//            activity = try Activity<CalendarEventWidgetAttributes>.request(attributes: attributes, content: content, pushType: nil)
-//            print("Activity started successfully")
-//        } catch {
-//            print("Failed to assign an activity: \(error.localizedDescription)")
-//        }
-//    }
-//
-//    func updateActivity(userSettings: UserSettings) async {
-//        guard let activity else { return }
-//        guard let calendarEventLocation else { return }
-//        guard let weatherData = calendarEventLocation.weatherData else { return }
-//        guard let startDate = calendarManager.firstEvent?.startDate else { return }
-//
-//        var eventStartDateWeatherData: HourlyWeather?
-//        for hour in weatherData.hourly {
-//            let timeInterval = TimeInterval(hour.dt)
-//            let weatherDate = Date(timeIntervalSince1970: timeInterval)
-//
-//            if Calendar.current.isDate(weatherDate, equalTo: startDate, toGranularity: .hour) {
-//                eventStartDateWeatherData = hour
-//            }
-//        }
-//
-//        guard let eventStartDateWeatherData else { return }
-//
-//        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
-//        let icon = WeatherService.getWeatherIcon(eventStartDateWeatherData.weather.first?.icon)
-//
-//        let content = ActivityContent(
-//            state: CalendarEventWidgetAttributes.ContentState(
-//                eventDate: startDate,
-//                name: calendarEventLocation.name,
-//                temperature: temp,
-//                iconName: icon
-//            ),
-//            staleDate: startDate
-//        )
-//
-//        await activity.update(content)
-//        print("Activity updated successfully!")
-//        }
-//
-//    func stopActivity() async {
-//        guard let activity else { return }
-//
-//        await activity.end(ActivityContent(state: CalendarEventWidgetAttributes.ContentState(eventDate: .now, name: "AAA", temperature: 112, iconName: "dog.fill"), staleDate: nil), dismissalPolicy: .immediate)
-//        self.activity = nil
-//    }
-//
-    
     private func fetchWeatherForCalendarEventLocation() async {
         print("fetchWeatherForCalendarEventLocation called!")
         let oldLocation: CLLocation?
-        if let oldCoordinate = calendarEventLocation?.coordinateObject {
+        if let oldCoordinate = calendarEventLocation?.location.coordinateObject {
             oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
         } else {
             oldLocation = nil
@@ -309,15 +217,15 @@ class ContentViewModel {
         /*await */getCalendarEventLocation()
         guard var location = calendarEventLocation else { return print("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
         
-        let newCoordinate = location.coordinateObject
+        let newCoordinate = location.location.coordinateObject
         let newLocation = CLLocation(latitude: newCoordinate.latitude, longitude: newCoordinate.longitude)
         
-        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 5_000, lastFetchTime: location.lastFetchTime) else { return }
+        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 5_000, lastFetchTime: location.location.lastFetchTime) else { return }
         
-        if let (data, time) = await fetchWeather(for: location.coordinateObject) {
+        if let (data, time) = await fetchWeather(for: location.location.coordinateObject) {
             
-            location.weatherData = data
-            location.lastFetchTime = time
+            location.location.weatherData = data
+            location.location.lastFetchTime = time
             calendarEventLocation = location
         }
         print("fetchWeatherForCalendarEventLocation done!")

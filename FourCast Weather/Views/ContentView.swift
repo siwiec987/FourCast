@@ -9,16 +9,12 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
-    
-    private let userSettings: UserSettings
-    
     @State private var viewModel: ContentViewModel
 //    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami.
     // UPDATE: jednak bez tego też się zaczęło z jakiegoś powodu odświeżać poprawnie XDDDDDDDD
     
-    init(userSettings: UserSettings) {
-        self.userSettings = userSettings
-        self.viewModel = ContentViewModel(userSettings: userSettings)
+    init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
+        self.viewModel = ContentViewModel(userSettings: userSettings, liveActivityManager: liveActivityManager)
     }
     
     var body: some View {
@@ -26,7 +22,7 @@ struct ContentView: View {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("calendar", systemImage: "calendar", value: -2) {
-                        WeatherView(weatherData: calendarEventLocation.weatherData)
+                        WeatherView(weatherData: calendarEventLocation.location.weatherData)
                     }
                 }
                 
@@ -128,6 +124,6 @@ struct ContentView: View {
 
 
 #Preview {
-    ContentView(userSettings: UserSettings())
+    ContentView(userSettings: UserSettings(), liveActivityManager: LiveActivityManager())
         .preferredColorScheme(.dark)
 }

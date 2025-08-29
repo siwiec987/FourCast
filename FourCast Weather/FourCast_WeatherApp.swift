@@ -9,13 +9,18 @@ import SwiftUI
 
 @main
 struct FourCast_WeatherApp: App {
-    @State private var userSettings = UserSettings()
+    private let userSettings = UserSettings()
+    private let liveActivityManager = LiveActivityManager()
     
     var body: some Scene {
         WindowGroup {
-            ContentView(userSettings: userSettings)
+            ContentView(userSettings: userSettings, liveActivityManager: liveActivityManager)
                 .preferredColorScheme(.dark)
         }
         .environment(userSettings)
+        .backgroundTask(.appRefresh(liveActivityManager.bgTaskIdentifier)) {
+            print("entered backgroundTask")
+            await liveActivityManager.endActivity(dismissalPolicy: .immediate)
+        }
     }
 }
