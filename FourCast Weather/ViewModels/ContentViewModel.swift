@@ -116,8 +116,12 @@ class ContentViewModel {
     
     private func initializeData() async {
         print("initializeData called!")
-        await fetchWeatherForCurrentLocation()
-        await fetchWeatherForCalendarEventLocation()
+        async let currentLocation: () = fetchWeatherForCurrentLocation()
+        async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
+        
+        await currentLocation
+        await calendarLocation
+        
         // TODO: trzeba dodać do ustawień wybór offsetu dla startu live activity, np. 30 minut przed startem wydarzenia
         await liveActivityManager.startOrUpdateActivity(calendarEventLocation: calendarEventLocation, userSettings: userSettings)
         print("initializeData done!")
@@ -138,7 +142,7 @@ class ContentViewModel {
             }
             
 //            Task {
-                await updateCurrentLocationName(coordinate: coordinate)
+            await updateCurrentLocationName(coordinate: coordinate)
 //            }
         } catch LocationManagerError.permissionDenied {
             errorTitle = "Brak dostępu do lokalizacji"
@@ -177,7 +181,7 @@ class ContentViewModel {
         print("updateCurrentLocationName done!")
     }
     
-    private func getCalendarEventLocation() /*async*/ {
+    private func getCalendarEventLocation() {
         print("getCalendarEventLocation called!")
         guard let calendarEvent = calendarManager.getEventIfAuthorized(), let coordinate = calendarEvent.structuredLocation?.geoLocation?.coordinate, let name = calendarEvent.structuredLocation?.title else {
             if let _ = calendarEventLocation {
@@ -207,20 +211,14 @@ class ContentViewModel {
     
     private func fetchWeatherForCalendarEventLocation() async {
         print("fetchWeatherForCalendarEventLocation called!")
-        let oldLocation: CLLocation?
-        if let oldCoordinate = calendarEventLocation?.location.coordinateObject {
-            oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
-        } else {
-            oldLocation = nil
-        }
+        let oldCoordinate = calendarEventLocation?.location.coordinateObject
         
-        /*await */getCalendarEventLocation()
+        getCalendarEventLocation()
         guard var location = calendarEventLocation else { return print("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
         
         let newCoordinate = location.location.coordinateObject
-        let newLocation = CLLocation(latitude: newCoordinate.latitude, longitude: newCoordinate.longitude)
         
-        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 5_000, lastFetchTime: location.location.lastFetchTime) else { return }
+        guard shouldFetchWeather(oldCoordinate: oldCoordinate, newCoordinate: newCoordinate, minDistance: 5_000, lastFetchTime: location.location.lastFetchTime) else { return }
         
         if let (data, time) = await fetchWeather(for: location.location.coordinateObject) {
             
@@ -233,20 +231,14 @@ class ContentViewModel {
     
     private func fetchWeatherForCurrentLocation() async {
         print("fetchWeatherForCurrentLocation called!")
-        let oldLocation: CLLocation?
-        if let oldCoordinate = currentLocation?.coordinateObject {
-            oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
-        } else {
-            oldLocation = nil
-        }
+        let oldCoordinate = currentLocation?.coordinateObject
         
         await fetchCurrentLocation()
         guard let currentLocationIndex, var currentLocation else { return }
         
         let newCoordinate = currentLocation.coordinateObject
-        let newLocation = CLLocation(latitude: newCoordinate.latitude, longitude: newCoordinate.longitude)
         
-        guard shouldFetchWeather(oldLocation: oldLocation, newLocation: newLocation, minDistance: 5_000, lastFetchTime: currentLocation.lastFetchTime) else { return }
+        guard shouldFetchWeather(oldCoordinate: oldCoordinate, newCoordinate: newCoordinate, minDistance: 5_000, lastFetchTime: currentLocation.lastFetchTime) else { return }
         
         if let (data, time) = await fetchWeather(for: currentLocation.coordinateObject) {
             
@@ -287,23 +279,22 @@ class ContentViewModel {
         return nil
     }
     
-    private func shouldFetchWeather(oldLocation: CLLocation? = nil, newLocation: CLLocation? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 90) -> Bool {
+    private func shouldFetchWeather(oldCoordinate: CLLocationCoordinate2D? = nil, newCoordinate: CLLocationCoordinate2D? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 90) -> Bool {
         print("shouldFetchWeather called!")
         
-        if let oldLocation, let newLocation, let minDistance {
+        if let oldCoordinate, let newCoordinate, let minDistance {
+            let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
+            let newLocation = CLLocation(latitude: newCoordinate.latitude, longitude: newCoordinate.longitude)
+            
             if oldLocation.distance(from: newLocation) > minDistance {
                 print("shouldFetchWeather return true for minDistance")
                 return true
             }
         }
         
-        if Date.now.timeIntervalSince(lastFetchTime ?? .distantPast) > minInterval {
-            print("shouldFetchWeather return true for minInterval")
-            return true
-        }
-        
-        print("shouldFetchWeather return false")
-        return false
+        let result = Date.now.timeIntervalSince(lastFetchTime ?? .distantPast) > minInterval
+        print("shouldFetchWeather returned \(result) for minInterval")
+        return result
     }
     
     private func handleWeatherError(_ error: Error) {
