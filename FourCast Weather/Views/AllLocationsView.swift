@@ -12,7 +12,7 @@ struct AllLocationsView: View {
     @Environment(Locations.self) private var locations
     
     @Binding var selection: Int
-//    @Binding var tabViewRebuild: UUID
+    @Binding var tabViewRebuild: UUID
     
     @State private var locationSearchService = LocationSearchService()
     @State private var showingSearchResults = false
@@ -54,9 +54,9 @@ struct AllLocationsView: View {
                 .padding(.horizontal, 8)
             }
         }
-//        .onChange(of: selection) {
-//            tabViewRebuild = UUID()
-//        }
+        .onChange(of: selection) {
+            tabViewRebuild = UUID()
+        }
         .searchable(text: $locationSearchService.query, isPresented: $showingSearchResults, placement: .navigationBarDrawer(displayMode: .always), prompt: "Szukaj miasta")
     }
 }
@@ -64,7 +64,7 @@ struct AllLocationsView: View {
 #Preview {
     @Previewable @State var selection = 1
     @Previewable @State var tabViewRebuild = UUID()
-    AllLocationsView(selection: $selection/*, tabViewRebuild: $tabViewRebuild*/)
+    AllLocationsView(selection: $selection, tabViewRebuild: $tabViewRebuild)
         .environment(Locations())
 }
 

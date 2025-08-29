@@ -10,8 +10,9 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel: ContentViewModel
-//    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami.
-    // UPDATE: jednak bez tego też się zaczęło z jakiegoś powodu odświeżać poprawnie XDDDDDDDD
+    @State private var tabViewRebuild = UUID() // bez tego, po zmianie selection w AllLocationsView, czasami wyświetla dane dla poprzedniej lokalizacji. Modyfikowane w AllLocationsView, bo przesuwanie między kartami działa dobrze, a jeśli zmieniało się w tym pliku, to psuło animację przejścia między kartami.
+    // UPDATE: jednak bez tego też się zaczęło z jakiegoś powodu odświeżać poprawnie
+    // UPDATE 2: jednak przestało odświeżać poprawnie, zostawię to
     
     init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
         self.viewModel = ContentViewModel(userSettings: userSettings, liveActivityManager: liveActivityManager)
@@ -38,12 +39,7 @@ struct ContentView: View {
                     }
                 }
             }
-//            .onAppear {
-//                Task {
-//                    await viewModel.refreshData()
-//                }
-//            }
-//            .id(tabViewRebuild)
+            .id(tabViewRebuild)
             .background(
                 BackgroundView(
                     timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
@@ -71,7 +67,7 @@ struct ContentView: View {
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection/*, tabViewRebuild: $tabViewRebuild*/)) {
+                    NavigationLink(destination: AllLocationsView(selection: $viewModel.selection, tabViewRebuild: $tabViewRebuild)) {
                         Image(systemName: "square.fill.on.square.fill")
                             .renderingMode(.original)
                     }
