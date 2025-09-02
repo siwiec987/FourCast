@@ -58,11 +58,11 @@ struct ContentView: View {
                     }
                 }
             }
-//            .onChange(of: viewModel.selection) {
-//                Task {
-//                    await viewModel.refreshData()
-//                }
-//            }
+            .onChange(of: viewModel.selection) {
+                Task {
+                    await viewModel.refreshAdditionalLocationData()
+                }
+            }
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {

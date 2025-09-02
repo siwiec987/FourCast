@@ -104,14 +104,19 @@ class ContentViewModel {
     
     func refreshData() async {
         print("refreshData called!")
+        await refreshAdditionalLocationData()
         await initializeData()
-        
+        print("refreshData done!")
+    }
+    
+    func refreshAdditionalLocationData() async {
+        print("refreshAdditionalLocationData called!")
         if let additionalLocationsStartIndex {
             if selection >= additionalLocationsStartIndex && selection < locations.locations.count {
                 await fetchWeatherForAdditionalLocation(index: selection)
             }
         }
-        print("refreshData done!")
+        print("refreshAdditionalLocationData done!")
     }
     
     private func initializeData() async {
@@ -132,7 +137,7 @@ class ContentViewModel {
         do {
             let coordinate = try await locationManager.getCurrentLocationIfAuthorized()
             
-            guard shouldUpdateCurrentLocation(coordinate: coordinate) else { return }
+//            guard shouldUpdateCurrentLocation(coordinate: coordinate) else { return } // nie wiem czy potrzebne
             
             if let currentLocationIndex {
                 locations.locations[currentLocationIndex].coordinate = Location.Coordinate(coordinate)
@@ -141,9 +146,9 @@ class ContentViewModel {
                 locations.locations.insert(location, at: 0)
             }
             
-//            Task {
-            await updateCurrentLocationName(coordinate: coordinate)
-//            }
+            Task {
+                await updateCurrentLocationName(coordinate: coordinate)
+            }
         } catch LocationManagerError.permissionDenied {
             errorTitle = "Brak dostępu do lokalizacji"
             errorMessage = "Aby wyświetlić prognozę pogody dla Twojej lokalizacji, włącz dostęp w Ustawieniach"
@@ -250,8 +255,8 @@ class ContentViewModel {
     }
     
     private func fetchWeatherForAdditionalLocation(index: Int) async {
-        print("fetchWeatherForAdditionalLocation(index: \(index) called!")
-        guard let startIndex = additionalLocationsStartIndex, index >= startIndex, index < locations.locations.count else { return }
+        print("fetchWeatherForAdditionalLocation(index: \(index)) called!")
+        guard let startIndex = additionalLocationsStartIndex, index >= startIndex, index < locations.locations.count else { return print("fetchWeatherForAdditionalLocation(index: \(index)) done: wrong index") }
         guard shouldFetchWeather(lastFetchTime: locations.locations[index].lastFetchTime) else { return }
         
         var location = locations.locations[index]
@@ -262,7 +267,7 @@ class ContentViewModel {
             location.lastFetchTime = time
             locations.locations[index] = location
         }
-        print("fetchWeatherForAdditionalLocation(index: \(index) done!")
+        print("fetchWeatherForAdditionalLocation(index: \(index)) done!")
     }
   
     private func fetchWeather(for coordinate: CLLocationCoordinate2D) async -> (WeatherData, Date)? {
