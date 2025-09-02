@@ -19,8 +19,11 @@ struct SearchLocationView: View {
         LazyVStack(alignment: .leading) {
             ForEach(locationSearchService.results) { result in
                     Button {
-                        LocationManager.getCoordinate(addressString: result.title) {(coordinate, error) in
-                            if locations.locations.contains(where: {$0.coordinate.latitude == coordinate.latitude && $0.coordinate.longitude == coordinate.longitude}) {
+                        LocationManager.getCoordinate(addressString: result.title) { coordinate, error in
+                            if let index = locations.locations.firstIndex(where: { $0.coordinateObject == coordinate }) {
+                                locationSearchService.query = ""
+                                selection = index
+                                print("SearchLocationView: location already exists!")
                             } else {
                                 Task {
                                     do {
