@@ -8,49 +8,97 @@
 import Foundation
 
 struct UserSettingsModel: Codable {
-    var temperatureUnitString: String
-    var windSpeedUnitString: String
+    private var temperatureUnitString: String
+    private var windSpeedUnitString: String
+    private var pressureUnitString: String
+    private var distanceUnitString: String
+    
+    var activityStartOffset: TimeInterval
     
     var temperatureUnit: UnitTemperature {
-        switch(temperatureUnitString) {
-        case "celsius":
-            return .celsius
-        case "fahrenheit":
-            return .fahrenheit
-        default:
-            return .kelvin
+        get {
+            switch(temperatureUnitString) {
+            case UnitTemperature.celsius.symbol:
+                return .celsius
+            case UnitTemperature.fahrenheit.symbol:
+                return .fahrenheit
+            default:
+                return .kelvin
+            }
+        }
+        
+        set {
+            temperatureUnitString = newValue.symbol
         }
     }
     
     var windSpeedUnit: UnitSpeed {
-        switch(windSpeedUnitString) {
-        case "km/h":
-            return .kilometersPerHour
-        case "mph":
-            return .milesPerHour
-        default:
-            return .metersPerSecond
+        get {
+            switch(windSpeedUnitString) {
+            case UnitSpeed.kilometersPerHour.symbol:
+                return .kilometersPerHour
+            case UnitSpeed.milesPerHour.symbol:
+                return .milesPerHour
+            case UnitSpeed.knots.symbol:
+                return .knots
+            default:
+                return .metersPerSecond
+            }
+        }
+        
+        set {
+            windSpeedUnitString = newValue.symbol
         }
     }
     
-    init(tempUnit: UnitTemperature, speedUnit: UnitSpeed) {
-        switch(tempUnit) {
-        case .celsius: 
-            temperatureUnitString = "celsius"
-        case .fahrenheit:
-            temperatureUnitString = "fahrenheit"
-        default:
-            temperatureUnitString = "kelvin"
+    var pressureUnit: UnitPressure {
+        get {
+            switch(pressureUnitString) {
+            case UnitPressure.millibars.symbol:
+                return .millibars
+            case UnitPressure.inchesOfMercury.symbol:
+                return .inchesOfMercury
+            case UnitPressure.millimetersOfMercury.symbol:
+                return .millimetersOfMercury
+            case UnitPressure.hectopascals.symbol:
+                return .hectopascals
+            default:
+                return .kilopascals
+            }
         }
         
-        switch(speedUnit) {
-        case .kilometersPerHour:
-            windSpeedUnitString = "km/h"
-        case .milesPerHour:
-            windSpeedUnitString = "mph"
-        default:
-            windSpeedUnitString = "m/s"
+        set {
+            pressureUnitString = newValue.symbol
         }
+    }
+    
+    var distanceUnit: UnitLength {
+        get {
+            switch(distanceUnitString) {
+            case UnitLength.miles.symbol:
+                return .miles
+            default:
+                return .kilometers
+            }
+        }
+        
+        set {
+            distanceUnitString = newValue.symbol
+        }
+    }
+    
+    init(
+        activityStartOffset: TimeInterval = 15 * 60,
+        tempUnit: UnitTemperature = .init(forLocale: .current, usage: .weather),
+        speedUnit: UnitSpeed = .init(forLocale: .current, usage: .wind),
+        pressureUnit: UnitPressure = .init(forLocale: .current, usage: .barometric),
+        distanceUnit: UnitLength = .init(forLocale: .current, usage: .visibility)
+    ) {
+        self.activityStartOffset = activityStartOffset
+        temperatureUnitString = tempUnit.symbol
+        windSpeedUnitString = speedUnit.symbol
+        pressureUnitString = pressureUnit.symbol
+        distanceUnitString = distanceUnit.symbol
     }
 }
 
@@ -72,10 +120,7 @@ class UserSettings {
             }
         }
         
-        let tempLocale = UnitTemperature(forLocale: .current, usage: .weather)
-        let speedLocale = UnitSpeed(forLocale: .current, usage: .wind)
-        
-        settings = UserSettingsModel(tempUnit: tempLocale, speedUnit: speedLocale)
+        settings = UserSettingsModel()
     }
     
     private func saveToUserDefaults() {

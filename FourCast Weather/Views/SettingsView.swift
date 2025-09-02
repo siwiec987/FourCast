@@ -16,6 +16,8 @@ struct Problem {
 struct SettingsView: View {
     @Environment(UserSettings.self) private var userSettings
     
+    @State private var activityDate: Date = .now
+    
     var calendarNotAuthorized: Bool
     var locationNotAuthorized: Bool
     
@@ -32,6 +34,22 @@ struct SettingsView: View {
         return result
     }
     
+    let temperatureUnits: [UnitTemperature] = [.celsius, .fahrenheit, .kelvin]
+    let speedUnits: [UnitSpeed] = [.metersPerSecond, .kilometersPerHour, .milesPerHour, .knots]
+    let pressureUnits: [UnitPressure] = [.millibars, .inchesOfMercury, .millimetersOfMercury, .hectopascals, .kilopascals]
+    let distanceUnits: [UnitLength] = [.miles, .kilometers]
+    let activityStartOffsets: [(title: String, offset: TimeInterval)] = [
+        ("W chwili wydarzenia", 0),
+        ("5 minut przed", -5 * 60),
+        ("10 minut przed", -10 * 60),
+        ("15 minut przed", -15 * 60),
+        ("30 minut przed", -30 * 60),
+        ("godzinę przed", -60 * 60),
+        ("godzinę i 30 minut przed", -90 * 60),
+        ("2 godziny przed", -120 * 60),
+        ("3 godziny przed", -180 * 60)
+    ]
+    
     var body: some View {
         @Bindable var userSettings = userSettings
         Form {
@@ -46,26 +64,41 @@ struct SettingsView: View {
             }
             
             Section("Jednostki") {
-                Picker("Temperatura", selection: $userSettings.settings.temperatureUnitString) {
-                    Text(UnitTemperature.celsius.symbol)
-                        .tag("celsius")
-                    
-                    Text(UnitTemperature.fahrenheit.symbol)
-                        .tag("fahrenheit")
-                    
-                    Text(UnitTemperature.kelvin.symbol)
-                        .tag("kelvin")
+                Picker("Temperatura", selection: $userSettings.settings.temperatureUnit) {
+                    ForEach(temperatureUnits, id: \.self) { unit in
+                        Text(unit.name)
+                            .tag(unit)
+                    }
                 }
                 
-                Picker("Prędkość wiatru", selection: $userSettings.settings.windSpeedUnitString) {
-                    Text(UnitSpeed.kilometersPerHour.symbol)
-                        .tag("km/h")
-                    
-                    Text(UnitSpeed.metersPerSecond.symbol)
-                        .tag("m/s")
-                    
-                    Text(UnitSpeed.milesPerHour.symbol)
-                        .tag("mph")
+                Picker("Wiatr", selection: $userSettings.settings.windSpeedUnit) {
+                    ForEach(speedUnits, id: \.self) { unit in
+                        Text(unit.name)
+                            .tag(unit)
+                    }
+                }
+                
+                Picker("Ciśnienie", selection: $userSettings.settings.pressureUnit) {
+                    ForEach(pressureUnits, id: \.self) { unit in
+                        Text(unit.name)
+                            .tag(unit)
+                    }
+                }
+                
+                Picker("Odległość", selection: $userSettings.settings.distanceUnit) {
+                    ForEach(distanceUnits, id: \.self) { unit in
+                        Text(unit.name)
+                            .tag(unit)
+                    }
+                }
+            }
+            
+            Section("Wydarzenia na żywo") {
+                Picker("Czas do wydarzenia z kalendarza", selection: $userSettings.settings.activityStartOffset) {
+                    ForEach(activityStartOffsets, id: \.offset) { offset in
+                        Text(offset.title)
+                            .tag(offset.offset)
+                    }
                 }
             }
         }
