@@ -143,9 +143,9 @@ class ContentViewModel {
 //            guard shouldUpdateCurrentLocation(coordinate: coordinate) else { return } // nie wiem czy potrzebne
             
             if let currentLocationIndex {
-                locations.locations[currentLocationIndex].coordinate = Location.Coordinate(coordinate)
+                locations.locations[currentLocationIndex].coordinate = coordinate
             } else {
-                let location = Location(name: ". . .", coordinate: Location.Coordinate(coordinate), role: .current)
+                let location = Location(name: ". . .", coordinate: coordinate, role: .current)
                 locations.locations.insert(location, at: 0)
             }
             
@@ -168,7 +168,7 @@ class ContentViewModel {
     
     private func shouldUpdateCurrentLocation(coordinate: CLLocationCoordinate2D, tolerance: CLLocationDistance = 10) -> Bool {
         print("shouldUpdateCurrentLocation called!")
-        guard let oldCoordinate = currentLocation?.coordinateObject else { return true }
+        guard let oldCoordinate = currentLocation?.coordinate else { return true }
         
         let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
         let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -200,17 +200,18 @@ class ContentViewModel {
             return
         }
 
+        let travelTime = calendarEvent.value(forKey: "travelTime") as? TimeInterval
         if var copy = calendarEventLocation {
             copy.location.name = name
-            copy.location.coordinate = Location.Coordinate(coordinate)
+            copy.location.coordinate = coordinate
             copy.startDate = calendarEvent.startDate
-            copy.travelTime = calendarEvent.value(forKey: "travelTime")
+            copy.travelTime = travelTime
             calendarEventLocation = copy
         } else {
             let event = CalendarEventLocation(
-                location: Location(name: name, coordinate: Location.Coordinate(coordinate), role: .calendarEvent),
+                location: Location(name: name, coordinate: coordinate, role: .calendarEvent),
                 startDate: calendarEvent.startDate,
-                travelTime: calendarEvent.value(forKey: "travelTime")
+                travelTime: travelTime
             )
             calendarEventLocation = event
         }
@@ -219,16 +220,16 @@ class ContentViewModel {
     
     private func fetchWeatherForCalendarEventLocation() async {
         print("fetchWeatherForCalendarEventLocation called!")
-        let oldCoordinate = calendarEventLocation?.location.coordinateObject
+        let oldCoordinate = calendarEventLocation?.location.coordinate
         
         getCalendarEventLocation()
         guard var location = calendarEventLocation else { return print("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
         
-        let newCoordinate = location.location.coordinateObject
+        let newCoordinate = location.location.coordinate
         
         guard shouldFetchWeather(oldCoordinate: oldCoordinate, newCoordinate: newCoordinate, minDistance: 5_000, lastFetchTime: location.location.lastFetchTime) else { return }
         
-        if let (data, time) = await fetchWeather(for: location.location.coordinateObject) {
+        if let (data, time) = await fetchWeather(for: location.location.coordinate) {
             
             location.location.weatherData = data
             location.location.lastFetchTime = time
@@ -239,20 +240,18 @@ class ContentViewModel {
     
     private func fetchWeatherForCurrentLocation() async {
         print("fetchWeatherForCurrentLocation called!")
-        let oldCoordinate = currentLocation?.coordinateObject
+        let oldCoordinate = currentLocation?.coordinate
         
         await fetchCurrentLocation()
-        guard let currentLocationIndex, var currentLocation else { return }
+        guard let currentLocationIndex, let currentLocation else { return }
         
-        let newCoordinate = currentLocation.coordinateObject
+        let newCoordinate = currentLocation.coordinate
         
         guard shouldFetchWeather(oldCoordinate: oldCoordinate, newCoordinate: newCoordinate, minDistance: 5_000, lastFetchTime: currentLocation.lastFetchTime) else { return }
         
-        if let (data, time) = await fetchWeather(for: currentLocation.coordinateObject) {
-            
-            currentLocation.weatherData = data
-            currentLocation.lastFetchTime = time
-            locations.locations[currentLocationIndex] = currentLocation
+        if let (data, time) = await fetchWeather(for: currentLocation.coordinate) {
+            locations.locations[currentLocationIndex].weatherData = data
+            locations.locations[currentLocationIndex].lastFetchTime = time
         }
         print("fetchWeatherForCurrentLocation done!")
     }
@@ -264,7 +263,7 @@ class ContentViewModel {
         
         var location = locations.locations[index]
         
-        if let (data, time) = await fetchWeather(for: location.coordinateObject) {
+        if let (data, time) = await fetchWeather(for: location.coordinate) {
             
             location.weatherData = data
             location.lastFetchTime = time

@@ -20,7 +20,7 @@ struct SearchLocationView: View {
             ForEach(locationSearchService.results) { result in
                     Button {
                         LocationManager.getCoordinate(addressString: result.title) { coordinate, error in
-                            if let index = locations.locations.firstIndex(where: { $0.coordinateObject == coordinate }) {
+                            if let index = locations.locations.firstIndex(where: { $0.coordinate == coordinate }) {
                                 locationSearchService.query = ""
                                 selection = index
                                 print("SearchLocationView: location already exists!")
@@ -28,7 +28,7 @@ struct SearchLocationView: View {
                                 Task {
                                     do {
                                         let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate)
-                                        let newLocation = Location(name: result.title, coordinate: Location.Coordinate(coordinate), role: .additional, weatherData: response, lastFetchTime: time)
+                                        let newLocation = Location(name: result.title, coordinate: coordinate, role: .additional, weatherData: response, lastFetchTime: time)
                                         locations.locations.append(newLocation)
                                         selection = locations.locations.count - 1
                                         print("New location: selection == \(selection)")
