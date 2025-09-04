@@ -11,17 +11,9 @@ import EventKit
 @Observable
 class CalendarManager {
     @ObservationIgnored private let store = EKEventStore()
-//    private var events: [EKEvent] = []
-    var notAuthorized = true
+    private(set) var isAuthorized = false
     
-//    var firstEvent: EKEvent? {
-//        events.first { $0.startDate > .now }
-//    }
-    
-    init() {
-//        handleAuthorizationStatus()
-//        subscribeToNotifications()
-    }
+    init() {}
     
     func getEventIfAuthorized() -> EKEvent? {
         handleAuthorizationStatus()
@@ -34,16 +26,16 @@ class CalendarManager {
         case .notDetermined:
             store.requestFullAccessToEvents() { success, error in
                 if success {
-                    self.notAuthorized = false
+                    self.isAuthorized = true
                     event = self.getEvent()
                 } else {
-                    self.notAuthorized = true
+                    self.isAuthorized = false
                 }
             }
         case .restricted, .denied, .writeOnly:
-            notAuthorized = true
+            isAuthorized = false
         case .fullAccess:
-            notAuthorized = false
+            isAuthorized = true
             event = getEvent()
         @unknown default:
             fatalError("FatalError: Coś się porządnie popsuło")
@@ -51,15 +43,6 @@ class CalendarManager {
         
         return event
     }
-    
-//    private func subscribeToNotifications() {
-//        NotificationCenter.default.addObserver(self, selector: #selector(storeChanged(_:)), name: .EKEventStoreChanged, object: nil)
-//    }
-//    
-//    @objc
-//    private func storeChanged(_ notification: Notification) {
-//        handleAuthorizationStatus()
-//    }
     
     private func getEvent() -> EKEvent? {
         let now = Date.now

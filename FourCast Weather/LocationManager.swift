@@ -15,7 +15,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     @ObservationIgnored private let locationManager = CLLocationManager()
     @ObservationIgnored private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>? = nil
     
-    var notAuthorized = true
+    private(set) var isAuthorized = false
     
     override init() {
         super.init()
@@ -37,11 +37,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
-            notAuthorized = true
+            isAuthorized = false
             locationContinuation?.resume(throwing: LocationManagerError.permissionDenied)
             locationContinuation = nil
         case .authorizedAlways, .authorizedWhenInUse:
-            notAuthorized = false
+            isAuthorized = true
 //                locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
         @unknown default:

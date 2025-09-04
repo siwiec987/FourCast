@@ -52,7 +52,7 @@ struct ContentView: View {
             )
             .onChange(of: scenePhase) {
                 if scenePhase == .active {
-                    print("ScenePhase == .active!!!")
+                    print("scenePhase == .active!!!")
                     Task {
                         await viewModel.refreshData()
                     }
@@ -61,6 +61,16 @@ struct ContentView: View {
             .onChange(of: viewModel.selection) {
                 Task {
                     await viewModel.refreshAdditionalLocationData()
+                }
+            }
+            .onChange(of: viewModel.userSettings.settings.activityStartOffset) {
+                Task {
+                    await viewModel.startOrUpdateLiveActivity()
+                }
+            }
+            .onChange(of: viewModel.userSettings.settings.temperatureUnit) {
+                Task {
+                    await viewModel.startOrUpdateLiveActivity()
                 }
             }
             .tabViewStyle(.page)
@@ -86,8 +96,12 @@ struct ContentView: View {
                     
                     Spacer()
                     
-                    NavigationLink(destination: SettingsView(calendarNotAuthorized: viewModel.calendarManager.notAuthorized, locationNotAuthorized: viewModel.locationManager.notAuthorized)) {
-                        if viewModel.calendarManager.notAuthorized || viewModel.locationManager.notAuthorized {
+                    NavigationLink(destination: SettingsView(
+                        calendarAuthorized: viewModel.calendarManager.isAuthorized,
+                        locationAuthorized: viewModel.locationManager.isAuthorized,
+                        liveActivitiesAuthorized: viewModel.liveActivityManager.isAuthorized
+                    )) {
+                        if !viewModel.calendarManager.isAuthorized || !viewModel.locationManager.isAuthorized {
                             Image(systemName: "gear.badge")
                                 .renderingMode(.original)
                         } else {

@@ -12,7 +12,7 @@ import ActivityKit
 struct CalendarEventLocation {
     var location: Location
     var startDate: Date
-    var travelTime: Any? // pole "czas ruszać" w szczegółach eventu
+    var travelTime: TimeInterval? // pole "czas ruszać" w szczegółach eventu
 }
 
 @MainActor @Observable
@@ -127,9 +127,12 @@ class ContentViewModel {
         await currentLocation
         await calendarLocation
         
-        // TODO: trzeba dodać do ustawień wybór offsetu dla startu live activity, np. 30 minut przed startem wydarzenia
-        await liveActivityManager.startOrUpdateActivity(calendarEventLocation: calendarEventLocation, userSettings: userSettings)
+        await startOrUpdateLiveActivity()
         print("initializeData done!")
+    }
+    
+    func startOrUpdateLiveActivity() async {
+        await liveActivityManager.startOrUpdateActivity(calendarEventLocation: calendarEventLocation, userSettings: userSettings)
     }
     
     private func fetchCurrentLocation() async {

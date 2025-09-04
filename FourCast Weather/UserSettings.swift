@@ -88,7 +88,7 @@ struct UserSettingsModel: Codable {
     }
     
     init(
-        activityStartOffset: TimeInterval = 15 * 60,
+        activityStartOffset: TimeInterval = 30 * 60,
         tempUnit: UnitTemperature = .init(forLocale: .current, usage: .weather),
         speedUnit: UnitSpeed = .init(forLocale: .current, usage: .wind),
         pressureUnit: UnitPressure = .init(forLocale: .current, usage: .barometric),

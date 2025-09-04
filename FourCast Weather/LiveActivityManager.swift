@@ -12,10 +12,10 @@ import Foundation
 @MainActor @Observable
 class LiveActivityManager {
     @ObservationIgnored private let authorizationInfo = ActivityAuthorizationInfo()
-    @ObservationIgnored private(set) var activity: Activity<CalendarEventWidgetAttributes>? = nil
+    @ObservationIgnored private var activity: Activity<CalendarEventWidgetAttributes>? = nil
     @ObservationIgnored let bgTaskIdentifier = "LiveActivityManager.scheduleActivityEndRequest"
     
-    var isAuthorized = false
+    private(set) var isAuthorized = false
     
     init() {
         isAuthorized = authorizationInfo.areActivitiesEnabled
@@ -29,12 +29,16 @@ class LiveActivityManager {
         }
     }
     
-    // TODO: trzeba dodać w ustawieniach możliwość wyboru ile czasu przed startem wydarzenia live activity się powinno odpalać i zrobić jakąś sprawdzajkę czy już odpalać czy nie
     private func startActivity(calendarEventLocation: CalendarEventLocation?, userSettings: UserSettings) {
         print("startActivity called!")
         guard activity == nil else { return print("startActivity done: already started") }
         guard checkAuthorization() else { return print("startActivity done: activities not enabled") }
         guard let calendarEventLocation else { return print("startActivity done: no calendarEventLocation") }
+        
+        let activityStartOffset = userSettings.settings.activityStartOffset == .infinity ? calendarEventLocation.travelTime : userSettings.settings.activityStartOffset
+        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 0))
+        guard Date.now >= activityStartDate else { return print("startActivity done: too early") }
+        
         guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("startActivity done: createActivityContent returned nil") }
 
         let attributes = CalendarEventWidgetAttributes()
@@ -61,6 +65,14 @@ class LiveActivityManager {
             return print("updateActivity done: no calendarEventLocation")
         }
         
+        let activityStartOffset = userSettings.settings.activityStartOffset == .infinity ? calendarEventLocation.travelTime : userSettings.settings.activityStartOffset
+        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 0))
+        guard Date.now >= activityStartDate else {
+            await endActivity(dismissalPolicy: .immediate)
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
+            return print("startActivity done: too early")
+        }
+        
         guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("updateActivity done: createActivityContent returned nil") }
         guard shouldUpdateActivity(newState: content.state) else { return print("updateActivity done: no changes detected") }
         
@@ -82,10 +94,9 @@ class LiveActivityManager {
         return currentState != newState
     }
     
-    func endActivity(dismissalPolicy: ActivityUIDismissalPolicy/*, calendarEventLocation: CalendarEventLocation?, userSettings: UserSettings*/) async {
+    func endActivity(dismissalPolicy: ActivityUIDismissalPolicy) async {
         print("endActivity called!")
         guard let activity else { return print("endActivity done: no activity") }
-//        guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("stopActivity done: createActivityContent returned nil") }
         
         let content = ActivityContent(
             state: CalendarEventWidgetAttributes.ContentState(

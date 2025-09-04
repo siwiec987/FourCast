@@ -16,18 +16,17 @@ struct Problem {
 struct SettingsView: View {
     @Environment(UserSettings.self) private var userSettings
     
-    @State private var activityDate: Date = .now
-    
-    var calendarNotAuthorized: Bool
-    var locationNotAuthorized: Bool
+    let calendarAuthorized: Bool
+    let locationAuthorized: Bool
+    let liveActivitiesAuthorized: Bool
     
     var permissionProblems: [AppPermissionProblem] {
         var result: [AppPermissionProblem] = []
         
-        if calendarNotAuthorized {
+        if !calendarAuthorized {
             result.append(.calendar)
         }
-        if locationNotAuthorized {
+        if !locationAuthorized {
             result.append(.location)
         }
         
@@ -38,17 +37,6 @@ struct SettingsView: View {
     let speedUnits: [UnitSpeed] = [.metersPerSecond, .kilometersPerHour, .milesPerHour, .knots]
     let pressureUnits: [UnitPressure] = [.millibars, .inchesOfMercury, .millimetersOfMercury, .hectopascals, .kilopascals]
     let distanceUnits: [UnitLength] = [.miles, .kilometers]
-    let activityStartOffsets: [(title: String, offset: TimeInterval)] = [
-        ("W chwili wydarzenia", 0),
-        ("5 minut przed", -5 * 60),
-        ("10 minut przed", -10 * 60),
-        ("15 minut przed", -15 * 60),
-        ("30 minut przed", -30 * 60),
-        ("godzinę przed", -60 * 60),
-        ("godzinę i 30 minut przed", -90 * 60),
-        ("2 godziny przed", -120 * 60),
-        ("3 godziny przed", -180 * 60)
-    ]
     
     var body: some View {
         @Bindable var userSettings = userSettings
@@ -93,26 +81,65 @@ struct SettingsView: View {
                 }
             }
             
-            Section("Wydarzenia na żywo") {
+            Section {
                 Picker("Czas do wydarzenia z kalendarza", selection: $userSettings.settings.activityStartOffset) {
-                    ForEach(activityStartOffsets, id: \.offset) { offset in
-                        Text(offset.title)
-                            .tag(offset.offset)
+                    ForEach(ActivityStartOffsetOption.allCases, id: \.self) { offsetOption in
+                        Text(offsetOption.displayName)
+                            .tag(offsetOption.offset)
                     }
                 }
+                .disabled(!liveActivitiesAuthorized)
+            } header: {
+                Text("Wydarzenia na żywo")
+            } footer: {
+                Text("Czas pozostały do najbliższego wydarzenia w kalendarzu. Jeśli w tym czasie użyjesz aplikacji, aplikacja uruchomi wydarzenie na żywo")
             }
         }
         .navigationTitle("Ustawienia")
     }
     
-    init(calendarNotAuthorized: Bool, locationNotAuthorized: Bool) {
-        self.calendarNotAuthorized = calendarNotAuthorized
-        self.locationNotAuthorized = locationNotAuthorized
+    enum ActivityStartOffsetOption: String, CaseIterable, Codable {
+        static let `default`: ActivityStartOffsetOption = .thirtyMinutesBefore
+        
+        case fiveMinutesBefore = "5 minut przed"
+        case tenMinutesBefore = "10 minut przed"
+        case fifteenMinutesBefore = "15 minut przed"
+        case thirtyMinutesBefore = "30 minut przed"
+        case oneHourBefore = "1 godzina przed"
+        case twoHoursBefore = "2 godziny przed"
+        case fourHoursBefore = "4 godziny przed"
+        case timeToLeave = "Czas ruszać"
+        
+        var displayName: String {
+            self.rawValue
+        }
+        
+        var offset: TimeInterval {
+            switch self {
+            case .fiveMinutesBefore:
+                5 * 60
+            case .tenMinutesBefore:
+                10 * 60
+            case .fifteenMinutesBefore:
+                15 * 60
+            case .thirtyMinutesBefore:
+                30 * 60
+            case .oneHourBefore:
+                60 * 60
+            case .twoHoursBefore:
+                120 * 60
+            case .fourHoursBefore:
+                240 * 60
+            case .timeToLeave:
+                .infinity
+            }
+        }
     }
 }
 
 #Preview {
-    SettingsView(calendarNotAuthorized: false, locationNotAuthorized: true)
+    SettingsView(calendarAuthorized: false, locationAuthorized: false, liveActivitiesAuthorized: false)
+        .environment(UserSettings())
 }
 
 
