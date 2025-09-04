@@ -15,10 +15,10 @@ struct CurrentWeatherView: View {
     
     var body: some View {
         VStack(spacing: 5) {
-            Text("\(WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings))°")
+            Text(UnitFormatter.getFormattedTemperature(temp, to: userSettings.settings.temperatureUnit))
                 .font(.system(size: 100, weight: .light))
             
-            Text("Odczuwalna: \(WeatherService.getConvertedTemperature(from: feelsLike, userSettings: userSettings))°")
+            Text("Odczuwalna: \(UnitFormatter.getFormattedTemperature(feelsLike, to: userSettings.settings.temperatureUnit))")
         }
         .foregroundStyle(.white)
         .padding(.top, -20)

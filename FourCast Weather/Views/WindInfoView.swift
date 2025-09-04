@@ -9,35 +9,41 @@ import SwiftUI
 
 struct WindInfoView: View {
     @Environment(UserSettings.self) private var userSettings
-    let windDeg: Int
-    let currentWindSpeed: Double
-    let dailyWindSpeed: Double?
+    let windDegree: Int
+    let windSpeed: Double
     let windGust: Double?
     
+    private var speed: String {
+        UnitFormatter.getFormattedWindSpeed(windSpeed, to: userSettings.settings.windSpeedUnit)
+    }
     
-    private var windDegree: String {
+    private var gust: String {
+        guard let windGust else { return "- -" }
+        
+        return UnitFormatter.getFormattedWindSpeed(windGust, to: userSettings.settings.windSpeedUnit)
+    }
+    
+    private var degree: String {
         var direction = "N"
         
-        if windDeg < 360 { direction = "NW" }
-        if windDeg < 315 { direction = "W" }
-        if windDeg < 270 { direction = "SW" }
-        if windDeg < 225 { direction = "S" }
-        if windDeg < 180 { direction = "SE" }
-        if windDeg < 135 { direction = "E" }
-        if windDeg < 90 { direction = "NE" }
-        if windDeg < 45 { direction = "N" }
+        if windDegree < 360 { direction = "NW" }
+        if windDegree < 315 { direction = "W" }
+        if windDegree < 270 { direction = "SW" }
+        if windDegree < 225 { direction = "S" }
+        if windDegree < 180 { direction = "SE" }
+        if windDegree < 135 { direction = "E" }
+        if windDegree < 90 { direction = "NE" }
+        if windDegree < 45 { direction = "N" }
         
-        return "\(windDeg)° \(direction)"
+        return "\(windDegree)° \(direction)"
     }
     
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 10) {
-                DetailView(title: "Prędkość", content: "\(WeatherService.getConvertedWindSpeed(from: currentWindSpeed, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
-                
-                DetailView(title: "Porywy", content: "\(WeatherService.getConvertedWindSpeed(from: windGust ?? dailyWindSpeed ?? 0.0, userSettings: userSettings)) \(userSettings.settings.windSpeedUnit.symbol)")
-                
-                DetailView(title: "Kierunek", content: windDegree)
+                DetailView(title: "Prędkość", content: speed)
+                DetailView(title: "Porywy", content: gust)
+                DetailView(title: "Kierunek", content: degree)
             }
             
             Spacer()
@@ -68,7 +74,7 @@ struct WindInfoView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
-                    .rotationEffect(Angle(degrees: Double(windDeg)))
+                    .rotationEffect(Angle(degrees: Double(windDegree)))
                     .fontWeight(.thin)
                     .padding()
             }
@@ -98,6 +104,6 @@ struct WindInfoView: View {
 
 #Preview {
     if let data = SampleWeatherData().data {
-        WindInfoView(windDeg: data.current.windDeg, currentWindSpeed: data.current.windSpeed, dailyWindSpeed: data.daily.first?.windSpeed, windGust: data.current.windGust)        
+        WindInfoView(windDegree: data.current.windDeg, windSpeed: data.current.windSpeed, windGust: data.current.windGust)        
     }
 }

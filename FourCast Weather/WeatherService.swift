@@ -10,7 +10,12 @@ import CoreLocation
 
 @Observable
 class WeatherService {
-    init() {}
+    enum Units {
+        static let temperature = UnitTemperature.kelvin
+        static let windSpeed = UnitSpeed.metersPerSecond
+        static let pressure = UnitPressure.hectopascals
+        static let distance = UnitLength.meters
+    }
     
     @MainActor func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData, Date) {
         do {
@@ -66,67 +71,6 @@ class WeatherService {
             
             throw OpenWeatherError.invalidData
         }
-    }
-    
-    static func getWeatherIcon(_ icon: String?) -> String {
-        let defaultIcon = "ellipsis"
-        
-        guard let icon else {return defaultIcon}
-        
-        switch(icon.last) {
-        case "d":
-            switch(icon.dropLast()) {
-            case "01":
-                return "sun.max.fill"
-            case "02":
-                return "cloud.sun.fill"
-            case "03", "04":
-                return "cloud.fill"
-            case "09":
-                return "cloud.drizzle.fill"
-            case "10":
-                return "cloud.rain.fill"
-            case "11":
-                return "cloud.bolt.fill"
-            case "13":
-                return "snowflake"
-            case "50":
-                return "sun.haze.fill"
-            default:
-                return defaultIcon
-            }
-        case "n":
-            switch(icon.dropLast()) {
-            case "01":
-                return "moon.stars.fill"
-            case "02":
-                return "cloud.moon.fill"
-            case "03", "04":
-                return "cloud.fill"
-            case "09":
-                return "cloud.drizzle.fill"
-            case "10":
-                return "cloud.rain.fill"
-            case "11":
-                return "cloud.bolt.fill"
-            case "13":
-                return "snowflake"
-            case "50":
-                return "moon.haze.fill"
-            default:
-                return defaultIcon
-            }
-        default:
-            return defaultIcon
-        }
-    }
-    
-    static func getConvertedTemperature(from temp: Double, userSettings: UserSettings) -> Int {
-        return Int(Measurement(value: temp, unit: UnitTemperature.kelvin).converted(to: userSettings.settings.temperatureUnit).value)
-    }
-    
-    static func getConvertedWindSpeed(from speed: Double, userSettings: UserSettings) -> Int {
-        return Int(Measurement(value: speed, unit: UnitSpeed.metersPerSecond).converted(to: userSettings.settings.windSpeedUnit).value)
     }
 }
 

@@ -17,11 +17,11 @@ struct DailyForecastView: View {
             ForEach(dailyWeatherData, id: \.dt) {dailyForecast in
                 HStack {
                     Text("\(Date.getWeekday(from: dailyForecast.dt, with: timezoneOffset))")
-                        .frame(width: 100)
+                        .frame(width: 150, alignment: .leading)
                     
-                    Spacer()
+//                    Spacer()
                     
-                    Image(systemName: WeatherService.getWeatherIcon(dailyForecast.weather[0].icon))
+                    Image(systemName: WeatherIconMapper.systemIcon(for: dailyForecast.weather[0].icon))
                         .renderingMode(.original)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -29,11 +29,12 @@ struct DailyForecastView: View {
                     
                     Spacer()
                     
-                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.min, userSettings: userSettings))°")
-                    
+                    Text(UnitFormatter.getFormattedTemperature(dailyForecast.temp.min, to: userSettings.settings.temperatureUnit))
+                        .bold()
                     Text(". . .")
-                    
-                    Text("\(WeatherService.getConvertedTemperature(from: dailyForecast.temp.max, userSettings: userSettings))°")
+                        .bold()
+                    Text(UnitFormatter.getFormattedTemperature(dailyForecast.temp.max, to: userSettings.settings.temperatureUnit))
+                        .bold()
                 }
             }
             .padding(5)
@@ -45,6 +46,8 @@ struct DailyForecastView: View {
 #Preview {
     if let data = SampleWeatherData().data {
         DailyForecastView(dailyWeatherData: data.daily, timezoneOffset: data.timezoneOffset)
-            .background(.blue)
+            .padding()
+            .background(.secondary)
+            .environment(UserSettings())
     }
 }

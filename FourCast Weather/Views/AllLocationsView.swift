@@ -72,12 +72,10 @@ struct LocationView: View {
     @Environment(UserSettings.self) private var userSettings
     let location: Location
     
-    private var temperature: Int {
-        if let temp = location.weatherData?.current.temp {
-            return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
-        }
+    private var temperature: String {
+        guard let temp = location.weatherData?.current.temp else { return "- -"}
         
-        return 0
+        return UnitFormatter.getFormattedTemperature(temp, to: userSettings.settings.temperatureUnit)
     }
     
     var body: some View {
@@ -92,7 +90,7 @@ struct LocationView: View {
                 miniature: true
             )
             
-            Text("\(temperature)°")
+            Text(temperature)
                 .font(.largeTitle)
                 .foregroundStyle(.white)
                 .shadow(color: .black, radius: 10)
@@ -123,7 +121,7 @@ struct LocationView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            Image(systemName: WeatherService.getWeatherIcon(location.weatherData?.current.weather[0].icon))
+            Image(systemName: WeatherIconMapper.systemIcon(for: location.weatherData?.current.weather[0].icon))
                 .renderingMode(.original)
                 .padding(8)
         }

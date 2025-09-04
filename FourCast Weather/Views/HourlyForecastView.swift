@@ -75,9 +75,9 @@ struct HourlyForecastItem: View {
     let hourlyForecast: HourlyWeather
     let timezoneOffset: Int?
     
-    private var temperature: Int {
+    private var temperature: String {
         let temp = hourlyForecast.temp
-        return WeatherService.getConvertedTemperature(from: temp, userSettings: userSettings)
+        return UnitFormatter.getFormattedTemperature(temp, to: userSettings.settings.temperatureUnit)
     }
     var body: some View {
         VStack {
@@ -87,13 +87,13 @@ struct HourlyForecastItem: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
             
-            Image(systemName: WeatherService.getWeatherIcon(hourlyForecast.weather[0].icon))
+            Image(systemName: WeatherIconMapper.systemIcon(for: hourlyForecast.weather[0].icon))
                 .renderingMode(.original)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 30, height: 30)
             
-            Text("\(temperature)°")
+            Text(temperature)
                 .bold()
         }
     }

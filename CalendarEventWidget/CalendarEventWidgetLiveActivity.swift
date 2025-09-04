@@ -14,7 +14,7 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
         // Dynamic stateful properties about your activity go here!
         var eventDate: Date
         var name: String
-        var temperature: Int
+        var temperature: String
         var iconName: String
         
         var timezoneOffset: Int?
@@ -40,7 +40,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         
                     Spacer()
                     
-                    Text("\(context.state.temperature)°")
+                    Text(context.state.temperature)
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                     
@@ -162,7 +162,7 @@ extension CalendarEventWidgetAttributes {
 extension CalendarEventWidgetAttributes.ContentState {
     fileprivate static var tenMins: CalendarEventWidgetAttributes.ContentState {
 //        CalendarEventWidgetAttributes.ContentState(emoji: "😀")
-        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: 19, iconName: "cloud.fill")
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: "19°", iconName: "cloud.fill")
      }
      
 //     fileprivate static var starEyes: CalendarEventWidgetAttributes.ContentState {

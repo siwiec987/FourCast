@@ -140,8 +140,8 @@ class LiveActivityManager {
         }
 
         let weatherIcon = eventStartDateWeatherData.weather.first?.icon
-        let temp = WeatherService.getConvertedTemperature(from: eventStartDateWeatherData.temp, userSettings: userSettings)
-        let icon = WeatherService.getWeatherIcon(weatherIcon)
+        let temp = UnitFormatter.getFormattedTemperature(eventStartDateWeatherData.temp, to: userSettings.settings.temperatureUnit)
+        let icon = WeatherIconMapper.systemIcon(for: weatherIcon)
 
         let content = ActivityContent(
             state: CalendarEventWidgetAttributes.ContentState(
