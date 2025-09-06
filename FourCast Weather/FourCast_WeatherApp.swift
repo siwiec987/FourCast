@@ -14,7 +14,7 @@ struct FourCast_WeatherApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView(userSettings: userSettings, liveActivityManager: liveActivityManager)
+            WeatherTabView(userSettings: userSettings, liveActivityManager: liveActivityManager)
                 .preferredColorScheme(.dark)
         }
         .environment(userSettings)
