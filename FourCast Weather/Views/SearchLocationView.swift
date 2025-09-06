@@ -65,4 +65,5 @@ struct SearchLocationView: View {
     @Previewable @State var locationSearchService = LocationSearchService()
     SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
         .environment(Locations())
+        .environment(WeatherService())
 }
