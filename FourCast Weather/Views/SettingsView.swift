@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-struct Problem {
-    let name: String
-    let description: String
-    let imageName: String
-}
-
 struct SettingsView: View {
     @Environment(UserSettings.self) private var userSettings
     
@@ -23,11 +17,15 @@ struct SettingsView: View {
     var permissionProblems: [AppPermissionProblem] {
         var result: [AppPermissionProblem] = []
         
+        if !locationAuthorized {
+            result.append(.location)
+        }
         if !calendarAuthorized {
             result.append(.calendar)
         }
-        if !locationAuthorized {
-            result.append(.location)
+        
+        if calendarAuthorized && !liveActivitiesAuthorized {
+            result.append(.liveActivity)
         }
         
         return result
@@ -44,7 +42,7 @@ struct SettingsView: View {
             if !permissionProblems.isEmpty {
                 Section("Uprawnienia") {
                     VStack {
-                        ForEach(permissionProblems, id: \.name) { problem in
+                        ForEach(permissionProblems, id: \.self) { problem in
                             PermissionProblemView(problem: problem)
                         }
                     }
@@ -81,18 +79,25 @@ struct SettingsView: View {
                 }
             }
             
-            Section {
-                Picker("Czas do wydarzenia z kalendarza", selection: $userSettings.settings.activityStartOffset) {
-                    ForEach(ActivityStartOffsetOption.allCases, id: \.self) { offsetOption in
-                        Text(offsetOption.displayName)
-                            .tag(offsetOption.offset)
+            if liveActivitiesAuthorized && calendarAuthorized {
+                Section {
+                    Picker("Czas do wydarzenia z kalendarza", selection: $userSettings.settings.activityStartOffset) {
+                        ForEach(ActivityStartOffsetOption.allCases, id: \.self) { offsetOption in
+                            Text(offsetOption.displayName)
+                                .tag(offsetOption.offset)
+                        }
                     }
+                } header: {
+                    Text("Wydarzenia na żywo")
+                } footer: {
+                    Text("Czas pozostały do najbliższego wydarzenia w kalendarzu. Jeśli w tym czasie użyjesz aplikacji, aplikacja uruchomi wydarzenie na żywo")
                 }
-                .disabled(!liveActivitiesAuthorized)
-            } header: {
-                Text("Wydarzenia na żywo")
-            } footer: {
-                Text("Czas pozostały do najbliższego wydarzenia w kalendarzu. Jeśli w tym czasie użyjesz aplikacji, aplikacja uruchomi wydarzenie na żywo")
+            }
+            
+            Section("Rekomendacje") {
+                NavigationLink(destination: Text("Tu będą opcje rekomendacji")) {
+                    Text("Dostosuj rekomendacje")
+                }
             }
         }
         .navigationTitle("Ustawienia")
@@ -116,29 +121,22 @@ struct SettingsView: View {
         
         var offset: TimeInterval {
             switch self {
-            case .fiveMinutesBefore:
-                5 * 60
-            case .tenMinutesBefore:
-                10 * 60
-            case .fifteenMinutesBefore:
-                15 * 60
-            case .thirtyMinutesBefore:
-                30 * 60
-            case .oneHourBefore:
-                60 * 60
-            case .twoHoursBefore:
-                120 * 60
-            case .fourHoursBefore:
-                240 * 60
-            case .timeToLeave:
-                .infinity
+            case .fiveMinutesBefore: 5 * 60
+            case .tenMinutesBefore: 10 * 60
+            case .fifteenMinutesBefore: 15 * 60
+            case .thirtyMinutesBefore: 30 * 60
+            case .oneHourBefore: 60 * 60
+            case .twoHoursBefore: 120 * 60
+            case .fourHoursBefore: 240 * 60
+            case .timeToLeave: .infinity
             }
         }
     }
 }
 
 #Preview {
-    SettingsView(calendarAuthorized: false, locationAuthorized: false, liveActivitiesAuthorized: false)
+    SettingsView(calendarAuthorized: true, locationAuthorized: false, liveActivitiesAuthorized: false)
+        .preferredColorScheme(.dark)
         .environment(UserSettings())
 }
 

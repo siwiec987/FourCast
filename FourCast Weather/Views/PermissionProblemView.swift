@@ -58,16 +58,10 @@ struct PermissionProblemView: View {
     PermissionProblemView(problem: .calendar)
 }
 
-enum AppPermissionProblem {
+enum AppPermissionProblem: String {
     case calendar
     case location
-
-    var name: String {
-        switch self {
-        case .calendar: return "calendar"
-        case .location: return "location"
-        }
-    }
+    case liveActivity
 
     var title: String {
         switch self {
@@ -75,6 +69,8 @@ enum AppPermissionProblem {
             return "Brak dostępu do kalendarza"
         case .location:
             return "Brak dostępu do lokalizacji"
+        case .liveActivity:
+            return "Brak dostępu do wydarzeń na żywo"
         }
     }
 
@@ -84,13 +80,19 @@ enum AppPermissionProblem {
             return "Aplikacja nie ma dostępu do Twojego kalendarza. Dzięki temu mogłaby sprawdzać, dokąd się wybierasz i podpowiadać pogodę dla tych miejsc."
         case .location:
             return "Aplikacja nie ma dostępu do Twojej lokalizacji. Potrzebuje jej, aby wyświetlać aktualną pogodę dla Twojego miejsca."
+        case .liveActivity:
+            return "Wydarzenia na żywo pozwalają wyświetlać pogodę i czas do wydarzeń bezpośrednio na ekranie blokady i w centrum powiadomień."
         }
     }
 
     var imageName: String {
         switch self {
-        case .calendar: return "calendar.badge.exclamationmark"
-        case .location: return "location.slash.fill"
+        case .calendar: 
+            return "calendar.badge.exclamationmark"
+        case .location: 
+            return "location.slash.fill"
+        case .liveActivity:
+            return "clock.badge.exclamationmark"
         }
     }
 }
