@@ -14,12 +14,24 @@ struct WeatherTabView: View {
     // UPDATE: jednak bez tego też się zaczęło z jakiegoś powodu odświeżać poprawnie
     // UPDATE 2: jednak przestało odświeżać poprawnie, zostawię to
     
+    @State private var navigationPath = NavigationPath()
+    
     init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
         self.viewModel = WeatherTabViewModel(userSettings: userSettings, liveActivityManager: liveActivityManager)
     }
     
+    var settingsImageName: String {
+        if !viewModel.calendarManager.isAuthorized ||
+            !viewModel.locationManager.isAuthorized ||
+            !viewModel.liveActivityManager.isAuthorized {
+            return "gear.badge"
+        } else {
+            return "gear"
+        }
+    }
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("calendar", systemImage: "calendar", value: -2) {
@@ -39,11 +51,6 @@ struct WeatherTabView: View {
                     }
                 }
             }
-//            .onAppear {
-//                if viewModel.locations.locations.isEmpty && viewModel.calendarEventLocation != nil {
-//                    // włącz AllLocationsView
-//                }
-//            }
             .id(tabViewRebuild)
             .background(
                 BackgroundView(
@@ -60,6 +67,10 @@ struct WeatherTabView: View {
                     print("scenePhase == .active!!!")
                     Task {
                         await viewModel.refreshData()
+                        
+                        if navigationPath.isEmpty && viewModel.locations.locations.isEmpty && viewModel.calendarEventLocation == nil {
+                            navigationPath.append(Destination.allLocations)
+                        }
                     }
                 }
             }
@@ -82,47 +93,45 @@ struct WeatherTabView: View {
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
-                    NavigationLink(destination: AllLocationsView(
-                        selection: $viewModel.selection,
-                        tabViewRebuild: $tabViewRebuild
-                    )) {
-                        Image(systemName: "square.fill.on.square.fill")
-                            .renderingMode(.original)
+                    NavigationLink(value: Destination.allLocations) {
+                        if viewModel.calendarManager.isAuthorized && viewModel.locationManager.isAuthorized && viewModel.liveActivityManager.isAuthorized {
+                            Image(systemName: "square.fill.on.square.fill")
+                                .tint(.white)
+                        } else {
+                            Image("custom.square.fill.on.square.fill.badge")
+                                .renderingMode(.original)
+                        }
                     }
                     
                     Spacer()
-
+                    
                     VStack {
-                            Text(viewModel.bottomToolbarTitle)
-                                .font(.caption2)
-                            
-                            Text(viewModel.bottomToolbarMessage)
-                                .font(.footnote)
-                                .fontWeight(.semibold)
+                        Text(viewModel.bottomToolbarTitle)
+                            .font(.caption2)
+                        
+                        Text(viewModel.bottomToolbarMessage)
+                            .font(.footnote)
+                            .fontWeight(.semibold)
                     }
                     .foregroundStyle(.white)
                     
                     Spacer()
                     
-                    NavigationLink(destination: SettingsView(
+                }
+            }
+            .navigationDestination(for: Destination.self) { destination in
+                switch destination {
+                case .allLocations:
+                    AllLocationsView(
+                        selection: $viewModel.selection,
+                        tabViewRebuild: $tabViewRebuild,
+                        calendarEventLocation: viewModel.calendarEventLocation?.location,
                         calendarAuthorized: viewModel.calendarManager.isAuthorized,
                         locationAuthorized: viewModel.locationManager.isAuthorized,
                         liveActivitiesAuthorized: viewModel.liveActivityManager.isAuthorized
-                    )) {
-                        if !viewModel.calendarManager.isAuthorized || !viewModel.locationManager.isAuthorized {
-                            Image(systemName: "gear.badge")
-                                .renderingMode(.original)
-                        } else {
-                            Image(systemName: "gear")
-                                .foregroundStyle(.white)
-                        }
-                    }
-                    .fontWeight(.black)
+                    )
                 }
             }
-            .tint(.white)
-            .navigationTitle(viewModel.navbarTitle)
-            .navigationBarTitleDisplayMode(.inline)
             .alert(viewModel.errorTitle, isPresented: $viewModel.showingError) {
                 Button("Ustawienia") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -139,7 +148,9 @@ struct WeatherTabView: View {
     }
 }
 
-
+enum Destination: Hashable {
+    case allLocations
+}
 
 #Preview {
     WeatherTabView(userSettings: UserSettings(), liveActivityManager: LiveActivityManager())
