@@ -29,6 +29,8 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
 struct CalendarEventWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: CalendarEventWidgetAttributes.self) { context in
+            let backgroundView = BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient)
+            
             // Lock screen/banner UI goes here
             VStack {
                 HStack {
@@ -67,9 +69,9 @@ struct CalendarEventWidgetLiveActivity: Widget {
                 }
             }
             .padding(10)
-            .activityBackgroundTint(Color.blue)
+            .activityBackgroundTint(backgroundView.topColor)
             .foregroundStyle(.white)
-            .background(BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient))
+            .background(backgroundView)
             
 
         } dynamicIsland: { context in
