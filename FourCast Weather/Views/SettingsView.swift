@@ -101,6 +101,7 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Ustawienia")
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     enum ActivityStartOffsetOption: String, CaseIterable, Codable {
