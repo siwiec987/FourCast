@@ -23,18 +23,18 @@ struct WeatherTabView: View {
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("calendar", systemImage: "calendar", value: -2) {
-                        WeatherView(weatherData: calendarEventLocation.location.weatherData)
+                        WeatherView(name: calendarEventLocation.location.name, weatherData: calendarEventLocation.location.weatherData)
                     }
                 }
                 
                 ForEach(Array(viewModel.locations.locations.enumerated()), id: \.element.id) { index, location in
                     if location.role == .current {
                         Tab("current", systemImage: "location", value: index) {
-                            WeatherView(weatherData: location.weatherData)
+                            WeatherView(name: location.name, weatherData: location.weatherData)
                         }
                     } else {
                         Tab(value: index) {
-                            WeatherView(weatherData: location.weatherData)
+                            WeatherView(name: location.name, weatherData: location.weatherData)
                         }
                     }
                 }

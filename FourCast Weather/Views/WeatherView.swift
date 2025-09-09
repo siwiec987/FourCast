@@ -10,7 +10,8 @@ import SwiftUI
 struct WeatherView: View {
     @Environment(UserSettings.self) private var userSettings
     
-    var weatherData: WeatherData?
+    let name: String
+    let weatherData: WeatherData?
     
     private var visibility: String {
         guard let weatherData, let visibility = weatherData.current.visibility else { return "- -"}
@@ -28,7 +29,7 @@ struct WeatherView: View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 15) {
                 if let weatherData {
-                    CurrentWeatherView(temp: weatherData.current.temp, feelsLike: weatherData.current.feelsLike)
+                    CurrentWeatherView(name: name, temp: weatherData.current.temp, feelsLike: weatherData.current.feelsLike)
                     HourlyForecastView(hourlyWeatherData: weatherData.hourly, timezoneOffset: weatherData.timezoneOffset)
                     DailyForecastView(dailyWeatherData: weatherData.daily, timezoneOffset: weatherData.timezoneOffset)
                     
@@ -63,6 +64,6 @@ struct WeatherView: View {
 }
 
 #Preview {
-    WeatherView(weatherData: SampleWeatherData().data)
+    WeatherView(name: "Bieruck", weatherData: SampleWeatherData().data)
         .background(.blue)
 }
