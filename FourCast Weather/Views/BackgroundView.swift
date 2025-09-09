@@ -21,13 +21,34 @@ struct BackgroundView: View {
     @State private var debugTime = 0.0 
     @State private var useDebugTime = false
     @State private var useDebugCloudThickness = false
-    @State private var showingDebugSliders = false
+    @State private var showingDebug = false
     @State private var debugStormType = Storm.Contents.rain
     @State private var useDebugStormType = false
     @State private var debugRainIntensity = 350.0
     @State private var useDebugRainIntensity = false
     @State private var debugWindSpeed = 0.0
     @State private var useDebugWindSpeed = false
+    
+    var useDebug: Binding<Bool> {
+        Binding (
+            get: {
+                useDebugTime ||
+                useDebugStormType ||
+                useDebugWindSpeed ||
+                useDebugRainIntensity ||
+                useDebugCloudThickness
+            },
+            set: {
+                if !$0 {
+                    useDebugTime = false
+                    useDebugStormType = false
+                    useDebugWindSpeed = false
+                    useDebugRainIntensity = false
+                    useDebugCloudThickness = false
+                }
+            }
+        )
+    }
     
     var formattedTime: String {
         let start = Calendar.current.startOfDay(for: .now)
@@ -205,7 +226,22 @@ struct BackgroundView: View {
             useDebugStormType = true
         }
         .toolbar {
-            Menu("Debug") {
+            if !miniature {
+                ToolbarItem(placement: .bottomBar) {
+                    Button("Debug") {
+                        showingDebug.toggle()
+                    }
+                }
+            }
+        }
+        .onTapGesture(count: 2) {
+            if miniature {
+                showingDebug.toggle()
+            }
+        }
+        .sheet(isPresented: $showingDebug) {
+            Form {
+                Toggle("Enable debug", isOn: useDebug)
                 Section("CLOUDS") {
                     Toggle("Use debug cloud thickness", isOn: $useDebugCloudThickness)
                     Picker("Thickness", selection: $debugCloudThickness) {
@@ -225,30 +261,21 @@ struct BackgroundView: View {
                     }
                     .pickerStyle(.segmented)
                     Toggle("Use debug rain intensity", isOn: $useDebugRainIntensity)
+                    Text("Intensity: \(debugRainIntensity)")
+                    Slider(value: $debugRainIntensity, in: 0...1000)
                     Toggle("Use debug wind speed", isOn: $useDebugWindSpeed)
+                    Text("Wind speed: \(debugWindSpeed)")
+                    Slider(value: $debugWindSpeed, in: 0...150)
                 }
                 
                 Section("TIME") {
                     Toggle("Use debug time", isOn: $useDebugTime)
-                }
-                
-                Section("MORE") {
-                    Toggle("Show sliders", isOn: $showingDebugSliders)
+                    Text("Time: \(formattedTime)")
+                    Slider(value: $debugTime, in: 0...1)
                 }
             }
-        }
-        .sheet(isPresented: $showingDebugSliders) {
-            VStack {
-                Text("Time: \(formattedTime)")
-                Slider(value: $debugTime, in: 0...1)
-                
-                Text("Rain intensity: \(debugRainIntensity)")
-                Slider(value: $debugRainIntensity, in: 0...1000)
-                Text("Wind speed: \(debugWindSpeed)")
-                Slider(value: $debugWindSpeed, in: 0...150)
-            }
-            .presentationDetents([.fraction(0.35)])
-            .padding()
+//            .padding(.top)
+            .presentationDetents([.medium])
         }
         #endif
     }
