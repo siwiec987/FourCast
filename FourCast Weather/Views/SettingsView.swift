@@ -52,28 +52,28 @@ struct SettingsView: View {
             Section("Jednostki") {
                 Picker("Temperatura", selection: $userSettings.settings.temperatureUnit) {
                     ForEach(temperatureUnits, id: \.self) { unit in
-                        Text(unit.name)
+                        Text(unit.localizedName)
                             .tag(unit)
                     }
                 }
                 
                 Picker("Wiatr", selection: $userSettings.settings.windSpeedUnit) {
                     ForEach(speedUnits, id: \.self) { unit in
-                        Text(unit.name)
+                        Text(unit.localizedName)
                             .tag(unit)
                     }
                 }
                 
                 Picker("Ciśnienie", selection: $userSettings.settings.pressureUnit) {
                     ForEach(pressureUnits, id: \.self) { unit in
-                        Text(unit.name)
+                        Text(unit.localizedName)
                             .tag(unit)
                     }
                 }
                 
                 Picker("Odległość", selection: $userSettings.settings.distanceUnit) {
                     ForEach(distanceUnits, id: \.self) { unit in
-                        Text(unit.name)
+                        Text(unit.localizedName)
                             .tag(unit)
                     }
                 }

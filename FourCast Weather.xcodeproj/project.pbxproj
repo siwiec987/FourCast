@@ -91,10 +91,10 @@
 				Storm/Storm.swift,
 				Storm/StormDrop.swift,
 				Storm/StormView.swift,
-				"Utilities/Extensions/Array+Extensions.swift",
-				"Utilities/Extensions/CLLocationCoordinate2D+Extension.swift",
-				"Utilities/Extensions/Colors+Extensions.swift",
-				"Utilities/Extensions/View+Modifiers.swift",
+				"Utilities/Extensions/Array+interpolated.swift",
+				"Utilities/Extensions/CLLocationCoordinate2D+Equatable.swift",
+				"Utilities/Extensions/Colors+BackgroundColors.swift",
+				"Utilities/Extensions/View+weatherComponent.swift",
 				Views/BackgroundView.swift,
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;

@@ -8,7 +8,7 @@
 import Foundation
 
 extension Unit {
-    var name: String {
+    var localizedName: String {
         let formatter = MeasurementFormatter()
         formatter.unitStyle = .long
         formatter.unitOptions = .providedUnit

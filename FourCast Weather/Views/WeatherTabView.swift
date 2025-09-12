@@ -32,6 +32,14 @@ struct WeatherTabView: View {
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
+            let backgroundView = BackgroundView(
+                timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
+                weatherIcon: viewModel.weatherDataForSelectedTab?.current.weather.first?.icon,
+                sunrise: viewModel.weatherDataForSelectedTab?.current.sunrise,
+                sunset: viewModel.weatherDataForSelectedTab?.current.sunset,
+                windSpeed: viewModel.weatherDataForSelectedTab?.current.windSpeed
+            )
+            
             TabView(selection: $viewModel.selection) {
                 if let calendarEventLocation = viewModel.calendarEventLocation {
                     Tab("calendar", systemImage: "calendar", value: -2) {
@@ -53,15 +61,10 @@ struct WeatherTabView: View {
             }
             .id(tabViewRebuild)
             .background(
-                BackgroundView(
-                    timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
-                    weatherIcon: viewModel.weatherDataForSelectedTab?.current.weather.first?.icon,
-                    sunrise: viewModel.weatherDataForSelectedTab?.current.sunrise,
-                    sunset: viewModel.weatherDataForSelectedTab?.current.sunset,
-                    windSpeed: viewModel.weatherDataForSelectedTab?.current.windSpeed
-                )
-                .animation(.default, value: viewModel.selection)
+                backgroundView
+                    .animation(.default, value: viewModel.selection)
             )
+            .environment(\.weatherBackgroundColor, backgroundView.topColor)
             .onChange(of: scenePhase) {
                 if scenePhase == .active {
                     print("scenePhase == .active!!!")

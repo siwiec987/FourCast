@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+//extension EnvironmentValues {
+//    @Entry var weatherBackgroundColor: Color = .clear.mix(with: .black, by: 0.2)
+//}
+
 extension View {
     func weatherComponent(addPadding: Bool = true) -> some View {
         modifier(WeatherComponent(addPadding: addPadding))
@@ -14,8 +18,9 @@ extension View {
 }
 
 struct WeatherComponent: ViewModifier {
-    let addPadding: Bool
+    @Environment(\.weatherBackgroundColor) private var weatherBackgroundColor
     
+    let addPadding: Bool
     var paddingAmount: CGFloat {
         addPadding ? 20 : 0
     }
@@ -24,7 +29,7 @@ struct WeatherComponent: ViewModifier {
         content
             .padding(paddingAmount)
             .foregroundStyle(.white)
-            .background(.clear.mix(with: .black, by: 0.2))
+            .background(weatherBackgroundColor.opacity(0.6))
             .clipShape(.rect(cornerRadius: 20))
     }
 }
