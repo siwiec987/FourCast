@@ -19,6 +19,12 @@ class LiveActivityManager {
     
     init() {
         isAuthorized = authorizationInfo.areActivitiesEnabled
+        
+        for activity in Activity<CalendarEventWidgetAttributes>.activities {
+            if activity.activityState == .active {
+                self.activity = activity
+            }
+        }
     }
     
     func startOrUpdateActivity(calendarEventLocation: CalendarEventLocation?, userSettings: UserSettings) async {
