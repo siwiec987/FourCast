@@ -94,7 +94,6 @@
 				"Utilities/Extensions/Array+interpolated.swift",
 				"Utilities/Extensions/CLLocationCoordinate2D+Equatable.swift",
 				"Utilities/Extensions/Colors+BackgroundColors.swift",
-				"Utilities/Extensions/View+weatherComponent.swift",
 				Views/BackgroundView.swift,
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
