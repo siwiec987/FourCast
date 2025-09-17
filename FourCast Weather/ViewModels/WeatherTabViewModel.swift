@@ -58,17 +58,6 @@ class WeatherTabViewModel {
         return result
     }
     
-    var navbarTitle: String {
-        if selection == -2, let calendarEventLocation {
-            return calendarEventLocation.location.name
-        }
-        if selection >= 0 && selection < locations.locations.count {
-            return locations.locations[selection].name
-        }
-        
-        return ""
-    }
-    
     var bottomToolbarMessage: String {
         let lastFetch: Date?
         if selection == -2 {
@@ -113,6 +102,7 @@ class WeatherTabViewModel {
         print("refreshAdditionalLocationData called!")
         if let additionalLocationsStartIndex {
             if selection >= additionalLocationsStartIndex && selection < locations.locations.count {
+                print("selection == \(selection)")
                 await fetchWeatherForAdditionalLocation(index: selection)
             }
         }
@@ -166,17 +156,17 @@ class WeatherTabViewModel {
         print("fetchCurrentLocation done!")
     }
     
-    private func shouldUpdateCurrentLocation(coordinate: CLLocationCoordinate2D, tolerance: CLLocationDistance = 10) -> Bool {
-        print("shouldUpdateCurrentLocation called!")
-        guard let oldCoordinate = currentLocation?.coordinate else { return true }
-        
-        let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
-        let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        
-        let result = oldLocation.distance(from: newLocation) > 10
-        print("shouldUpdateCurrentLocation return \(result)")
-        return result
-    }
+//    private func shouldUpdateCurrentLocation(coordinate: CLLocationCoordinate2D, tolerance: CLLocationDistance = 10) -> Bool {
+//        print("shouldUpdateCurrentLocation called!")
+//        guard let oldCoordinate = currentLocation?.coordinate else { return true }
+//        
+//        let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
+//        let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+//        
+//        let result = oldLocation.distance(from: newLocation) > 10
+//        print("shouldUpdateCurrentLocation return \(result)")
+//        return result
+//    }
     
     private func updateCurrentLocationName(coordinate: CLLocationCoordinate2D) async {
         print("updateCurrentLocationName called!")
