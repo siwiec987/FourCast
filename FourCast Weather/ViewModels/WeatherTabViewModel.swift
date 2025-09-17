@@ -276,8 +276,16 @@ class WeatherTabViewModel {
         return nil
     }
     
-    private func shouldFetchWeather(oldCoordinate: CLLocationCoordinate2D? = nil, newCoordinate: CLLocationCoordinate2D? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 90) -> Bool {
+    private func shouldFetchWeather(oldCoordinate: CLLocationCoordinate2D? = nil, newCoordinate: CLLocationCoordinate2D? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 1800) -> Bool {
         print("shouldFetchWeather called!")
+        guard let lastFetchTime else {
+            print("shouldFetchWeather return true: lastFetchTime nil")
+            return true
+        }
+        if !Calendar.current.isDate(.now, equalTo: lastFetchTime, toGranularity: .hour) {
+            print("shouldFetchWeather return true: hours differ")
+            return true
+        }
         
         if let oldCoordinate, let newCoordinate, let minDistance {
             let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
@@ -289,7 +297,7 @@ class WeatherTabViewModel {
             }
         }
         
-        let result = Date.now.timeIntervalSince(lastFetchTime ?? .distantPast) > minInterval
+        let result = Date.now.timeIntervalSince(lastFetchTime) > minInterval
         print("shouldFetchWeather returned \(result) for minInterval")
         return result
     }
