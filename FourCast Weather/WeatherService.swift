@@ -8,8 +8,7 @@
 import Foundation
 import CoreLocation
 
-@Observable
-class WeatherService {
+struct WeatherService {
     enum Units {
         static let temperature = UnitTemperature.kelvin
         static let windSpeed = UnitSpeed.metersPerSecond
@@ -17,7 +16,7 @@ class WeatherService {
         static let distance = UnitLength.meters
     }
     
-    @MainActor func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData, Date) {
+    static func fetchWeatherData(coordinate: CLLocationCoordinate2D) async throws  -> (WeatherData, Date) {
         do {
             let latitude = coordinate.latitude
             let longitude = coordinate.longitude

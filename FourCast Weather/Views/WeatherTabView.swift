@@ -147,7 +147,6 @@ struct WeatherTabView: View {
             }
         }
         .environment(viewModel.locations)
-        .environment(viewModel.weatherService)
     }
 }
 

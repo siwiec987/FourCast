@@ -17,7 +17,6 @@ struct CalendarEventLocation {
 
 @MainActor @Observable
 class WeatherTabViewModel {
-    @ObservationIgnored let weatherService = WeatherService()
     let locationManager = LocationManager()
     let locations = Locations()
     let calendarManager = CalendarManager()
@@ -265,7 +264,7 @@ class WeatherTabViewModel {
     private func fetchWeather(for coordinate: CLLocationCoordinate2D) async -> (WeatherData, Date)? {
         print("fetchWeather called!")
         do {
-            let (data, time) = try await weatherService.fetchWeatherData(coordinate: coordinate)
+            let (data, time) = try await WeatherService.fetchWeatherData(coordinate: coordinate)
             print("fetchWeather return data")
             return (data, time)
         } catch {

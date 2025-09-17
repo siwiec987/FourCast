@@ -10,7 +10,6 @@ import SwiftUI
 struct SearchLocationView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(Locations.self) private var locations
-    @Environment(WeatherService.self) private var weatherService
     
     @Binding var selection: Int
     @Binding var locationSearchService: LocationSearchService
@@ -27,7 +26,7 @@ struct SearchLocationView: View {
                             } else {
                                 Task {
                                     do {
-                                        let (response, time) = try await weatherService.fetchWeatherData(coordinate: coordinate)
+                                        let (response, time) = try await WeatherService.fetchWeatherData(coordinate: coordinate)
                                         let newLocation = Location(name: result.title, coordinate: coordinate, role: .additional, weatherData: response, lastFetchTime: time)
                                         locations.locations.append(newLocation)
                                         selection = locations.locations.count - 1
@@ -65,5 +64,4 @@ struct SearchLocationView: View {
     @Previewable @State var locationSearchService = LocationSearchService()
     SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
         .environment(Locations())
-        .environment(WeatherService())
 }
