@@ -25,8 +25,11 @@ struct WeatherComponent: ViewModifier {
         content
             .padding(paddingAmount)
             .foregroundStyle(.white)
-            .background(weatherBackgroundColor.opacity(0.5))
+            .background(
+                weatherBackgroundColor
+                    .opacity(0.5)
+                    .animation(.default, value: weatherBackgroundColor)
+            )
             .clipShape(.rect(cornerRadius: 20))
-            .animation(.default, value: weatherBackgroundColor)
     }
 }
