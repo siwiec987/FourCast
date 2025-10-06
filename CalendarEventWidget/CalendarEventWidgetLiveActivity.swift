@@ -15,10 +15,11 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
         var eventDate: Date
         var name: String
         var temperature: String
-        var iconName: String
+//        var iconName: String
+        var weatherCondition: WeatherData.WeatherCondition.ConditionType
         
         var timezoneOffset: Int?
-        var weatherIcon: String?
+//        var weatherIcon: String?
         var sunrise: Int?
         var sunset: Int?
     }
@@ -29,7 +30,7 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
 struct CalendarEventWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: CalendarEventWidgetAttributes.self) { context in
-            let backgroundView = BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherIcon: context.state.weatherIcon, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient)
+            let backgroundView = BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherCondition: context.state.weatherCondition, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient)
             
             // Lock screen/banner UI goes here
             VStack {
@@ -43,7 +44,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                     
-                    Image(systemName: context.state.iconName)
+                    Image(systemName: context.state.weatherCondition.iconName)
 //                        .renderingMode(.original)
                         .resizable()
                         .scaledToFit()
@@ -91,7 +92,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                             .scaledToFit()
                             .minimumScaleFactor(0.5)
                         
-                        Image(systemName: context.state.iconName)
+                        Image(systemName: context.state.weatherCondition.iconName)
                             .renderingMode(.original)
                             .resizable()
                             .scaledToFit()
@@ -130,13 +131,13 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         .font(.caption)
                         .fontWeight(.semibold)
                     
-                    Image(systemName: context.state.iconName)
+                    Image(systemName: context.state.weatherCondition.iconName)
                         .font(.system(size: 16))
                         .foregroundStyle(.primary)
                 }
                 .frame(maxWidth: 60, alignment: .trailing)
             } minimal: {
-                Image(systemName: context.state.iconName)
+                Image(systemName: context.state.weatherCondition.iconName)
                     .font(.system(size: 18))
             }
         }
@@ -151,11 +152,11 @@ extension CalendarEventWidgetAttributes {
 
 extension CalendarEventWidgetAttributes.ContentState {
     fileprivate static var tenMins: CalendarEventWidgetAttributes.ContentState {
-        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: "19°", iconName: "cloud.fill")
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: "19°", weatherCondition: .clouds)
      }
     
     fileprivate static var fiveHours: CalendarEventWidgetAttributes.ContentState {
-        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 60 * 5), name: "Bedzinska 39", temperature: "109°", iconName: "cloud.fill")
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 60 * 5), name: "Bedzinska 39", temperature: "109°", weatherCondition: .clouds)
      }
 }
 

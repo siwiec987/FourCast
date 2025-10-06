@@ -39,7 +39,7 @@ class LocationSearchService: NSObject, MKLocalSearchCompleterDelegate {
     }
     
     func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        self.results = completer.results.map {result in
+        self.results = completer.results.map { result in
             LocationResult(title: result.title, subtitle: result.subtitle)
         }
     }
@@ -47,10 +47,10 @@ class LocationSearchService: NSObject, MKLocalSearchCompleterDelegate {
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
         print("Błąd uzupełniania: \(error.localizedDescription)")
     }
-}
-
-struct LocationResult: Identifiable, Hashable {
-    var id = UUID()
-    var title: String
-    var subtitle:String
+    
+    struct LocationResult: Identifiable, Hashable {
+        var id = UUID()
+        var title: String
+        var subtitle:String
+    }
 }

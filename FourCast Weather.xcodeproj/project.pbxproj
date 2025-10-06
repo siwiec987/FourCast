@@ -85,6 +85,7 @@
 				Clouds/Cloud.swift,
 				Clouds/CloudGroup.swift,
 				Clouds/CloudsView.swift,
+				Models/WeatherData.swift,
 				Stars/Star.swift,
 				Stars/StarField.swift,
 				Stars/StarsView.swift,

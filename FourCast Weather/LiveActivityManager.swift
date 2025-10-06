@@ -109,9 +109,8 @@ class LiveActivityManager {
                 eventDate: activity.content.state.eventDate,
                 name: activity.content.state.name,
                 temperature: activity.content.state.temperature,
-                iconName: activity.content.state.iconName,
+                weatherCondition: activity.content.state.weatherCondition,
                 timezoneOffset: activity.content.state.timezoneOffset,
-                weatherIcon: activity.content.state.weatherIcon,
                 sunrise: activity.content.state.sunrise,
                 sunset: activity.content.state.sunset
             ),
@@ -144,21 +143,25 @@ class LiveActivityManager {
             print("createContentState done: no weatherData for event start date")
             return nil
         }
+        
+        guard let weatherCondition = eventStartDateWeatherData.weather.first?.condition else {
+            print("createContentState done: no weather condition")
+            return nil
+        }
 
-        let weatherIcon = eventStartDateWeatherData.weather.first?.icon
+//        let weatherIcon = eventStartDateWeatherData.weather.first?.icon
         let temp = UnitFormatter.getFormattedTemperature(eventStartDateWeatherData.temp, to: userSettings.settings.temperatureUnit)
-        let icon = WeatherIconMapper.systemIcon(for: weatherIcon)
+//        let icon = WeatherIconMapper.systemIcon(for: weatherIcon)
 
         let content = ActivityContent(
             state: CalendarEventWidgetAttributes.ContentState(
                 eventDate: calendarEventLocation.startDate,
                 name: calendarEventLocation.location.name,
                 temperature: temp,
-                iconName: icon,
+                weatherCondition: weatherCondition,
                 timezoneOffset: weatherData.timezoneOffset,
-                weatherIcon: weatherIcon,
-                sunrise: weatherData.current.sunrise,
-                sunset: weatherData.current.sunset
+                sunrise: weatherData.daily.first?.sunrise,
+                sunset: weatherData.daily.first?.sunset
             ),
             staleDate: nil
         )

@@ -9,7 +9,8 @@ import SwiftUI
 
 struct BackgroundView: View {
     let timezoneOffset: Int?
-    let weatherIcon: String?
+//    let weatherIcon: String?
+    let weatherCondition: WeatherData.WeatherCondition.ConditionType?
     let sunrise: Int?
     let sunset: Int?
     let windSpeed: Double?
@@ -79,16 +80,25 @@ struct BackgroundView: View {
         }
         #endif
 
-        guard let weatherIcon else { return .none }
+        guard let weatherCondition else { return .none }
         
         let result: Cloud.Thickness
-        switch weatherIcon.dropLast() {
-        case "02": result = .light
-        case "03": result = .light
-        case "04": result = .regular
-        case "09": result = .regular
-        case "10": result = .regular
-        case "11": result = .thick
+//        switch weatherIcon.dropLast() {
+//        case "02": result = .light
+//        case "03": result = .light
+//        case "04": result = .regular
+//        case "09": result = .regular
+//        case "10": result = .regular
+//        case "11": result = .thick
+//        default: result = .thin
+//        }
+        
+        switch weatherCondition {
+        case .fewClouds: result = .light
+        case .clouds: result = .regular
+        case .drizzle: result = .regular
+        case .rain: result = .regular
+        case .thunderstorm: result = .thick
         default: result = .thin
         }
         
@@ -122,14 +132,22 @@ struct BackgroundView: View {
         }
         #endif
         
-        guard let weatherIcon else { return .none }
+        guard let weatherCondition else { return .none }
         
         let result: Storm.Contents
-        switch weatherIcon.dropLast() {
-        case "09": result = .rain
-        case "10": result = .rain
-        case "11": result = .rain
-        case "13": result = .snow
+//        switch weatherIcon.dropLast() {
+//        case "09": result = .rain
+//        case "10": result = .rain
+//        case "11": result = .rain
+//        case "13": result = .snow
+//        default: result = .none
+//        }
+        
+        switch weatherCondition {
+        case .drizzle: result = .rain
+        case .rain: result = .rain
+        case .thunderstorm: result = .rain
+        case .snow: result = .snow
         default: result = .none
         }
         
@@ -143,15 +161,22 @@ struct BackgroundView: View {
         }
         #endif
         
-        guard let weatherIcon else { return 350.0 }
+        guard let weatherCondition else { return 350.0 }
         
         let result: Double
-        switch weatherIcon.dropLast() {
-        case "09": result = 100.0
-        case "10": result = 300.0
-        case "11": result = 450.0
-        case "13": result = 250.0
-        default: result = 350.0
+//        switch weatherIcon.dropLast() {
+//        case "09": result = 100.0
+//        case "10": result = 300.0
+//        case "11": result = 450.0
+//        case "13": result = 250.0
+//        default: result = 350.0
+//        }
+        switch weatherCondition {
+        case .drizzle: result = 100
+        case .rain: result = 300
+        case .thunderstorm: result = 450
+        case .snow: result = 250
+        default: result = 350
         }
         
         return miniature ? result / 10 : result
@@ -306,32 +331,32 @@ struct BackgroundView: View {
         var result = (type == .top) ? resultTop : resultBottom
         
         guard let timezoneOffset else { return result }
-        guard let weatherIcon else { return result }
+        guard let weatherCondition else { return result }
         guard let sunrise else { return result }
         guard let sunset else { return result }
         
-        let colorsDayNightStart: [String: [Color]] = [
-            "01": [.clearSkyDayStart, .clearSkyNightStart],
-            "02": [.fewCloudsDayStart, .fewCloudsNightStart],
-            "03": [.scatteredCloudsDayStart, .scatteredCloudsNightStart],
-            "04": [.brokenCloudsDayStart, .brokenCloudsNightStart],
-            "09": [.showerRainDayStart, .showerRainNightStart],
-            "10": [.rainDayStart, .rainNightStart],
-            "11": [.thunderStormDayStart, .thunderStormNightStart],
-            "13": [.snowDayStart, .snowNightStart],
-            "50": [.mistDayStart, .mistNightStart],
+        let colorsDayNightStart: [WeatherData.WeatherCondition.ConditionType: [Color]] = [
+            .clear(isDaytime: true): [.clearSkyDayStart, .clearSkyNightStart],
+            .fewClouds(isDaytime: true): [.fewCloudsDayStart, .fewCloudsNightStart],
+//            "03": [.scatteredCloudsDayStart, .scatteredCloudsNightStart],
+            .clouds: [.brokenCloudsDayStart, .brokenCloudsNightStart],
+            .drizzle: [.showerRainDayStart, .showerRainNightStart],
+            .rain: [.rainDayStart, .rainNightStart],
+            .thunderstorm: [.thunderStormDayStart, .thunderStormNightStart],
+            .snow: [.snowDayStart, .snowNightStart],
+            .haze(isDaytime: true): [.mistDayStart, .mistNightStart],
         ]
         
-        let colorsDayNightEnd: [String: [Color]] = [
-            "01": [.clearSkyDayEnd, .clearSkyNightEnd],
-            "02": [.fewCloudsDayEnd, .fewCloudsNightEnd],
-            "03": [.scatteredCloudsDayEnd, .scatteredCloudsNightEnd],
-            "04": [.brokenCloudsDayEnd, .brokenCloudsNightEnd],
-            "09": [.showerRainDayEnd, .showerRainNightEnd],
-            "10": [.rainDayEnd, .rainNightEnd],
-            "11": [.thunderStormDayEnd, .thunderStormNightEnd],
-            "13": [.snowDayEnd, .snowNightEnd],
-            "50": [.mistDayEnd, .mistNightEnd],
+        let colorsDayNightEnd: [WeatherData.WeatherCondition.ConditionType: [Color]] = [
+            .clear(isDaytime: false): [.clearSkyDayEnd, .clearSkyNightEnd],
+            .fewClouds(isDaytime: false): [.fewCloudsDayEnd, .fewCloudsNightEnd],
+//            "03": [.scatteredCloudsDayEnd, .scatteredCloudsNightEnd],
+            .clouds: [.brokenCloudsDayEnd, .brokenCloudsNightEnd],
+            .drizzle: [.showerRainDayEnd, .showerRainNightEnd],
+            .rain: [.rainDayEnd, .rainNightEnd],
+            .thunderstorm: [.thunderStormDayEnd, .thunderStormNightEnd],
+            .snow: [.snowDayEnd, .snowNightEnd],
+            .haze(isDaytime: false): [.mistDayEnd, .mistNightEnd],
         ]
         
         let timeZone = TimeZone(secondsFromGMT: timezoneOffset) ?? .current
@@ -346,9 +371,9 @@ struct BackgroundView: View {
         let sunriseLocation = sunriseDate.timeIntervalSince(startOfDay) / 86_400
         let sunsetLocation = sunsetDate.timeIntervalSince(startOfDay) / 86_400
         
-        let icon = String(weatherIcon.dropLast())
+//        let icon = String(weatherIcon.dropLast())
         
-        guard let colors = (type == .top) ? colorsDayNightStart[icon] : colorsDayNightEnd[icon] else { return result }
+        guard let colors = (type == .top) ? colorsDayNightStart[weatherCondition] : colorsDayNightEnd[weatherCondition] else { return result }
         
         let day = colors[0]
         let night = colors[1]
@@ -451,9 +476,21 @@ struct BackgroundView: View {
         static let all: Effects = [.gradient, .stars, .clouds, .storm]
     }
     
-    init(timezoneOffset: Int? = nil, weatherIcon: String? = nil, sunrise: Int? = nil, sunset: Int? = nil, windSpeed: Double? = nil, effects: Effects = .all, miniature: Bool = false, debugCloudThickness: Cloud.Thickness = .regular, debugTime: Double = 0.0, useDebugTime: Bool = false, useDebugCloudThickness: Bool = false) {
+    init(
+        timezoneOffset: Int? = nil,
+        weatherCondition: WeatherData.WeatherCondition.ConditionType? = nil,
+        sunrise: Int? = nil,
+        sunset: Int? = nil,
+        windSpeed: Double? = nil,
+        effects: Effects = .all,
+        miniature: Bool = false,
+        debugCloudThickness: Cloud.Thickness = .regular,
+        debugTime: Double = 0.0,
+        useDebugTime: Bool = false,
+        useDebugCloudThickness: Bool = false
+    ) {
         self.timezoneOffset = timezoneOffset
-        self.weatherIcon = weatherIcon
+        self.weatherCondition = weatherCondition
         self.sunrise = sunrise
         self.sunset = sunset
         self.effects = effects

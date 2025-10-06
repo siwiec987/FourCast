@@ -122,9 +122,9 @@ struct LocationView: View {
         ZStack {
             BackgroundView(
                 timezoneOffset: location.weatherData?.timezoneOffset,
-                weatherIcon: location.weatherData?.current.weather.first?.icon,
-                sunrise: location.weatherData?.current.sunrise,
-                sunset: location.weatherData?.current.sunset,
+                weatherCondition: location.weatherData?.current.weather.first?.condition,
+                sunrise: location.weatherData?.daily.first?.sunrise,
+                sunset: location.weatherData?.daily.first?.sunset,
                 windSpeed: location.weatherData?.current.windSpeed,
                 effects: [.gradient, .stars, .clouds],
                 miniature: true
@@ -161,9 +161,11 @@ struct LocationView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            Image(systemName: WeatherIconMapper.systemIcon(for: location.weatherData?.current.weather[0].icon))
-                .renderingMode(.original)
-                .padding(8)
+            if let iconName = location.weatherData?.current.weather[0].condition.iconName {
+                Image(systemName: iconName)
+                    .renderingMode(.original)
+                    .padding(8)
+            }
         }
         .frame(width: 100, height: 100)
         .clipShape(RoundedRectangle(cornerRadius: 15))

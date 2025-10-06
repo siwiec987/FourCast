@@ -34,9 +34,9 @@ struct WeatherTabView: View {
         NavigationStack(path: $navigationPath) {
             let backgroundView = BackgroundView(
                 timezoneOffset: viewModel.weatherDataForSelectedTab?.timezoneOffset,
-                weatherIcon: viewModel.weatherDataForSelectedTab?.current.weather.first?.icon,
-                sunrise: viewModel.weatherDataForSelectedTab?.current.sunrise,
-                sunset: viewModel.weatherDataForSelectedTab?.current.sunset,
+                weatherCondition: viewModel.weatherDataForSelectedTab?.current.weather.first?.condition,
+                sunrise: viewModel.weatherDataForSelectedTab?.daily.first?.sunrise,
+                sunset: viewModel.weatherDataForSelectedTab?.daily.first?.sunset,
                 windSpeed: viewModel.weatherDataForSelectedTab?.current.windSpeed
             )
             
