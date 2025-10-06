@@ -27,7 +27,7 @@ struct WeatherComponent: ViewModifier {
             .foregroundStyle(.white)
             .background(
                 weatherBackgroundColor
-                    .opacity(0.5)
+                    .opacity(0.8)
                     .animation(.default, value: weatherBackgroundColor)
             )
             .clipShape(.rect(cornerRadius: 20))
