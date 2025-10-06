@@ -9,12 +9,6 @@ import Foundation
 import CoreLocation
 import ActivityKit
 
-struct CalendarEventLocation {
-    var location: Location
-    var startDate: Date
-    var travelTime: TimeInterval? // pole "czas ruszać" w szczegółach eventu
-}
-
 @MainActor @Observable
 class WeatherTabViewModel {
     let locationManager = LocationManager()

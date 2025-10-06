@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DailyForecastView: View {
     @Environment(UserSettings.self) private var userSettings
-    let dailyWeatherData: [DailyWeather]
+    let dailyWeatherData: [WeatherData.DailyWeather]
     let timezoneOffset: Int
     
     var body: some View {
@@ -22,7 +22,7 @@ struct DailyForecastView: View {
                     HStack {
                         Spacer()
                         
-                        Image(systemName: WeatherIconMapper.systemIcon(for: dailyForecast.weather[0].icon))
+                        Image(systemName: dailyForecast.weather[0].condition.iconName)
                             .renderingMode(.original)
                             .resizable()
                             .aspectRatio(contentMode: .fit)

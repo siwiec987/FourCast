@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HourlyForecastView: View {
-    let hourlyWeatherData: [HourlyWeather]
+    let hourlyWeatherData: [WeatherData.HourlyWeather]
     let timezoneOffset: Int
     
     var body: some View {
@@ -25,7 +25,7 @@ struct HourlyForecastView: View {
         .weatherComponent(addPadding: false)
     }
     
-    func getWeekdays(forecasts: [HourlyWeather]) -> [String] {
+    func getWeekdays(forecasts: [WeatherData.HourlyWeather]) -> [String] {
         var result: [String] = []
         
         for forecast in forecasts {
@@ -41,7 +41,7 @@ struct HourlyForecastView: View {
 
 struct DayForecastView: View {
     var day: String
-    var hourlyForecast: [HourlyWeather]?
+    var hourlyForecast: [WeatherData.HourlyWeather]?
     var timezoneOffset: Int?
     
     var body: some View {
@@ -62,7 +62,7 @@ struct DayForecastView: View {
         .clipShape(RoundedRectangle(cornerRadius: 15))
     }
     
-    private func getHourlyForecasts(for day: String) -> [HourlyWeather] {
+    private func getHourlyForecasts(for day: String) -> [WeatherData.HourlyWeather] {
         return (hourlyForecast ?? []).filter {
             Date.getWeekday(from: $0.dt, with: timezoneOffset ?? 0) == day
         }
@@ -71,7 +71,7 @@ struct DayForecastView: View {
 
 struct HourlyForecastItem: View {
     @Environment(UserSettings.self) private var userSettings
-    let hourlyForecast: HourlyWeather
+    let hourlyForecast: WeatherData.HourlyWeather
     let timezoneOffset: Int?
     
     private var temperature: String {
@@ -86,7 +86,7 @@ struct HourlyForecastItem: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
             
-            Image(systemName: WeatherIconMapper.systemIcon(for: hourlyForecast.weather[0].icon))
+            Image(systemName: hourlyForecast.weather[0].condition.iconName)
                 .renderingMode(.original)
                 .resizable()
                 .aspectRatio(contentMode: .fit)

@@ -130,7 +130,7 @@ class LiveActivityManager {
             return nil
         }
 
-        var eventStartDateWeatherData: HourlyWeather?
+        var eventStartDateWeatherData: WeatherData.HourlyWeather?
         for hour in weatherData.hourly {
             let timeInterval = TimeInterval(hour.dt)
             let weatherDate = Date(timeIntervalSince1970: timeInterval)
