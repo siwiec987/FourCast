@@ -33,13 +33,13 @@ struct WeatherView: View {
                     HourlyForecastView(hourlyWeatherData: weatherData.hourly, timezoneOffset: weatherData.timezoneOffset)
                     DailyForecastView(dailyWeatherData: weatherData.daily, timezoneOffset: weatherData.timezoneOffset)
                     
-                    HStack(spacing: 15) {
-                        SmallComponentView(name: "Wschód słońca", iconName: "sunrise", info: Date.getFormattedHour(from: weatherData.current.sunrise, with: weatherData.timezoneOffset))
-                        SmallComponentView(name: "Zachód słońca", iconName: "sunset", info: Date.getFormattedHour(from: weatherData.current.sunset, with: weatherData.timezoneOffset))
-                    }
+                    if let today = weatherData.daily.first {
+                        HStack(spacing: 15) {
+                            SmallComponentView(name: "Wschód słońca", iconName: "sunrise", info: Date.getFormattedHour(from: today.sunrise, with: weatherData.timezoneOffset))
+                            SmallComponentView(name: "Zachód słońca", iconName: "sunset", info: Date.getFormattedHour(from: today.sunset, with: weatherData.timezoneOffset))
+                        }
                     
-                    if let moonData = weatherData.daily.first {
-                        MoonriseMoonsetView(moonrise: moonData.moonrise, moonset: moonData.moonset, moonPhase: moonData.moonPhase, timezoneOffset: weatherData.timezoneOffset)                        
+                        MoonriseMoonsetView(moonrise: today.moonrise, moonset: today.moonset, moonPhase: today.moonPhase, timezoneOffset: weatherData.timezoneOffset)
                     }
                     
                     WindInfoView(windDegree: weatherData.current.windDeg, windSpeed: weatherData.current.windSpeed, windGust: weatherData.current.windGust)
@@ -66,4 +66,5 @@ struct WeatherView: View {
 #Preview {
     WeatherView(name: "Bieruck", weatherData: SampleWeatherData().data)
         .background(.blue)
+        .environment(UserSettings())
 }
