@@ -30,6 +30,10 @@ struct WeatherView: View {
             VStack(spacing: 15) {
                 if let weatherData {
                     CurrentWeatherView(name: name, temp: weatherData.current.temp, feelsLike: weatherData.current.feelsLike)
+                    if let weatherCondition = weatherData.current.weather.first {
+                        ClothingRecommendationView(temperature: weatherData.current.feelsLike, weatherCondition: weatherCondition, uvi: weatherData.current.uvi)
+                    }
+                    
                     HourlyForecastView(hourlyWeatherData: weatherData.hourly, timezoneOffset: weatherData.timezoneOffset)
                     DailyForecastView(dailyWeatherData: weatherData.daily, timezoneOffset: weatherData.timezoneOffset)
                     
