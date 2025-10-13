@@ -8,5 +8,6 @@
 import SwiftUI
 
 extension EnvironmentValues {
-    @Entry var weatherBackgroundColor: Color = .clear.mix(with: .black, by: 0.2)
+    @Entry var weatherBackgroundTopColor: Color = .clear.mix(with: .black, by: 0.6)
+    @Entry var weatherBackgroundBottomColor: Color = .clear.mix(with: .black, by: 0.2)
 }

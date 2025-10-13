@@ -64,7 +64,8 @@ struct WeatherTabView: View {
                 backgroundView
                     .animation(.default, value: viewModel.selection)
             )
-            .environment(\.weatherBackgroundColor, backgroundView.bottomColor)
+            .environment(\.weatherBackgroundTopColor, backgroundView.topColor)
+            .environment(\.weatherBackgroundBottomColor, backgroundView.bottomColor)
             .onChange(of: scenePhase) {
                 if scenePhase == .active {
                     print("scenePhase == .active!!!")

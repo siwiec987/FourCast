@@ -14,7 +14,7 @@ extension View {
 }
 
 struct WeatherComponent: ViewModifier {
-    @Environment(\.weatherBackgroundColor) private var weatherBackgroundColor
+    @Environment(\.weatherBackgroundBottomColor) private var weatherBackgroundColor
     
     let addPadding: Bool
     var paddingAmount: CGFloat {
