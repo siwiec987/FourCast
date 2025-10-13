@@ -110,6 +110,7 @@ class LiveActivityManager {
                 name: activity.content.state.name,
                 temperature: activity.content.state.temperature,
                 weatherCondition: activity.content.state.weatherCondition,
+                clothingRecommendation: activity.content.state.clothingRecommendation,
                 timezoneOffset: activity.content.state.timezoneOffset,
                 sunrise: activity.content.state.sunrise,
                 sunset: activity.content.state.sunset
@@ -144,21 +145,22 @@ class LiveActivityManager {
             return nil
         }
         
-        guard let weatherCondition = eventStartDateWeatherData.weather.first?.condition else {
+        guard let weatherCondition = eventStartDateWeatherData.weather.first else {
             print("createContentState done: no weather condition")
             return nil
         }
 
-//        let weatherIcon = eventStartDateWeatherData.weather.first?.icon
         let temp = UnitFormatter.getFormattedTemperature(eventStartDateWeatherData.temp, to: userSettings.settings.temperatureUnit)
-//        let icon = WeatherIconMapper.systemIcon(for: weatherIcon)
+        
+        let recommendation = ClothingRecommender.recommend(temperature: eventStartDateWeatherData.feelsLike, weatherCondition: weatherCondition, uvi: eventStartDateWeatherData.uvi, preferences: userSettings.settings.clothingPreferences)
 
         let content = ActivityContent(
             state: CalendarEventWidgetAttributes.ContentState(
                 eventDate: calendarEventLocation.startDate,
                 name: calendarEventLocation.location.name,
                 temperature: temp,
-                weatherCondition: weatherCondition,
+                weatherCondition: weatherCondition.condition,
+                clothingRecommendation: recommendation,
                 timezoneOffset: weatherData.timezoneOffset,
                 sunrise: weatherData.daily.first?.sunrise,
                 sunset: weatherData.daily.first?.sunset
