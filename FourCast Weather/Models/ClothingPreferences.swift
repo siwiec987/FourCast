@@ -9,10 +9,10 @@ import Foundation
 
 struct ClothingPreferences: Codable {
     static let `default` = ClothingPreferences(
-        temperatureOffset: 0,
+        temperatureOffset: Measurement(value: 0, unit: .celsius),
         clothingItems: [.tShirt, .sweater, .lightJacket, .winterJacket, .hatWinter, .hatCap, .gloves, .scarf, .umbrella, .sunglasses]
     )
     
-    var temperatureOffset: Int
-    var clothingItems: [ClothingRecommender.ClothingItem]
+    var temperatureOffset: Measurement<UnitTemperature>
+    var clothingItems: Set<ClothingRecommender.ClothingItem>
 }
