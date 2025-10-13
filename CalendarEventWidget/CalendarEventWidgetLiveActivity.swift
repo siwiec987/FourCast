@@ -18,6 +18,8 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
 //        var iconName: String
         var weatherCondition: WeatherData.WeatherCondition.ConditionType
         
+        var clothingRecommendation: [ClothingRecommender.ClothingItem]
+        
         var timezoneOffset: Int?
 //        var weatherIcon: String?
         var sunrise: Int?
@@ -28,6 +30,24 @@ struct CalendarEventWidgetAttributes: ActivityAttributes {
 }
 
 struct CalendarEventWidgetLiveActivity: Widget {
+    func iconImage(for item: ClothingRecommender.ClothingItem) -> Image {
+        switch item.iconName {
+        case .system(let name): Image(systemName: name)
+        case .asset(let name): Image(name)
+        }
+    }
+    
+    func clothingRecommendationView(for recommendation: [ClothingRecommender.ClothingItem]) -> some View {
+        ForEach(recommendation) { item in
+            iconImage(for: item)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .foregroundStyle(.white)
+        }
+    }
+    
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: CalendarEventWidgetAttributes.self) { context in
             let backgroundView = BackgroundView(timezoneOffset: context.state.timezoneOffset, weatherCondition: context.state.weatherCondition, sunrise: context.state.sunrise, sunset: context.state.sunset, effects: .gradient)
@@ -61,11 +81,7 @@ struct CalendarEventWidgetLiveActivity: Widget {
                     Spacer()
                     
                     HStack {
-                        ForEach(0..<6) { _ in
-                            Image(systemName: "dog.fill")
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                        }
+                        clothingRecommendationView(for: context.state.clothingRecommendation)
                     }
                 }
             }
@@ -110,13 +126,9 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         Spacer()
                         
                         HStack {
-                            ForEach(0..<6) { _ in
-                                Image(systemName: "dog.fill")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                            }
+                            clothingRecommendationView(for: context.state.clothingRecommendation)
                         }
-                        .scaledToFit()
+//                        .scaledToFit()
                     }
                 }
             } compactLeading: {
@@ -152,11 +164,11 @@ extension CalendarEventWidgetAttributes {
 
 extension CalendarEventWidgetAttributes.ContentState {
     fileprivate static var tenMins: CalendarEventWidgetAttributes.ContentState {
-        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: "19°", weatherCondition: .clouds)
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 10), name: "Bedzinska 39", temperature: "19°", weatherCondition: .clouds, clothingRecommendation: [.tShirt, .sunglasses, .umbrella])
      }
     
     fileprivate static var fiveHours: CalendarEventWidgetAttributes.ContentState {
-        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 60 * 5), name: "Bedzinska 39", temperature: "109°", weatherCondition: .clouds)
+        CalendarEventWidgetAttributes.ContentState(eventDate: Date().addingTimeInterval(60 * 60 * 5), name: "Bedzinska 39", temperature: "109°", weatherCondition: .clouds, clothingRecommendation: [.winterJacket, .gloves, .hatWinter, .scarf, .sunglasses, .umbrella])
      }
 }
 
