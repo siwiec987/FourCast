@@ -8,72 +8,123 @@
 import Foundation
 
 struct ClothingRecommender {
-    
-    static func recommend(temp: Int, isWindy: Bool, isRainy: Bool, uv: Int, preferences: ClothingPreferences) -> [ClothingItem] {
-        var result: [ClothingItem] = []
-        result = []
-        // logika
+    static func recommend(temperature: Double, weatherCondition: WeatherData.WeatherCondition, uvi: Double, preferences: ClothingPreferences) -> [ClothingItem] {
+        let temperature = Measurement(value: temperature, unit: WeatherService.Units.temperature).converted(to: .celsius)
+        let rounded = (temperature + preferences.temperatureOffset).converted(to: .celsius).value.rounded()
+        let finalTemp = Measurement(value: rounded, unit: UnitTemperature.celsius)
         
-        return result
+        let isDaytime = weatherCondition.isDaytime
+        let isRainy = weatherCondition.condition == .drizzle || weatherCondition.condition == .rain || weatherCondition.condition == .thunderstorm || weatherCondition.condition == .snow
+        
+        var result: Set<ClothingItem> = []
+        
+        for item in preferences.clothingItems {
+            if let temperatureRange = item.temperatureRange, temperatureRange.contains(finalTemp) {
+                result.insert(item)
+            }
+        }
+        
+        if isDaytime {
+            if preferences.clothingItems.contains(.hatCap) && uvi >= 4 && !result.contains(.hatWinter) {
+                result.insert(.hatCap)
+            }
+            
+            if preferences.clothingItems.contains(.sunglasses) && uvi >= 3 {
+                result.insert(.sunglasses)
+            }
+        }
+        
+        if isRainy {
+            if preferences.clothingItems.contains(.umbrella) && weatherCondition.condition != .snow {
+                result.insert(.umbrella)
+            } else if !result.contains(where: { [.winterJacket, .coat].contains($0) }) {
+                result.remove(.tShirt)
+                result.remove(.sweater)
+                
+                result.insert(.lightJacket)
+            }
+        }
+
+        return result.sorted { $0.rawValue < $1.rawValue }
     }
     
-    enum ClothingItem: CaseIterable, Codable {
-        case tShirt
+    enum ClothingItem: Int, CaseIterable, Codable, Identifiable {
+        case tShirt = 1
         case sweater
         case lightJacket
-        //    case rainJacket
         case winterJacket
         case coat
         
         case hatWinter
-        case hatCap
         case gloves
         case scarf
-        case umbrella
+        
+        case hatCap
         case sunglasses
+        case umbrella
+        
+        var id: Self { self }
+        
+        var description: String {
+            switch self {
+            case .tShirt: "Lekki t-shirt"
+            case .sweater: "Sweter lub bluza"
+            case .lightJacket: "Lekka kurtka przejściowa"
+            case .winterJacket: "Ciepła zimowa kurtka"
+            case .coat: "Zimowy płaszcz"
+                
+            case .hatWinter: "Ciepła czapka zimowa"
+            case .gloves: "Rękawiczki"
+            case .scarf: "Szalik"
+                
+            case .hatCap: "Czapka z daszkiem"
+            case .sunglasses: "Okulary przeciwsłoneczne"
+            case .umbrella: "Parasol"
+            }
+        }
         
         var iconName: IconSource {
             switch self {
             case .tShirt: .system("tshirt.fill")
             case .sweater: .asset("crewneck.fill")
             case .lightJacket: .asset("jacket.light.fill")
-                //        case .rainJacket: ""
             case .winterJacket: .system("jacket.fill")
             case .coat: .system("coat.fill")
                 
             case .hatWinter: .asset("hat.winter.fill")
-            case .hatCap: .system("hat.cap.fill")
             case .gloves: .asset("gloves.fill")
             case .scarf: .asset("scarf.fill")
-            case .umbrella: .system("umbrella.fill")
+                
+            case .hatCap: .system("hat.cap.fill")
             case .sunglasses: .system("sunglasses.fill")
+            case .umbrella: .system("umbrella.fill")
             }
         }
         
-        var temperatureRange: ClosedRange<Measurement<UnitTemperature>> {
+        var temperatureRange: ClosedRange<Measurement<UnitTemperature>>? {
             let minTemp = -100
             let maxTemp = 100
             
             return switch self {
             case .tShirt: getCelsiusMeasurementClosedRange(min: 20, max: maxTemp)
-            case .sweater: getCelsiusMeasurementClosedRange(min: 12, max: 20)
-            case .lightJacket: getCelsiusMeasurementClosedRange(min: 8, max: 15)
-            case .winterJacket: getCelsiusMeasurementClosedRange(min: minTemp, max: 8)
-            case .coat: getCelsiusMeasurementClosedRange(min: minTemp, max: 8)
+            case .sweater: getCelsiusMeasurementClosedRange(min: 14, max: 19)
+            case .lightJacket: getCelsiusMeasurementClosedRange(min: 8, max: 13)
+            case .winterJacket: getCelsiusMeasurementClosedRange(min: minTemp, max: 7)
+            case .coat: getCelsiusMeasurementClosedRange(min: minTemp, max: 7)
                 
-            case .hatWinter: getCelsiusMeasurementClosedRange(min: minTemp, max: 8)
-            case .hatCap: getCelsiusMeasurementClosedRange(min: 15, max: maxTemp)
+            case .hatWinter: getCelsiusMeasurementClosedRange(min: minTemp, max: 7)
             case .gloves: getCelsiusMeasurementClosedRange(min: minTemp, max: 3)
-            case .scarf: getCelsiusMeasurementClosedRange(min: minTemp, max: 8)
-            case .umbrella: getCelsiusMeasurementClosedRange(min: minTemp, max: maxTemp)
-            case .sunglasses: getCelsiusMeasurementClosedRange(min: minTemp, max: maxTemp)
+            case .scarf: getCelsiusMeasurementClosedRange(min: minTemp, max: 7)
+                
+            case .hatCap: nil
+            case .sunglasses: nil
+            case .umbrella: nil
             }
             
             func getCelsiusMeasurementClosedRange(min: Int, max: Int) -> ClosedRange<Measurement<UnitTemperature>> {
                 Measurement(value: Double(min), unit: .celsius)...Measurement(value: Double(max), unit: .celsius)
             }
         }
-        
         
         enum IconSource {
             case system(String)
