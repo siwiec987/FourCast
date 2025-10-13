@@ -83,15 +83,6 @@ struct BackgroundView: View {
         guard let weatherCondition else { return .none }
         
         let result: Cloud.Thickness
-//        switch weatherIcon.dropLast() {
-//        case "02": result = .light
-//        case "03": result = .light
-//        case "04": result = .regular
-//        case "09": result = .regular
-//        case "10": result = .regular
-//        case "11": result = .thick
-//        default: result = .thin
-//        }
         
         switch weatherCondition {
         case .fewClouds: result = .light
@@ -135,13 +126,6 @@ struct BackgroundView: View {
         guard let weatherCondition else { return .none }
         
         let result: Storm.Contents
-//        switch weatherIcon.dropLast() {
-//        case "09": result = .rain
-//        case "10": result = .rain
-//        case "11": result = .rain
-//        case "13": result = .snow
-//        default: result = .none
-//        }
         
         switch weatherCondition {
         case .drizzle: result = .rain
@@ -164,13 +148,7 @@ struct BackgroundView: View {
         guard let weatherCondition else { return 350.0 }
         
         let result: Double
-//        switch weatherIcon.dropLast() {
-//        case "09": result = 100.0
-//        case "10": result = 300.0
-//        case "11": result = 450.0
-//        case "13": result = 250.0
-//        default: result = 350.0
-//        }
+        
         switch weatherCondition {
         case .drizzle: result = 100
         case .rain: result = 300
@@ -299,7 +277,6 @@ struct BackgroundView: View {
                     Slider(value: $debugTime, in: 0...1)
                 }
             }
-//            .padding(.top)
             .presentationDetents([.medium])
         }
         #endif
@@ -338,7 +315,6 @@ struct BackgroundView: View {
         let colorsDayNightStart: [WeatherData.WeatherCondition.ConditionType: [Color]] = [
             .clear(isDaytime: true): [.clearSkyDayStart, .clearSkyNightStart],
             .fewClouds(isDaytime: true): [.fewCloudsDayStart, .fewCloudsNightStart],
-//            "03": [.scatteredCloudsDayStart, .scatteredCloudsNightStart],
             .clouds: [.brokenCloudsDayStart, .brokenCloudsNightStart],
             .drizzle: [.showerRainDayStart, .showerRainNightStart],
             .rain: [.rainDayStart, .rainNightStart],
@@ -350,7 +326,6 @@ struct BackgroundView: View {
         let colorsDayNightEnd: [WeatherData.WeatherCondition.ConditionType: [Color]] = [
             .clear(isDaytime: false): [.clearSkyDayEnd, .clearSkyNightEnd],
             .fewClouds(isDaytime: false): [.fewCloudsDayEnd, .fewCloudsNightEnd],
-//            "03": [.scatteredCloudsDayEnd, .scatteredCloudsNightEnd],
             .clouds: [.brokenCloudsDayEnd, .brokenCloudsNightEnd],
             .drizzle: [.showerRainDayEnd, .showerRainNightEnd],
             .rain: [.rainDayEnd, .rainNightEnd],
@@ -370,8 +345,6 @@ struct BackgroundView: View {
 
         let sunriseLocation = sunriseDate.timeIntervalSince(startOfDay) / 86_400
         let sunsetLocation = sunsetDate.timeIntervalSince(startOfDay) / 86_400
-        
-//        let icon = String(weatherIcon.dropLast())
         
         guard let colors = (type == .top) ? colorsDayNightStart[weatherCondition] : colorsDayNightEnd[weatherCondition] else { return result }
         
