@@ -79,6 +79,10 @@ struct WeatherData: Codable, Equatable {
 //        let main: String
 //        let description: String
         private let icon: String
+        
+        init(icon: String) {
+            self.icon = icon
+        }
     }
 }
 
@@ -128,26 +132,5 @@ extension WeatherData.WeatherCondition {
                 isDaytime ? "sun.haze.fill" : "moon.haze.fill"
             }
         }
-        
-//        func colors(isDaytime: Bool) -> [Color] {
-//            switch self {
-//            case .clear:
-//                isDaytime ? [.clearSkyDayStart, .clearSkyDayEnd] : [.clearSkyNightStart, .clearSkyNightEnd]
-//            case .fewClouds:
-//                isDaytime ? [.fewCloudsDayStart, .fewCloudsDayEnd] : [.fewCloudsNightStart, .fewCloudsNightEnd]
-//            case .clouds:
-//                isDaytime ? [.brokenCloudsDayStart, .brokenCloudsDayEnd] : [.brokenCloudsNightStart, .brokenCloudsNightEnd]
-//            case .drizzle:
-//                isDaytime ? [.showerRainDayStart, .showerRainDayEnd] : [.showerRainNightStart, .showerRainNightEnd]
-//            case .rain:
-//                isDaytime ? [.rainDayStart, .rainDayEnd] : [.rainNightStart, .rainNightEnd]
-//            case .thunderstorm:
-//                isDaytime ? [.thunderStormDayStart, .thunderStormDayEnd] : [.thunderStormNightStart, .thunderStormNightEnd]
-//            case .snow:
-//                isDaytime ? [.snowDayStart, .snowDayEnd] : [.snowNightStart, .snowNightEnd]
-//            case .haze:
-//                isDaytime ? [.mistDayStart, .mistDayEnd] : [.mistNightStart, .mistNightEnd]
-//            }
-//        }
     }
 }
