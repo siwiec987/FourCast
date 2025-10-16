@@ -65,12 +65,11 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         .fontWeight(.semibold)
                     
                     Image(systemName: context.state.weatherCondition.iconName)
-//                        .renderingMode(.original)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 40, height: 40)
                 }
-                .padding(.bottom, -15)
+                .padding(.bottom, -5)
                 
                 HStack(alignment: .lastTextBaseline) {
                     Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
@@ -128,8 +127,8 @@ struct CalendarEventWidgetLiveActivity: Widget {
                         HStack {
                             clothingRecommendationView(for: context.state.clothingRecommendation)
                         }
-//                        .scaledToFit()
                     }
+                    .padding(.top, -5)
                 }
             } compactLeading: {
                 Text(timerInterval: Date.now...context.state.eventDate, pauseTime: nil)
