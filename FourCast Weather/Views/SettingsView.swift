@@ -95,8 +95,10 @@ struct SettingsView: View {
             }
             
             Section("Rekomendacje") {
-                NavigationLink(destination: Text("Tu będą opcje rekomendacji")) {
-                    Text("Dostosuj rekomendacje")
+                NavigationLink("Dostosuj rekomendacje") {
+                    ClothingPreferencesConfigView(
+                        navigationTitle: "Rekomendacje",
+                        navigationTitleDisplayMode: .inline)
                 }
             }
         }
