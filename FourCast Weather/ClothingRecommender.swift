@@ -9,8 +9,8 @@ import Foundation
 
 struct ClothingRecommender {
     static func recommend(temperature: Double, weatherCondition: WeatherData.WeatherCondition, uvi: Double, preferences: ClothingPreferences) -> [ClothingItem] {
-        let temperature = Measurement(value: temperature, unit: WeatherService.Units.temperature).converted(to: .celsius)
-        let rounded = (temperature + preferences.temperatureOffset).converted(to: .celsius).value.rounded()
+        let temp = Measurement(value: temperature, unit: WeatherService.Units.temperature).converted(to: .celsius)
+        let rounded = (temp - preferences.temperatureOffset).converted(to: .celsius).value.rounded()
         let finalTemp = Measurement(value: rounded, unit: UnitTemperature.celsius)
         
         let isDaytime = weatherCondition.isDaytime
