@@ -68,8 +68,8 @@ extension Color {
     static let mistNightStart = Color(red: 0.20, green: 0.22, blue: 0.26)
     static let mistNightEnd = Color(red: 0.12, green: 0.13, blue: 0.16)
     
-    static let darkCloudStart = Color(red: 0.21, green: 0.23, blue: 0.30)  /*Color(hue: 0.65, saturation: 0.3, brightness: 0.3)*/
-    static let darkCloudEnd = Color(red: 0.48, green: 0.51, blue: 0.60)    /*Color(hue: 0.65, saturation: 0.3, brightness: 0.7)*/
+    static let darkCloudStart = Color(red: 0.21, green: 0.23, blue: 0.30)
+    static let darkCloudEnd = Color(red: 0.48, green: 0.51, blue: 0.60)
     static let lightCloudStart = Color.white
     static let lightCloudEnd = Color(white: 0.75)
     static let sunriseCloudStart = Color.lightCloudStart
