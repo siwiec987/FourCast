@@ -116,13 +116,14 @@ struct SettingsView: View {
         case oneHourBefore = "1 godzina przed"
         case twoHoursBefore = "2 godziny przed"
         case fourHoursBefore = "4 godziny przed"
+        case sixHoursBefore = "6 godzin przed"
         case timeToLeave = "Czas ruszać"
         
         var displayName: String {
             self.rawValue
         }
         
-        var offset: TimeInterval {
+        var offset: TimeInterval? {
             switch self {
             case .fiveMinutesBefore: 5 * 60
             case .tenMinutesBefore: 10 * 60
@@ -131,7 +132,8 @@ struct SettingsView: View {
             case .oneHourBefore: 60 * 60
             case .twoHoursBefore: 120 * 60
             case .fourHoursBefore: 240 * 60
-            case .timeToLeave: .infinity
+            case .sixHoursBefore: 360 * 60
+            case .timeToLeave: nil
             }
         }
     }

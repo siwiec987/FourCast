@@ -13,7 +13,7 @@ struct UserSettingsModel: Codable {
     private var pressureUnitString: String
     private var distanceUnitString: String
     
-    var activityStartOffset: TimeInterval
+    var activityStartOffset: TimeInterval?
     
     var clothingPreferences: ClothingPreferences
     
@@ -94,7 +94,7 @@ struct UserSettingsModel: Codable {
         speedUnit: UnitSpeed = .init(forLocale: .current, usage: .wind),
         pressureUnit: UnitPressure = .init(forLocale: .current, usage: .barometric),
         distanceUnit: UnitLength = .init(forLocale: .current, usage: .visibility),
-        activityStartOffset: TimeInterval = 30 * 60,
+        activityStartOffset: TimeInterval? = 30 * 60,
         clothingPreferences: ClothingPreferences = .default
     ) {
         temperatureUnitString = tempUnit.symbol

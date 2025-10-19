@@ -41,8 +41,12 @@ class LiveActivityManager {
         guard checkAuthorization() else { return print("startActivity done: activities not enabled") }
         guard let calendarEventLocation else { return print("startActivity done: no calendarEventLocation") }
         
-        let activityStartOffset = userSettings.settings.activityStartOffset == .infinity ? calendarEventLocation.travelTime : userSettings.settings.activityStartOffset
-        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 0))
+        var activityStartOffset = userSettings.settings.activityStartOffset
+        if activityStartOffset == nil {
+            activityStartOffset = calendarEventLocation.travelTime
+        }
+        
+        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 30 * 60))
         guard Date.now >= activityStartDate else { return print("startActivity done: too early") }
         
         guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("startActivity done: createActivityContent returned nil") }
@@ -71,8 +75,12 @@ class LiveActivityManager {
             return print("updateActivity done: no calendarEventLocation")
         }
         
-        let activityStartOffset = userSettings.settings.activityStartOffset == .infinity ? calendarEventLocation.travelTime : userSettings.settings.activityStartOffset
-        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 0))
+        var activityStartOffset = userSettings.settings.activityStartOffset
+        if activityStartOffset == nil {
+            activityStartOffset = calendarEventLocation.travelTime
+        }
+        
+        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 30 * 60))
         guard Date.now >= activityStartDate else {
             await endActivity(dismissalPolicy: .immediate)
             BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
