@@ -35,12 +35,9 @@ struct DailyForecastView: View {
                     HStack {
                         Text(UnitFormatter.getFormattedTemperature(dailyForecast.temp.min, to: userSettings.settings.temperatureUnit))
                             .foregroundStyle(.secondary)
-//                        Text(". . .")
-                        Spacer()
                         Text(UnitFormatter.getFormattedTemperature(dailyForecast.temp.max, to: userSettings.settings.temperatureUnit))
                     }
                     .bold()
-//                    .fixedSize(horizontal: true, vertical: false)
                     .gridColumnAlignment(.trailing)
                 }
             }
