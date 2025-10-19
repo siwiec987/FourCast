@@ -38,7 +38,7 @@ class CalendarManager {
             isAuthorized = true
             event = getEvent()
         @unknown default:
-            fatalError("FatalError: Coś się porządnie popsuło")
+            isAuthorized = false
         }
         
         return event
