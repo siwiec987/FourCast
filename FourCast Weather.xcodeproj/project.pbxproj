@@ -83,12 +83,13 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				ClothingRecommender.swift,
 				Clouds/Cloud.swift,
 				Clouds/CloudGroup.swift,
 				Clouds/CloudsView.swift,
 				Models/ClothingPreferences.swift,
 				Models/WeatherData.swift,
+				Services/ClothingRecommender.swift,
+				Services/WeatherService.swift,
 				Stars/Star.swift,
 				Stars/StarField.swift,
 				Stars/StarsView.swift,
@@ -99,7 +100,6 @@
 				"Utilities/Extensions/CLLocationCoordinate2D+Equatable.swift",
 				"Utilities/Extensions/Colors+BackgroundColors.swift",
 				Views/BackgroundView.swift,
-				WeatherService.swift,
 			);
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
 		};

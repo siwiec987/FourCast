@@ -92,6 +92,8 @@ struct ClothingPreferencesConfigView: View {
     private func load() {
         let preferences = userSettings.settings.clothingPreferences
         
+        temperatureOffset = preferences.temperatureOffset.converted(to: .celsius).value
+        
         likesUmbrellas = preferences.clothingItems.contains(.umbrella)
         likesCaps = preferences.clothingItems.contains(.hatCap)
         likesSunglasses = preferences.clothingItems.contains(.sunglasses)
@@ -99,8 +101,6 @@ struct ClothingPreferencesConfigView: View {
         likesGloves = preferences.clothingItems.contains(.gloves)
         likesScarves = preferences.clothingItems.contains(.scarf)
         winterOuterwear = preferences.clothingItems.contains(.winterJacket) ? .winterJacket : .coat
-        
-        temperatureOffset = preferences.temperatureOffset.converted(to: .celsius).value
     }
 }
 
