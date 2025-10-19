@@ -8,8 +8,6 @@
 import Foundation
 import CoreLocation
 
-// TODO: Naprawić didChangeAuthorization, bo wywaliłem i teraz po nadaniu uprawnień nie pobiera lokalizacji :(((
-
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
     @ObservationIgnored private let locationManager = CLLocationManager()
@@ -45,7 +43,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 //                locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
         @unknown default:
-            locationContinuation?.resume(throwing: LocationManagerError.unknown)
+            locationContinuation?.resume(throwing: LocationManagerError.permissionDenied)
             locationContinuation = nil
         }
     }
@@ -131,5 +129,4 @@ enum LocationManagerError: Error {
     case permissionDenied
     case noLocationFound
     case alreadyInUse
-    case unknown
 }
