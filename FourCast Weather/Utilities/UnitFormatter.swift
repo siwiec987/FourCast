@@ -10,7 +10,10 @@ import Foundation
 struct UnitFormatter {
     static func getFormattedTemperature(_ temperature: Double, to newUnit: UnitTemperature) -> String {
         let measurement = Measurement(value: temperature, unit: WeatherService.Units.temperature)
-        let rounded = measurement.converted(to: newUnit).value.rounded()
+        var rounded = measurement.converted(to: newUnit).value.rounded()
+        if rounded == -0 {
+            rounded = 0
+        }
         
         return Measurement(value: rounded, unit: newUnit)
             .formatted(.measurement(width: .abbreviated, usage: .asProvided, hidesScaleName: true))
