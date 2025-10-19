@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ClothingPreferencesConfigView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(UserSettings.self) private var userSettings
     
     @State private var likesUmbrellas = true
@@ -69,6 +70,11 @@ struct ClothingPreferencesConfigView: View {
         .navigationBarTitleDisplayMode(navigationTitleDisplayMode)
         .onAppear(perform: load)
         .onDisappear(perform: save)
+        .onChange(of: scenePhase) {
+            if scenePhase != .active {
+                save()
+            }
+        }
     }
     
     private func save() {
