@@ -15,6 +15,7 @@ struct WeatherTabView: View {
     // UPDATE 2: jednak przestało odświeżać poprawnie, zostawię to
     
     @State private var navigationPath = NavigationPath()
+    @State private var backgroundColors = WeatherBackgroundColors()
     
     init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
         self.viewModel = WeatherTabViewModel(userSettings: userSettings, liveActivityManager: liveActivityManager)
@@ -62,10 +63,8 @@ struct WeatherTabView: View {
             .id(tabViewRebuild)
             .background(
                 backgroundView
-                    .animation(.default, value: viewModel.selection)
+                    .animation(.default, value: viewModel.weatherDataForSelectedTab)
             )
-            .environment(\.weatherBackgroundTopColor, backgroundView.topColor)
-            .environment(\.weatherBackgroundBottomColor, backgroundView.bottomColor)
             .onChange(of: scenePhase) {
                 if scenePhase == .active {
                     print("scenePhase == .active!!!")
@@ -93,6 +92,11 @@ struct WeatherTabView: View {
                     await viewModel.startOrUpdateLiveActivity()
                 }
             }
+            .onChange(of: viewModel.weatherDataForSelectedTab) {
+                backgroundColors.topColor = backgroundView.topColor
+                backgroundColors.bottomColor = backgroundView.bottomColor
+            }
+            .environment(backgroundColors)
             .tabViewStyle(.page)
             .indexViewStyle(.page(backgroundDisplayMode: .always))
             .toolbar {

@@ -14,7 +14,7 @@ extension View {
 }
 
 struct WeatherComponent: ViewModifier {
-    @Environment(\.weatherBackgroundBottomColor) private var weatherBackgroundColor
+    @Environment(WeatherBackgroundColors.self) private var backgroundColors
     
     let addPadding: Bool
     var paddingAmount: CGFloat {
@@ -26,9 +26,9 @@ struct WeatherComponent: ViewModifier {
             .padding(paddingAmount)
             .foregroundStyle(.white)
             .background(
-                weatherBackgroundColor
+                backgroundColors.bottomColor
                     .opacity(0.8)
-                    .animation(.default, value: weatherBackgroundColor)
+                    .animation(.default, value: backgroundColors.bottomColor)
             )
             .clipShape(.rect(cornerRadius: 20))
     }
