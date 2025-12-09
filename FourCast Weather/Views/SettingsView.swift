@@ -98,7 +98,9 @@ struct SettingsView: View {
                 NavigationLink("Dostosuj rekomendacje") {
                     ClothingPreferencesConfigView(
                         navigationTitle: "Rekomendacje",
-                        navigationTitleDisplayMode: .inline)
+                        navigationTitleDisplayMode: .inline,
+                        userSettings: userSettings
+                    )
                 }
             }
         }

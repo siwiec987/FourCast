@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct FourCast_WeatherApp: App {
     @AppStorage("firstLaunch") private var firstLaunch = true
+//    @State private var firstLaunch = true
     
     private let userSettings = UserSettings()
     private let liveActivityManager = LiveActivityManager()
@@ -24,7 +25,6 @@ struct FourCast_WeatherApp: App {
         }
         .environment(userSettings)
         .backgroundTask(.appRefresh(liveActivityManager.bgTaskIdentifier)) {
-            print("entered backgroundTask")
             await liveActivityManager.endActivity(dismissalPolicy: .immediate)
         }
     }
@@ -34,7 +34,8 @@ struct FourCast_WeatherApp: App {
         NavigationStack {
             ClothingPreferencesConfigView(
                 navigationTitle: "Cześć!",
-                navigationTitleDisplayMode: .large
+                navigationTitleDisplayMode: .large,
+                userSettings: userSettings
             )
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

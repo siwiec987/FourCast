@@ -9,32 +9,23 @@ import SwiftUI
 
 struct ClothingPreferencesConfigView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(UserSettings.self) private var userSettings
+//    @Environment(UserSettings.self) private var userSettings
     
-    @State private var likesUmbrellas = true
-    @State private var likesCaps = true
-    @State private var likesSunglasses = true
-    
-    @State private var likesWinterHats = true
-    @State private var likesGloves = true
-    @State private var likesScarves = true
-    
-    @State private var winterOuterwear: ClothingRecommender.ClothingItem = .winterJacket
-    
-    @State private var temperatureOffset = 0.0
+    @State private var viewModel: ClothingPreferencesViewModel
     
     let navigationTitle: String
     let navigationTitleDisplayMode: NavigationBarItem.TitleDisplayMode
     
-    init(navigationTitle: String, navigationTitleDisplayMode: NavigationBarItem.TitleDisplayMode) {
+    init(navigationTitle: String, navigationTitleDisplayMode: NavigationBarItem.TitleDisplayMode, userSettings: UserSettings) {
         self.navigationTitle = navigationTitle
         self.navigationTitleDisplayMode = navigationTitleDisplayMode
+        self.viewModel = ClothingPreferencesViewModel(userSettings: userSettings)
     }
     
     var body: some View {
         Form {
             Section {
-                Picker("W zimę preferuję", selection: $winterOuterwear) {
+                Picker("W zimę preferuję", selection: $viewModel.winterOuterwear) {
                     Text("Kurtki")
                         .tag(ClothingRecommender.ClothingItem.winterJacket)
                     
@@ -44,19 +35,19 @@ struct ClothingPreferencesConfigView: View {
             }
             
             Section {
-                Toggle("Używam parasola", isOn: $likesUmbrellas)
-                Toggle("Noszę czapki z daszkiem", isOn: $likesCaps)
-                Toggle("Lubię okulary przeciwsłoneczne", isOn: $likesSunglasses)
+                Toggle("Używam parasola", isOn: $viewModel.likesUmbrellas)
+                Toggle("Noszę czapki z daszkiem", isOn: $viewModel.likesCaps)
+                Toggle("Lubię okulary przeciwsłoneczne", isOn: $viewModel.likesSunglasses)
             }
             
             Section {
-                Toggle("Noszę czapki zimowe", isOn: $likesWinterHats)
-                Toggle("Noszę rękawiczki", isOn: $likesGloves)
-                Toggle("Noszę szaliki", isOn: $likesScarves)
+                Toggle("Noszę czapki zimowe", isOn: $viewModel.likesWinterHats)
+                Toggle("Noszę rękawiczki", isOn: $viewModel.likesGloves)
+                Toggle("Noszę szaliki", isOn: $viewModel.likesScarves)
             }
             
             Section {
-                Picker("Temperatury", selection: $temperatureOffset) {
+                Picker("Temperatury", selection: $viewModel.temperatureOffset) {
                     Text("Lubię zimno").tag(-5.0)
                     Text("Neutralnie").tag(0.0)
                     Text("Lubię ciepło").tag(5.0)
@@ -68,53 +59,24 @@ struct ClothingPreferencesConfigView: View {
         }
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(navigationTitleDisplayMode)
-        .onAppear(perform: load)
-        .onDisappear(perform: save)
+        .onAppear(perform: viewModel.load)
+        .onDisappear(perform: viewModel.save)
         .onChange(of: scenePhase) {
             if scenePhase != .active {
-                save()
+                viewModel.save()
             }
         }
-    }
-    
-    private func save() {
-        var preferences = userSettings.settings.clothingPreferences
-        
-        preferences.likesUmbrellas(likesUmbrellas)
-        preferences.likesCaps(likesCaps)
-        preferences.likesSunglasses(likesSunglasses)
-        preferences.likesWinterHats(likesWinterHats)
-        preferences.likesGloves(likesGloves)
-        preferences.likesScarves(likesScarves)
-        preferences.winterOuterwearChoice(winterOuterwear)
-        
-        preferences.temperatureOffset = Measurement(value: temperatureOffset, unit: .celsius)
-        
-        userSettings.settings.clothingPreferences = preferences
-        
-        print("Preferences saved!")
-    }
-    
-    private func load() {
-        let preferences = userSettings.settings.clothingPreferences
-        
-        temperatureOffset = preferences.temperatureOffset.converted(to: .celsius).value
-        
-        likesUmbrellas = preferences.clothingItems.contains(.umbrella)
-        likesCaps = preferences.clothingItems.contains(.hatCap)
-        likesSunglasses = preferences.clothingItems.contains(.sunglasses)
-        likesWinterHats = preferences.clothingItems.contains(.hatWinter)
-        likesGloves = preferences.clothingItems.contains(.gloves)
-        likesScarves = preferences.clothingItems.contains(.scarf)
-        winterOuterwear = preferences.clothingItems.contains(.winterJacket) ? .winterJacket : .coat
     }
 }
 
 #Preview {
     NavigationStack {
-        ClothingPreferencesConfigView(navigationTitle: "Preferencje", navigationTitleDisplayMode: .inline)
+        ClothingPreferencesConfigView(
+            navigationTitle: "Preferencje",
+            navigationTitleDisplayMode: .inline,
+            userSettings: UserSettings()
+        )
     }
     .preferredColorScheme(.dark)
-    .environment(UserSettings())
 }
 
