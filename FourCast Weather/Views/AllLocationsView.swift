@@ -54,7 +54,7 @@ struct AllLocationsView: View {
     var body: some View {
         ScrollView {
             if showingSearchResults {
-                SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
+                SearchLocationView(selection: $selection, locationSearchService: $locationSearchService, locations: locations)
             } else {
                 LazyVGrid(columns: columns) {
                     if let calendarEventLocation {

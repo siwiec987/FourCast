@@ -9,37 +9,28 @@ import SwiftUI
 
 struct SearchLocationView: View {
     @Environment(\.dismiss) var dismiss
-    @Environment(Locations.self) private var locations
     
     @Binding var selection: Int
     @Binding var locationSearchService: LocationSearchService
+    
+    @State private var viewModel: SearchLocationViewModel
+    
+    init(selection: Binding<Int>, locationSearchService: Binding<LocationSearchService>, locations: Locations) {
+        _selection = selection
+        _locationSearchService = locationSearchService
+        self.viewModel = SearchLocationViewModel(locations: locations)
+    }
     
     var body: some View {
         LazyVStack(alignment: .leading) {
             ForEach(locationSearchService.results) { result in
                     Button {
-                        LocationManager.getCoordinate(addressString: result.title) { coordinate, error in
-                            if let index = locations.locations.firstIndex(where: { $0.coordinate == coordinate }) {
-                                locationSearchService.query = ""
+                        Task {
+                            if let index = await viewModel.handleSelection(result) {
                                 selection = index
-                                print("SearchLocationView: location already exists!")
-                            } else {
-                                Task {
-                                    do {
-                                        let (response, time) = try await WeatherService.fetchWeatherData(coordinate: coordinate)
-                                        let newLocation = Location(name: result.title, coordinate: coordinate, role: .additional, weatherData: response, lastFetchTime: time)
-                                        locations.locations.append(newLocation)
-                                        selection = locations.locations.count - 1
-                                        print("New location: selection == \(selection)")
-                                        
-                                    } catch OpenWeatherError.invalidData {
-                                        print("Invalid data")
-                                    } catch {
-                                        print("coś innego")
-                                    }
-                                }
                             }
                             
+                            locationSearchService.query = ""
                             dismiss()
                         }
                     } label: {
@@ -49,10 +40,10 @@ struct SearchLocationView: View {
                             Text(result.subtitle)
                                 .foregroundStyle(.secondary)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .foregroundStyle(.primary)
-                    
-                .padding(.vertical, 5)
+                    .padding(.vertical, 5)
             }
         }
         .padding(.horizontal)
@@ -60,8 +51,7 @@ struct SearchLocationView: View {
 }
 
 #Preview {
-    @Previewable @State var selection = 1
     @Previewable @State var locationSearchService = LocationSearchService()
-    SearchLocationView(selection: $selection, locationSearchService: $locationSearchService)
-        .environment(Locations())
+    locationSearchService.query = "po"
+    return SearchLocationView(selection: .constant(1), locationSearchService: $locationSearchService, locations: Locations())
 }
