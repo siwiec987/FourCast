@@ -7,7 +7,7 @@
 		<string>LiveActivityManager.scheduleActivityEndRequest</string>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Give us pls. We want to know your plans.</string>
+	<string>Potrzebujemy dostępu do kalendarza, żeby wyświetlać pogodę dla Twoich nadchodzących wydarzeń.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
