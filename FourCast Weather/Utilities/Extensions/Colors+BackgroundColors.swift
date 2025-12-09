@@ -70,10 +70,13 @@ extension Color {
     
     static let darkCloudStart = Color(red: 0.21, green: 0.23, blue: 0.30)
     static let darkCloudEnd = Color(red: 0.48, green: 0.51, blue: 0.60)
+    
     static let lightCloudStart = Color.white
     static let lightCloudEnd = Color(white: 0.75)
-    static let sunriseCloudStart = Color.lightCloudStart
+    
+    static let sunriseCloudStart = Color.sunriseStart
     static let sunriseCloudEnd = Color.sunriseEnd
-    static let sunsetCloudStart = Color.lightCloudStart
+    
+    static let sunsetCloudStart = Color.sunsetStart
     static let sunsetCloudEnd = Color.sunsetEnd
 }
