@@ -456,23 +456,23 @@ struct BackgroundView: View {
         sunset: Int? = nil,
         windSpeed: Double? = nil,
         effects: Effects = .all,
-        miniature: Bool = false,
-        debugCloudThickness: Cloud.Thickness = .regular,
-        debugTime: Double = 0.0,
-        useDebugTime: Bool = false,
-        useDebugCloudThickness: Bool = false
+        miniature: Bool = false
     ) {
         self.timezoneOffset = timezoneOffset
         self.weatherCondition = weatherCondition
         self.sunrise = sunrise
         self.sunset = sunset
         self.effects = effects
-        self.debugCloudThickness = debugCloudThickness
-        self.debugTime = debugTime
-        self.useDebugTime = useDebugTime
-        self.useDebugCloudThickness = useDebugCloudThickness
         self.windSpeed = windSpeed
         self.miniature = miniature
+
+
+        #if DEBUG
+            self.debugCloudThickness = .regular
+            self.debugTime = 0.0
+            self.useDebugTime = false
+            self.useDebugCloudThickness = false
+        #endif
     }
 }
 
