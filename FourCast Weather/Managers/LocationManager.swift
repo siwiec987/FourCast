@@ -81,7 +81,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
     
-    static func getLocationName(location: CLLocation?, completion: @escaping (String?) -> Void) {
+    static func getLocationName(location: CLLocation?, completion: @Sendable @escaping (String?) -> Void) {
         guard let location else {
             completion(nil)
             return
@@ -109,7 +109,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
     
-    static func getCoordinate(addressString: String, completion: @escaping(CLLocationCoordinate2D, NSError?) -> Void) {
+    static func getCoordinate(addressString: String, completion: @Sendable @escaping (CLLocationCoordinate2D, NSError?) -> Void) {
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(addressString) { (placemarks, error) in
             if let placemark = placemarks?.first, error == nil {

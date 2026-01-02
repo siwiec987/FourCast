@@ -157,9 +157,9 @@ class WeatherTabViewModel {
         print("updateCurrentLocationName done!")
     }
     
-    private func getCalendarEventLocation() {
+    private func getCalendarEventLocation() async {
         print("getCalendarEventLocation called!")
-        guard let calendarEvent = calendarManager.getEventIfAuthorized(), let coordinate = calendarEvent.structuredLocation?.geoLocation?.coordinate, let name = calendarEvent.structuredLocation?.title else {
+        guard let calendarEvent = await calendarManager.getEventIfAuthorized(), let coordinate = calendarEvent.structuredLocation?.geoLocation?.coordinate, let name = calendarEvent.structuredLocation?.title else {
             if let _ = calendarEventLocation {
                 selection = 0
                 calendarEventLocation = nil
@@ -190,7 +190,7 @@ class WeatherTabViewModel {
         print("fetchWeatherForCalendarEventLocation called!")
         let oldCoordinate = calendarEventLocation?.location.coordinate
         
-        getCalendarEventLocation()
+        await getCalendarEventLocation()
         guard var location = calendarEventLocation else { return print("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
         
         let newCoordinate = location.location.coordinate

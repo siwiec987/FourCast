@@ -8,40 +8,39 @@
 import Foundation
 import EventKit
 
-@Observable
+@MainActor @Observable
 class CalendarManager {
     @ObservationIgnored private let store = EKEventStore()
     private(set) var isAuthorized = false
     
     init() {}
     
-    func getEventIfAuthorized() -> EKEvent? {
-        handleAuthorizationStatus()
+    func getEventIfAuthorized() async -> EKEvent? {
+        await handleAuthorizationStatus()
     }
     
-    private func handleAuthorizationStatus() -> EKEvent? {
-        var event: EKEvent? = nil
-        
+    private func handleAuthorizationStatus() async -> EKEvent? {
         switch EKEventStore.authorizationStatus(for: .event) {
         case .notDetermined:
-            store.requestFullAccessToEvents() { success, error in
-                if success {
-                    self.isAuthorized = true
-                    event = self.getEvent()
-                } else {
-                    self.isAuthorized = false
-                }
+            do {
+                let result = try await store.requestFullAccessToEvents()
+                self.isAuthorized = result
+                return result ? getEvent() : nil
+            } catch {
+                self.isAuthorized = false
+                return nil
             }
+            
         case .restricted, .denied, .writeOnly:
             isAuthorized = false
+            return nil
         case .fullAccess:
             isAuthorized = true
-            event = getEvent()
+            return getEvent()
         @unknown default:
             isAuthorized = false
+            return nil
         }
-        
-        return event
     }
     
     private func getEvent() -> EKEvent? {
