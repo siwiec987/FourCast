@@ -51,7 +51,7 @@ class WeatherTabViewModel {
         return result
     }
     
-    var bottomToolbarMessage: String {
+    var lastFetchTimeForSelectedTab: Date? {
         let lastFetch: Date?
         if selection == -2 {
             lastFetch = calendarEventLocation?.location.lastFetchTime
@@ -61,22 +61,7 @@ class WeatherTabViewModel {
             lastFetch = nil
         }
         
-        guard let lastFetch else { return "" }
-        
-        let calendar = Calendar.current
-        if calendar.isDateInToday(lastFetch) {
-            return lastFetch.formatted(date: .omitted, time: .shortened)
-        }
-        
-        return lastFetch.formatted(date: .abbreviated, time: .shortened)
-    }
-    
-    var bottomToolbarTitle: String {
-        guard !bottomToolbarMessage.isEmpty else {
-            return ""
-        }
-        
-        return "Ostatnia aktualizacja:"
+        return lastFetch
     }
     
     init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {

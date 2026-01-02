@@ -21,6 +21,25 @@ struct WeatherTabView: View {
         self.viewModel = WeatherTabViewModel(userSettings: userSettings, liveActivityManager: liveActivityManager)
     }
     
+    var bottomToolbarMessage: String {
+        guard let lastFetch = viewModel.lastFetchTimeForSelectedTab else { return "" }
+        
+        let calendar = Calendar.current
+        if calendar.isDateInToday(lastFetch) {
+            return lastFetch.formatted(date: .omitted, time: .shortened)
+        }
+        
+        return lastFetch.formatted(date: .abbreviated, time: .shortened)
+    }
+    
+    var bottomToolbarTitle: String {
+        guard !bottomToolbarMessage.isEmpty else {
+            return ""
+        }
+        
+        return "Ostatnia aktualizacja:"
+    }
+    
     var settingsImageName: String {
         if !viewModel.calendarManager.isAuthorized ||
             !viewModel.locationManager.isAuthorized ||
@@ -114,10 +133,10 @@ struct WeatherTabView: View {
                     Spacer()
                     
                     VStack {
-                        Text(viewModel.bottomToolbarTitle)
+                        Text(bottomToolbarTitle)
                             .font(.caption2)
                         
-                        Text(viewModel.bottomToolbarMessage)
+                        Text(bottomToolbarMessage)
                             .font(.footnote)
                             .fontWeight(.semibold)
                     }
