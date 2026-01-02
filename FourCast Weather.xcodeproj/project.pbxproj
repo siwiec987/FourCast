@@ -514,6 +514,7 @@
 				INFOPLIST_FILE = "FourCast-Weather-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FourCast Weather";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Potrzebujemy dostępu do kalendarza, żeby wyświetlać pogodę dla Twoich nadchodzących wydarzeń.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aby wyświetlać prognozę dla Twojego położenia, potrzebujemy dostępu do lokalizacji urządzenia.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aby wyświetlać prognozę dla Twojego położenia, potrzebujemy dostępu do lokalizacji urządzenia.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -555,6 +556,7 @@
 				INFOPLIST_FILE = "FourCast-Weather-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "FourCast Weather";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Potrzebujemy dostępu do kalendarza, żeby wyświetlać pogodę dla Twoich nadchodzących wydarzeń.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Aby wyświetlać prognozę dla Twojego położenia, potrzebujemy dostępu do lokalizacji urządzenia.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Aby wyświetlać prognozę dla Twojego położenia, potrzebujemy dostępu do lokalizacji urządzenia.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
