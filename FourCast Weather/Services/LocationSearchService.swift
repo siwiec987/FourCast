@@ -7,9 +7,12 @@
 
 import Foundation
 import MapKit
+import OSLog
 
 @Observable
 class LocationSearchService: NSObject, MKLocalSearchCompleterDelegate {
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "LocationSearch")
+    
     var query = "" {
         didSet {
             handleSearchFragment(query)
@@ -45,7 +48,7 @@ class LocationSearchService: NSObject, MKLocalSearchCompleterDelegate {
     }
     
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
-        print("Błąd uzupełniania: \(error.localizedDescription)")
+        logger.error("completer error: \(error.localizedDescription)")
     }
     
     struct LocationResult: Identifiable, Hashable {

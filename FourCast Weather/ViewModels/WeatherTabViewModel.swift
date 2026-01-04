@@ -8,9 +8,12 @@
 import Foundation
 import CoreLocation
 import ActivityKit
+import OSLog
 
 @MainActor @Observable
 class WeatherTabViewModel {
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "WeatherTabVM")
+    
     let locationManager = LocationManager()
     let locations = Locations()
     let calendarManager = CalendarManager()
@@ -70,25 +73,25 @@ class WeatherTabViewModel {
     }
     
     func refreshData() async {
-        print("refreshData called!")
+        logger.debug("refreshData called")
         await refreshAdditionalLocationData()
         await initializeData()
-        print("refreshData done!")
+        logger.debug("refreshData done")
     }
     
     func refreshAdditionalLocationData() async {
-        print("refreshAdditionalLocationData called!")
+        logger.debug("refreshAdditionalLocationData called")
         if let additionalLocationsStartIndex {
             if selection >= additionalLocationsStartIndex && selection < locations.locations.count {
-                print("selection == \(selection)")
+                logger.debug("selection == \(self.selection)")
                 await fetchWeatherForAdditionalLocation(index: selection)
             }
         }
-        print("refreshAdditionalLocationData done!")
+        logger.debug("refreshAdditionalLocationData done")
     }
     
     private func initializeData() async {
-        print("initializeData called!")
+        logger.debug("initializeData called")
         async let currentLocation: () = fetchWeatherForCurrentLocation()
         async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
         
@@ -96,7 +99,7 @@ class WeatherTabViewModel {
         await calendarLocation
         
         await startOrUpdateLiveActivity()
-        print("initializeData done!")
+        logger.debug("initializeData done")
     }
     
     func startOrUpdateLiveActivity() async {
@@ -104,7 +107,7 @@ class WeatherTabViewModel {
     }
     
     private func fetchCurrentLocation() async {
-        print("fetchCurrentLocation called!")
+        logger.debug("fetchCurrentLocation called")
         do {
             let coordinate = try await locationManager.getCurrentLocationIfAuthorized()
             
@@ -125,46 +128,46 @@ class WeatherTabViewModel {
                 locations.locations.remove(at: currentLocationIndex)
             }
         } catch LocationManagerError.alreadyInUse {
-            print("locationManager.getCurrentLocationIfAuthorized() already in use!")
+            logger.debug("locationManager.getCurrentLocationIfAuthorized() already in use")
         } catch {
             errorTitle = "Nie można określić lokalizacji"
             errorMessage = "Sprawdź czy GPS jest włączony i spróbuj ponownie"
             showingError = true
         }
-        print("fetchCurrentLocation done!")
+        logger.debug("fetchCurrentLocation done")
     }
     
 //    private func shouldUpdateCurrentLocation(coordinate: CLLocationCoordinate2D, tolerance: CLLocationDistance = 10) -> Bool {
-//        print("shouldUpdateCurrentLocation called!")
+//        logger.debug("shouldUpdateCurrentLocation called!")
 //        guard let oldCoordinate = currentLocation?.coordinate else { return true }
 //        
 //        let oldLocation = CLLocation(latitude: oldCoordinate.latitude, longitude: oldCoordinate.longitude)
 //        let newLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
 //        
 //        let result = oldLocation.distance(from: newLocation) > 10
-//        print("shouldUpdateCurrentLocation return \(result)")
+//        logger.debug("shouldUpdateCurrentLocation return \(result)")
 //        return result
 //    }
     
     private func updateCurrentLocationName(coordinate: CLLocationCoordinate2D) async {
-        print("updateCurrentLocationName called!")
+        logger.debug("updateCurrentLocationName called")
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let name = await LocationManager.getLocationName(for: location)
         
         if let name, let currentLocationIndex {
             locations.locations[currentLocationIndex].name = name
         }
-        print("updateCurrentLocationName done!")
+        logger.debug("updateCurrentLocationName done")
     }
     
     private func getCalendarEventLocation() async {
-        print("getCalendarEventLocation called!")
+        logger.debug("getCalendarEventLocation called")
         guard let calendarEvent = await calendarManager.getEventIfAuthorized(), let coordinate = calendarEvent.structuredLocation?.geoLocation?.coordinate, let name = calendarEvent.structuredLocation?.title else {
             if let _ = calendarEventLocation {
                 selection = 0
                 calendarEventLocation = nil
             }
-            print("getCalendarEventLocation done: no calendar event found")
+            logger.debug("getCalendarEventLocation done: no calendar event found")
             return
         }
 
@@ -183,15 +186,15 @@ class WeatherTabViewModel {
             )
             calendarEventLocation = event
         }
-        print("getCalendarEventLocation done!")
+        logger.debug("getCalendarEventLocation done")
     }
     
     private func fetchWeatherForCalendarEventLocation() async {
-        print("fetchWeatherForCalendarEventLocation called!")
+        logger.debug("fetchWeatherForCalendarEventLocation called")
         let oldCoordinate = calendarEventLocation?.location.coordinate
         
         await getCalendarEventLocation()
-        guard var location = calendarEventLocation else { return print("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
+        guard var location = calendarEventLocation else { return logger.debug("fetchWeatherForCalendarEventLocation done: no calendarEventLocation") }
         
         let newCoordinate = location.location.coordinate
         
@@ -203,11 +206,11 @@ class WeatherTabViewModel {
             location.location.lastFetchTime = time
             calendarEventLocation = location
         }
-        print("fetchWeatherForCalendarEventLocation done!")
+        logger.debug("fetchWeatherForCalendarEventLocation done")
     }
     
     private func fetchWeatherForCurrentLocation() async {
-        print("fetchWeatherForCurrentLocation called!")
+        logger.debug("fetchWeatherForCurrentLocation called")
         let oldCoordinate = currentLocation?.coordinate
         
         await fetchCurrentLocation()
@@ -221,12 +224,12 @@ class WeatherTabViewModel {
             locations.locations[currentLocationIndex].weatherData = data
             locations.locations[currentLocationIndex].lastFetchTime = time
         }
-        print("fetchWeatherForCurrentLocation done!")
+        logger.debug("fetchWeatherForCurrentLocation done")
     }
     
     private func fetchWeatherForAdditionalLocation(index: Int) async {
-        print("fetchWeatherForAdditionalLocation(index: \(index)) called!")
-        guard let startIndex = additionalLocationsStartIndex, index >= startIndex, index < locations.locations.count else { return print("fetchWeatherForAdditionalLocation(index: \(index)) done: wrong index") }
+        logger.debug("fetchWeatherForAdditionalLocation(index: \(index)) called")
+        guard let startIndex = additionalLocationsStartIndex, index >= startIndex, index < locations.locations.count else { return logger.debug("fetchWeatherForAdditionalLocation(index: \(index)) done: wrong index") }
         guard shouldFetchWeather(lastFetchTime: locations.locations[index].lastFetchTime) else { return }
         
         var location = locations.locations[index]
@@ -237,31 +240,31 @@ class WeatherTabViewModel {
             location.lastFetchTime = time
             locations.locations[index] = location
         }
-        print("fetchWeatherForAdditionalLocation(index: \(index)) done!")
+        logger.debug("fetchWeatherForAdditionalLocation(index: \(index)) done")
     }
   
     private func fetchWeather(for coordinate: CLLocationCoordinate2D) async -> (WeatherData, Date)? {
-        print("fetchWeather called!")
+        logger.debug("fetchWeather called")
         do {
             let (data, time) = try await WeatherService.fetchWeatherData(coordinate: coordinate)
-            print("fetchWeather return data")
+            logger.debug("fetchWeather return data")
             return (data, time)
         } catch {
             handleWeatherError(error)
         }
         
-        print("fetchWeather return nil")
+        logger.debug("fetchWeather return nil")
         return nil
     }
     
     private func shouldFetchWeather(oldCoordinate: CLLocationCoordinate2D? = nil, newCoordinate: CLLocationCoordinate2D? = nil, minDistance: CLLocationDistance? = nil, lastFetchTime: Date?, minInterval: TimeInterval = 1800) -> Bool {
-        print("shouldFetchWeather called!")
+        logger.debug("shouldFetchWeather called")
         guard let lastFetchTime else {
-            print("shouldFetchWeather return true: lastFetchTime nil")
+            logger.debug("shouldFetchWeather return true: lastFetchTime nil")
             return true
         }
         if !Calendar.current.isDate(.now, equalTo: lastFetchTime, toGranularity: .hour) {
-            print("shouldFetchWeather return true: hours differ")
+            logger.debug("shouldFetchWeather return true: hours differ")
             return true
         }
         
@@ -270,40 +273,40 @@ class WeatherTabViewModel {
             let newLocation = CLLocation(latitude: newCoordinate.latitude, longitude: newCoordinate.longitude)
             
             if oldLocation.distance(from: newLocation) > minDistance {
-                print("shouldFetchWeather return true for minDistance")
+                logger.debug("shouldFetchWeather return true for minDistance")
                 return true
             }
         }
         
         let result = Date.now.timeIntervalSince(lastFetchTime) > minInterval
-        print("shouldFetchWeather returned \(result) for minInterval")
+        logger.debug("shouldFetchWeather returned \(result) for minInterval")
         return result
     }
     
     private func handleWeatherError(_ error: Error) {
 //        switch error {
 //        case OpenWeatherError.invalidData:
-//            print("Invalid data")
+//            logger.debug("Invalid data")
 //            
 //        case OpenWeatherError.invalidURL:
-//            print("Invalid URL")
+//            logger.debug("Invalid URL")
 //            
 //        case OpenWeatherError.invalidResponse:
-//            print("Invalid response")
+//            logger.debug("Invalid response")
 //            
 //        case OpenWeatherError.invalidKey:
-//            print("Invalid API key")
+//            logger.debug("Invalid API key")
 //            
 //        case OpenWeatherError.keyNotFound:
-//            print("API key not found")
+//            logger.debug("API key not found")
 //
 //        default:
-//            print("Unknown weather error")
+//            logger.debug("Unknown weather error")
 //
 //        }
         
 //        return
         
-        print("WeatherError:", error)
+        logger.error("WeatherError: \(error.localizedDescription)")
     }
 }

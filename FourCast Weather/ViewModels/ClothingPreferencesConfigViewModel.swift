@@ -6,9 +6,12 @@
 //
 
 import Foundation
+import OSLog
 
 @MainActor @Observable
 class ClothingPreferencesViewModel {
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "ClothingPreferencesVM")
+    
     var likesUmbrellas = true
     var likesCaps = true
     var likesSunglasses = true
@@ -31,7 +34,7 @@ class ClothingPreferencesViewModel {
         let preferences = userSettings.settings.clothingPreferences
         
         temperatureOffset = preferences.temperatureOffset.converted(to: .celsius).value
-        print(temperatureOffset)
+        logger.debug("\(self.temperatureOffset)")
         
         likesUmbrellas = preferences.clothingItems.contains(.umbrella)
         likesCaps = preferences.clothingItems.contains(.hatCap)
@@ -57,6 +60,6 @@ class ClothingPreferencesViewModel {
 
         userSettings.settings.clothingPreferences = preferences
         
-        print("Preferences saved!")
+        logger.debug("Preferences saved!")
     }
 }

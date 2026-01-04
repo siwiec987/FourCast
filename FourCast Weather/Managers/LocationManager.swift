@@ -7,11 +7,13 @@
 
 import Foundation
 import CoreLocation
+import OSLog
 
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
     @ObservationIgnored private let locationManager = CLLocationManager()
     @ObservationIgnored private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>? = nil
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "Location")
     
     private(set) var isAuthorized = false
     
@@ -70,7 +72,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         locationContinuation?.resume(throwing: error)
         locationContinuation = nil
-        print("Błąd pobierania lokalizacji: \(error.localizedDescription)")
+        logger.error("locationManager error: \(error.localizedDescription)")
     }
 
     static func getLocationName(for location: CLLocation?) async -> String? {

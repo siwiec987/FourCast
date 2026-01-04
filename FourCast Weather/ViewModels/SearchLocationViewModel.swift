@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import OSLog
 
 @MainActor @Observable
 class SearchLocationViewModel {
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "SearchLocationVM")
     @ObservationIgnored private let locations: Locations
     
     init(locations: Locations) {
@@ -20,7 +22,7 @@ class SearchLocationViewModel {
             let coordinate = try await LocationManager.getCoordinate(address: result.title)
             
             if let index = locations.locations.firstIndex(where: { $0.coordinate == coordinate }) {
-                print("SearchLocationViewModel: location already exists!")
+                logger.debug("SearchLocationViewModel: location already exists!")
                 return index
             }
             
@@ -30,7 +32,7 @@ class SearchLocationViewModel {
             
             return locations.locations.count - 1
         } catch {
-            print(error.localizedDescription)
+            logger.error("handleSelection: \(error.localizedDescription)")
         }
         
         return nil

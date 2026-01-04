@@ -6,13 +6,15 @@
 //
 
 import Foundation
+import OSLog
 
 struct SampleWeatherData {
     var data: WeatherData?
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "SampleData")
     
     init() {
         guard let url = Bundle.main.url(forResource: "sampleWeatherData", withExtension: "json") else {
-                print("Cannot find sampleData.json")
+            logger.debug("Cannot find sampleData.json")
                 return
             }
             
@@ -23,7 +25,7 @@ struct SampleWeatherData {
                 let result = try decoder.decode(WeatherData.self, from: data)
                 self.data = result
             } catch {
-                print("Error loading sample data: \(error)")
+                logger.debug("Error loading sample data: \(error)")
             }
     }
 }
