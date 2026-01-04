@@ -8,6 +8,7 @@
 import ActivityKit
 import BackgroundTasks
 import Foundation
+import OSLog
 
 @MainActor @Observable
 class LiveActivityManager {
@@ -15,11 +16,13 @@ class LiveActivityManager {
     @ObservationIgnored private var activity: Activity<CalendarEventWidgetAttributes>? = nil
     @ObservationIgnored let bgTaskIdentifier = "LiveActivityManager.scheduleActivityEndRequest"
     
-    private(set) var isAuthorized = false
+    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "LiveActivity")
+    
+    var isAuthorized: Bool {
+        authorizationInfo.areActivitiesEnabled
+    }
     
     init() {
-        isAuthorized = authorizationInfo.areActivitiesEnabled
-        
         for activity in Activity<CalendarEventWidgetAttributes>.activities {
             if activity.activityState == .active {
                 self.activity = activity
@@ -36,132 +39,103 @@ class LiveActivityManager {
     }
     
     private func startActivity(calendarEventLocation: CalendarEventLocation?, userSettings: UserSettings) {
-        print("startActivity called!")
-        guard activity == nil else { return print("startActivity done: already started") }
-        guard checkAuthorization() else { return print("startActivity done: activities not enabled") }
-        guard let calendarEventLocation else { return print("startActivity done: no calendarEventLocation") }
+        logger.debug("startActivity called")
+        guard activity == nil else { return logger.debug("startActivity done: already started") }
+        guard isAuthorized else { return logger.debug("startActivity done: activities not enabled") }
+        guard let calendarEventLocation else { return logger.debug("startActivity done: no calendarEventLocation") }
         
-        var activityStartOffset = userSettings.settings.activityStartOffset
-        if activityStartOffset == nil {
-            activityStartOffset = calendarEventLocation.travelTime
-        }
+        let offset = effectiveStartOffset(offset: userSettings.settings.activityStartOffset, travelTime: calendarEventLocation.travelTime)
+        guard shouldBeActive(eventStart: calendarEventLocation.startDate, offset: offset) else { return logger.debug("startActivity done: too early") }
         
-        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 30 * 60))
-        guard Date.now >= activityStartDate else { return print("startActivity done: too early") }
-        
-        guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("startActivity done: createActivityContent returned nil") }
+        guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return logger.debug("startActivity done: createActivityContent returned nil") }
 
         let attributes = CalendarEventWidgetAttributes()
         do {
             activity = try Activity<CalendarEventWidgetAttributes>.request(attributes: attributes, content: content, pushType: nil)
-            print("startActivity done: activity started successfully")
+            logger.debug("startActivity done: activity started successfully")
             scheduleActivityEnd(calendarEventLocation.startDate)
         } catch {
-            print("startActivity done: failed to assign an activity: \(error.localizedDescription)")
+            logger.error("startActivity failed: \(error.localizedDescription)")
         }
     }
 
     private func updateActivity(calendarEventLocation: CalendarEventLocation?, userSettings: UserSettings) async {
-        print("updateActivity called!")
-        guard let activity else { return print("updateActivity done: no activity") }
-        guard checkAuthorization() else {
+        logger.debug("updateActivity called!")
+        guard let currentActivity = activity else { return logger.debug("updateActivity done: no activity") }
+        guard isAuthorized else {
             await endActivity(dismissalPolicy: .immediate)
-            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
-            return print("updateActivity done: activities not enabled")
+            return logger.debug("updateActivity done: activities not enabled")
         }
         guard let calendarEventLocation else {
             await endActivity(dismissalPolicy: .immediate)
-            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
-            return print("updateActivity done: no calendarEventLocation")
+            return logger.debug("updateActivity done: no calendarEventLocation")
         }
         
-        var activityStartOffset = userSettings.settings.activityStartOffset
-        if activityStartOffset == nil {
-            activityStartOffset = calendarEventLocation.travelTime
-        }
-        
-        let activityStartDate = calendarEventLocation.startDate.addingTimeInterval(-(activityStartOffset ?? 30 * 60))
-        guard Date.now >= activityStartDate else {
+        let offset = effectiveStartOffset(offset: userSettings.settings.activityStartOffset, travelTime: calendarEventLocation.travelTime)
+        guard shouldBeActive(eventStart: calendarEventLocation.startDate, offset: offset) else {
             await endActivity(dismissalPolicy: .immediate)
-            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
-            return print("startActivity done: too early")
+            return logger.debug("updateActivity done: too early")
         }
         
-        guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return print("updateActivity done: createActivityContent returned nil") }
-        guard shouldUpdateActivity(newState: content.state) else { return print("updateActivity done: no changes detected") }
+        guard let content = createActivityContent(calendarEventLocation: calendarEventLocation, userSettings: userSettings) else { return logger.debug("updateActivity done: createActivityContent returned nil") }
+        guard shouldUpdateActivity(newState: content.state) else { return logger.debug("updateActivity done: no changes detected") }
         
-        await activity.update(content)
-        if activity.content.state.eventDate != content.state.eventDate {
-            scheduleActivityEnd(calendarEventLocation.startDate)
+        let oldEventDate = currentActivity.content.state.eventDate
+        await currentActivity.update(content)
+        if oldEventDate != content.state.eventDate {
+            scheduleActivityEnd(content.state.eventDate)
         }
-        print("Activity updated successfully!")
+        logger.debug("Activity updated successfully")
     }
     
     private func shouldUpdateActivity(newState: CalendarEventWidgetAttributes.ContentState) -> Bool {
         guard let activity else {
-            print("shouldUpdateActivity done: no activity")
+            logger.debug("shouldUpdateActivity done: no activity")
             return false
         }
         
         let currentState = activity.content.state
-        
         return currentState != newState
     }
     
     func endActivity(dismissalPolicy: ActivityUIDismissalPolicy) async {
-        print("endActivity called!")
-        guard let activity else { return print("endActivity done: no activity") }
+        logger.debug("endActivity called")
+        guard let activity else { return logger.debug("endActivity done: no activity") }
         
-        let content = ActivityContent(
-            state: CalendarEventWidgetAttributes.ContentState(
-                eventDate: activity.content.state.eventDate,
-                name: activity.content.state.name,
-                temperature: activity.content.state.temperature,
-                weatherCondition: activity.content.state.weatherCondition,
-                clothingRecommendation: activity.content.state.clothingRecommendation,
-                timezoneOffset: activity.content.state.timezoneOffset,
-                sunrise: activity.content.state.sunrise,
-                sunset: activity.content.state.sunset
-            ),
-            staleDate: nil
-        )
+        let current = activity.content.state
+        let content = ActivityContent(state: current, staleDate: nil)
         
         await activity.end(content, dismissalPolicy: dismissalPolicy)
         self.activity = nil
-        print("endActivity done")
+        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
+        logger.debug("endActivity done")
     }
     
     private func createActivityContent(calendarEventLocation: CalendarEventLocation, userSettings: UserSettings) -> ActivityContent<CalendarEventWidgetAttributes.ContentState>? {
-        print("createActivityContent called!")
+        logger.debug("createActivityContent called")
         guard let weatherData = calendarEventLocation.location.weatherData else {
-            print("createContentState done: no weatherData")
+            logger.debug("createContent done: no weatherData")
             return nil
         }
 
-        var eventStartDateWeatherData: WeatherData.HourlyWeather?
-        for hour in weatherData.hourly {
-            let timeInterval = TimeInterval(hour.dt)
-            let weatherDate = Date(timeIntervalSince1970: timeInterval)
-
-            if Calendar.current.isDate(weatherDate, equalTo: calendarEventLocation.startDate, toGranularity: .hour) {
-                eventStartDateWeatherData = hour
-            }
-        }
-
-        guard let eventStartDateWeatherData else {
-            print("createContentState done: no weatherData for event start date")
-            return nil
+        let eventHour = weatherData.hourly.first { hour in
+            let date = Date(timeIntervalSince1970: TimeInterval(hour.dt))
+            return Calendar.current.isDate(date, equalTo: calendarEventLocation.startDate, toGranularity: .hour)
         }
         
-        guard let weatherCondition = eventStartDateWeatherData.weather.first else {
-            print("createContentState done: no weather condition")
+        guard let eventHour, let weatherCondition = eventHour.weather.first else {
+            logger.debug("createActivityContent: no hourly data for event hour")
             return nil
         }
 
-        let temp = UnitFormatter.getFormattedTemperature(eventStartDateWeatherData.temp, to: userSettings.settings.temperatureUnit)
-        
-        let recommendation = ClothingRecommender.recommend(temperature: eventStartDateWeatherData.feelsLike, weatherCondition: weatherCondition, uvi: eventStartDateWeatherData.uvi, preferences: userSettings.settings.clothingPreferences)
+        let temp = UnitFormatter.getFormattedTemperature(eventHour.temp, to: userSettings.settings.temperatureUnit)
+        let recommendation = ClothingRecommender.recommend(temperature: eventHour.feelsLike, weatherCondition: weatherCondition, uvi: eventHour.uvi, preferences: userSettings.settings.clothingPreferences)
 
+        let eventDay = weatherData.daily.first { day in
+            let date = Date(timeIntervalSince1970: TimeInterval(day.dt))
+            return Calendar.current.isDate(date, inSameDayAs: calendarEventLocation.startDate)
+        }
+        
         let content = ActivityContent(
             state: CalendarEventWidgetAttributes.ContentState(
                 eventDate: calendarEventLocation.startDate,
@@ -170,8 +144,8 @@ class LiveActivityManager {
                 weatherCondition: weatherCondition.condition,
                 clothingRecommendation: recommendation,
                 timezoneOffset: weatherData.timezoneOffset,
-                sunrise: weatherData.daily.first?.sunrise,
-                sunset: weatherData.daily.first?.sunset
+                sunrise: eventDay?.sunrise,
+                sunset: eventDay?.sunset
             ),
             staleDate: nil
         )
@@ -180,7 +154,7 @@ class LiveActivityManager {
     }
     
     private func scheduleActivityEnd(_ date: Date) {
-        print("scheduleActivityEnd called!")
+        logger.debug("scheduleActivityEnd called")
         BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: bgTaskIdentifier)
         
         let request = BGAppRefreshTaskRequest(identifier: bgTaskIdentifier)
@@ -188,14 +162,18 @@ class LiveActivityManager {
         
         do {
             try BGTaskScheduler.shared.submit(request)
-            print("scheduleActivityEnd done: task submitted")
+            logger.debug("scheduleActivityEnd done: task submitted")
         } catch {
-            print("scheduleActivityEnd done: error: \(error)")
+            logger.error("scheduleActivityEnd failed: \(error.localizedDescription)")
         }
     }
     
-    private func checkAuthorization() -> Bool {
-        isAuthorized = authorizationInfo.areActivitiesEnabled
-        return isAuthorized
+    private func effectiveStartOffset(offset: TimeInterval?, travelTime: TimeInterval?, defaultOffset: TimeInterval = 30*60) -> TimeInterval {
+        offset ?? travelTime ?? defaultOffset
+    }
+    
+    private func shouldBeActive(eventStart: Date, offset: TimeInterval) -> Bool {
+        Date.now >= eventStart.addingTimeInterval(-offset)
     }
 }
+
