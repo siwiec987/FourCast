@@ -10,17 +10,19 @@ import EventKit
 
 @MainActor @Observable
 class CalendarManager {
-    @ObservationIgnored private let store = EKEventStore()
+    @ObservationIgnored let store: EKEventStore
     private(set) var isAuthorized = false
     
-    init() {}
+    init(store: EKEventStore = EKEventStore()) {
+        self.store = store
+    }
     
     func getEventIfAuthorized() async -> EKEvent? {
         await handleAuthorizationStatus()
     }
     
     private func handleAuthorizationStatus() async -> EKEvent? {
-        switch EKEventStore.authorizationStatus(for: .event) {
+        switch type(of: store).authorizationStatus(for: .event) {
         case .notDetermined:
             do {
                 let result = try await store.requestFullAccessToEvents()

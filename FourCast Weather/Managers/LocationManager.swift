@@ -11,13 +11,15 @@ import OSLog
 
 @Observable
 class LocationManager: NSObject, CLLocationManagerDelegate {
-    @ObservationIgnored private let locationManager = CLLocationManager()
+    @ObservationIgnored private var locationManager: CLLocationManager
     @ObservationIgnored private var locationContinuation: CheckedContinuation<CLLocationCoordinate2D, Error>? = nil
     @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "Location")
     
     private(set) var isAuthorized = false
     
-    override init() {
+    init(manager: CLLocationManager = CLLocationManager()) {
+        self.locationManager = manager
+        
         super.init()
         self.locationManager.delegate = self
     }
@@ -38,15 +40,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             locationManager.requestWhenInUseAuthorization()
         case .restricted, .denied:
             isAuthorized = false
-            locationContinuation?.resume(throwing: LocationManagerError.permissionDenied)
-            locationContinuation = nil
+            finishWithError(LocationManagerError.permissionDenied)
         case .authorizedAlways, .authorizedWhenInUse:
             isAuthorized = true
 //                locationManager.requestLocation() //requestLocation pobiera lokalizację jakieś 5 sekund
             locationManager.startUpdatingLocation() //to śmiga od razu
         @unknown default:
-            locationContinuation?.resume(throwing: LocationManagerError.permissionDenied)
-            locationContinuation = nil
+            finishWithError(LocationManagerError.permissionDenied)
         }
     }
     
@@ -60,19 +60,30 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         locationManager.stopUpdatingLocation()
         
         guard let location = locations.last else {
-            locationContinuation?.resume(throwing: LocationManagerError.noLocationFound)
-            locationContinuation = nil
+            finishWithError(LocationManagerError.noLocationFound)
             return
         }
         
-        locationContinuation?.resume(returning: location.coordinate)
-        locationContinuation = nil
+        finishWithSuccess(location.coordinate)
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        locationContinuation?.resume(throwing: error)
-        locationContinuation = nil
+        finishWithError(error)
         logger.error("locationManager error: \(error.localizedDescription)")
+    }
+    
+    private func finishWithError(_ error: Error) {
+        guard let continuation = locationContinuation else { return }
+        continuation.resume(throwing: error)
+        
+        locationContinuation = nil
+    }
+    
+    private func finishWithSuccess(_ coordinate: CLLocationCoordinate2D) {
+        guard let continuation = locationContinuation else { return }
+        continuation.resume(returning: coordinate)
+        
+        locationContinuation = nil
     }
 
     static func getLocationName(for location: CLLocation?) async -> String? {

@@ -14,9 +14,9 @@ import OSLog
 class WeatherTabViewModel {
     @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "WeatherTabVM")
     
-    let locationManager = LocationManager()
-    let locations = Locations()
-    let calendarManager = CalendarManager()
+    let locationManager: LocationManager
+    let locations: Locations
+    let calendarManager: CalendarManager
     let userSettings: UserSettings
     let liveActivityManager: LiveActivityManager
     
@@ -67,7 +67,10 @@ class WeatherTabViewModel {
         return lastFetch
     }
     
-    init(userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
+    init(locationManager: LocationManager = LocationManager(), locations: Locations = Locations(), calendarManager: CalendarManager = CalendarManager(), userSettings: UserSettings, liveActivityManager: LiveActivityManager) {
+        self.locationManager = locationManager
+        self.locations = locations
+        self.calendarManager = calendarManager
         self.userSettings = userSettings
         self.liveActivityManager = liveActivityManager
     }
