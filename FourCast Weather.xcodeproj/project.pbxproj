@@ -13,6 +13,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2D0755502F0AE2AB00E5D34A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2DF9F4B12D5D39290089598D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2DF9F4B82D5D39290089598D;
+			remoteInfo = "FourCast Weather";
+		};
 		2D24A1922DB717A300F531B0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2DF9F4B12D5D39290089598D /* Project object */;
@@ -58,6 +65,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		2D07554C2F0AE2AB00E5D34A /* FourCast WeatherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FourCast WeatherTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D0848252D6E071100BCB561 /* FourCast Weather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FourCast Weather.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D24A1702DB6A9BC00F531B0 /* CalendarEventWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CalendarEventWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D24A1722DB6A9BC00F531B0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -106,6 +114,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		2D07554D2F0AE2AB00E5D34A /* FourCast WeatherTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "FourCast WeatherTests";
+			sourceTree = "<group>";
+		};
 		2D24A1762DB6A9BC00F531B0 /* CalendarEventWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -126,6 +139,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		2D0755492F0AE2AB00E5D34A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2D24A16D2DB6A9BC00F531B0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -161,13 +181,38 @@
 				2D0848252D6E071100BCB561 /* FourCast Weather.app */,
 				2D24A1702DB6A9BC00F531B0 /* CalendarEventWidgetExtension.appex */,
 				2D24A1762DB6A9BC00F531B0 /* CalendarEventWidget */,
+				2D07554D2F0AE2AB00E5D34A /* FourCast WeatherTests */,
 				2D24A1712DB6A9BC00F531B0 /* Frameworks */,
+				2D07554C2F0AE2AB00E5D34A /* FourCast WeatherTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2D07554B2F0AE2AB00E5D34A /* FourCast WeatherTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2D0755522F0AE2AB00E5D34A /* Build configuration list for PBXNativeTarget "FourCast WeatherTests" */;
+			buildPhases = (
+				2D0755482F0AE2AB00E5D34A /* Sources */,
+				2D0755492F0AE2AB00E5D34A /* Frameworks */,
+				2D07554A2F0AE2AB00E5D34A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2D0755512F0AE2AB00E5D34A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2D07554D2F0AE2AB00E5D34A /* FourCast WeatherTests */,
+			);
+			name = "FourCast WeatherTests";
+			packageProductDependencies = (
+			);
+			productName = "FourCast WeatherTests";
+			productReference = 2D07554C2F0AE2AB00E5D34A /* FourCast WeatherTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D24A1882DB6A9BD00F531B0 /* Build configuration list for PBXNativeTarget "CalendarEventWidgetExtension" */;
@@ -224,9 +269,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1630;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 1630;
 				TargetAttributes = {
+					2D07554B2F0AE2AB00E5D34A = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 2DF9F4B82D5D39290089598D;
+					};
 					2D24A16F2DB6A9BC00F531B0 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -254,11 +303,19 @@
 			targets = (
 				2DF9F4B82D5D39290089598D /* FourCast Weather */,
 				2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */,
+				2D07554B2F0AE2AB00E5D34A /* FourCast WeatherTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2D07554A2F0AE2AB00E5D34A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2D24A16E2DB6A9BC00F531B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -276,6 +333,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2D0755482F0AE2AB00E5D34A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		2D24A16C2DB6A9BC00F531B0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -293,6 +357,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2D0755512F0AE2AB00E5D34A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2DF9F4B82D5D39290089598D /* FourCast Weather */;
+			targetProxy = 2D0755502F0AE2AB00E5D34A /* PBXContainerItemProxy */;
+		};
 		2D24A1932DB717A300F531B0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 2D24A16F2DB6A9BC00F531B0 /* CalendarEventWidgetExtension */;
@@ -316,6 +385,50 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		2D0755532F0AE2AB00E5D34A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64Y9KZQZ75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.siwiec.jakub.FourCast-WeatherTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FourCast Weather.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FourCast Weather";
+			};
+			name = Debug;
+		};
+		2D0755542F0AE2AB00E5D34A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 64Y9KZQZ75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.siwiec.jakub.FourCast-WeatherTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FourCast Weather.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FourCast Weather";
+			};
+			name = Release;
+		};
 		2D24A1892DB6A9BD00F531B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -588,6 +701,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		2D0755522F0AE2AB00E5D34A /* Build configuration list for PBXNativeTarget "FourCast WeatherTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D0755532F0AE2AB00E5D34A /* Debug */,
+				2D0755542F0AE2AB00E5D34A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		2D24A1882DB6A9BD00F531B0 /* Build configuration list for PBXNativeTarget "CalendarEventWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
