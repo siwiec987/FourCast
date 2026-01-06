@@ -61,12 +61,14 @@ struct ClothingRecommendationView: View {
 
 
 #Preview {
-    let temp = Measurement(value: 10, unit: UnitTemperature.celsius).converted(to: .kelvin).value
+    let temp = Measurement(value: 25, unit: UnitTemperature.celsius).converted(to: .kelvin).value
     let settings = UserSettings()
     settings.settings.clothingPreferences = ClothingPreferences(temperatureOffset: Measurement<UnitTemperature>(value: 0, unit: .celsius), clothingItems: [.tShirt, .sweater, .lightJacket, .winterJacket, .hatWinter, .hatCap, .gloves, .scarf])
     
-    return ClothingRecommendationView(temperature: temp, weatherCondition: WeatherData.WeatherCondition(icon: "09d"), uvi: 6)
-        .background(.blue)
-        .environment(settings)
-        .preferredColorScheme(.dark)
+    return ScrollView(.horizontal) {
+        ClothingRecommendationView(temperature: temp, weatherCondition: WeatherData.WeatherCondition(icon: "01d"), uvi: 0)
+            .background(.blue)
+            .environment(settings)
+            .preferredColorScheme(.dark)
+    }
 }
