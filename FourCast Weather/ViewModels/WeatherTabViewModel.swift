@@ -78,7 +78,14 @@ class WeatherTabViewModel {
     func refreshData() async {
         logger.debug("refreshData called")
         await refreshAdditionalLocationData()
-        await initializeData()
+//        await initializeData()
+        async let currentLocation: () = fetchWeatherForCurrentLocation()
+        async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
+        
+        await currentLocation
+        await calendarLocation
+        
+        await startOrUpdateLiveActivity()
         logger.debug("refreshData done")
     }
     
@@ -93,17 +100,17 @@ class WeatherTabViewModel {
         logger.debug("refreshAdditionalLocationData done")
     }
     
-    private func initializeData() async {
-        logger.debug("initializeData called")
-        async let currentLocation: () = fetchWeatherForCurrentLocation()
-        async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
-        
-        await currentLocation
-        await calendarLocation
-        
-        await startOrUpdateLiveActivity()
-        logger.debug("initializeData done")
-    }
+//    private func initializeData() async {
+//        logger.debug("initializeData called")
+//        async let currentLocation: () = fetchWeatherForCurrentLocation()
+//        async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
+//        
+//        await currentLocation
+//        await calendarLocation
+//        
+//        await startOrUpdateLiveActivity()
+//        logger.debug("initializeData done")
+//    }
     
     func startOrUpdateLiveActivity() async {
         await liveActivityManager.startOrUpdateActivity(calendarEventLocation: calendarEventLocation, userSettings: userSettings)
