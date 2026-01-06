@@ -8,10 +8,10 @@
 import Foundation
 import OSLog
 
-@MainActor @Observable
+@MainActor
 class SearchLocationViewModel {
-    @ObservationIgnored private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "SearchLocationVM")
-    @ObservationIgnored private let locations: Locations
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "App", category: "SearchLocationVM")
+    private let locations: Locations
     
     init(locations: Locations) {
         self.locations = locations

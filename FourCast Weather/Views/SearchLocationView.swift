@@ -13,7 +13,7 @@ struct SearchLocationView: View {
     @Binding var selection: Int
     @Binding var locationSearchService: LocationSearchService
     
-    @State private var viewModel: SearchLocationViewModel
+    private var viewModel: SearchLocationViewModel
     
     init(selection: Binding<Int>, locationSearchService: Binding<LocationSearchService>, locations: Locations) {
         _selection = selection
