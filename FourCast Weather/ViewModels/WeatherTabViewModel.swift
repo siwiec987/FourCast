@@ -77,11 +77,11 @@ class WeatherTabViewModel {
     
     func refreshData() async {
         logger.debug("refreshData called")
-        async let additionalLocations: () = refreshAdditionalLocationData()
-        async let currentLocation: () = fetchWeatherForCurrentLocation()
-        async let calendarLocation: () = fetchWeatherForCalendarEventLocation()
+        async let additional: () = refreshAdditionalLocationData()
+        async let current: () = fetchWeatherForCurrentLocation()
+        async let calendar: () = fetchWeatherForCalendarEventLocation()
         
-        await _ = (additionalLocations, currentLocation, calendarLocation)
+        await _ = (additional, current, calendar)
         
         await startOrUpdateLiveActivity()
         logger.debug("refreshData done")
