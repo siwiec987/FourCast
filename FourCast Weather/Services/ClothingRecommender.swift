@@ -14,7 +14,7 @@ struct ClothingRecommender {
         let finalTemp = Measurement(value: rounded, unit: UnitTemperature.celsius)
         
         let isDaytime = weatherCondition.isDaytime
-        let isRainy = weatherCondition.condition == .drizzle || weatherCondition.condition == .rain || weatherCondition.condition == .thunderstorm || weatherCondition.condition == .snow
+        let isRainy = weatherCondition.condition == .drizzle || weatherCondition.condition == .rain || weatherCondition.condition == .thunderstorm
         
         var result: Set<ClothingItem> = []
         
@@ -35,7 +35,7 @@ struct ClothingRecommender {
         }
         
         if isRainy {
-            if preferences.clothingItems.contains(.umbrella) && weatherCondition.condition != .snow {
+            if preferences.clothingItems.contains(.umbrella) {
                 result.insert(.umbrella)
             } else if !result.contains(where: { [.winterJacket, .coat].contains($0) }) {
                 result.remove(.tShirt)
