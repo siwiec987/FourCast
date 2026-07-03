@@ -72,4 +72,4 @@ This project was created as part of an engineering thesis focused on the design 
 
 
 **Compact:**                                    
-<img width="400" alt="Live Acitvity – Compact" src="https://github.com/user-attachments/assets/c3fc69a1-89cf-4bef-8c0f-9646290fc0db" />
+<img width="400" alt="Live Activity – Compact" src="https://github.com/user-attachments/assets/c3fc69a1-89cf-4bef-8c0f-9646290fc0db" />
